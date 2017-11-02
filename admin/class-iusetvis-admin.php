@@ -100,4 +100,123 @@ class Iusetvis_Admin {
 
 	}
 
+	/**
+	 * Add an options page under the Settings submenu
+	 *
+	 * @since  1.0.0
+	 */
+	public function add_menu_pages() {
+		
+		// Main menu page Registrations
+		add_menu_page(
+			__( 'Courses', 'iusetvis' ),
+			__( 'Registrations', 'iusetvis' ),
+			'edit_pages',
+			$this->plugin_name . '_options_page',
+			array( $this, 'display_registrations_page' )
+		);
+
+		// Submenu page Upload
+		add_submenu_page(
+			$this->plugin_name . "_options_page",
+			__( 'Courses', 'iusetvis' ),
+			__( 'Upload', 'iusetvis' ),
+			'edit_pages',
+			$this->plugin_name . '_upload_file',
+			array( $this, 'upload_file' )
+		);
+
+		// Submenu page Email
+	    add_submenu_page(
+	    	$this->plugin_name . "_options_page",
+	    	__( 'Email', 'iusetvis' ),
+	    	__( 'Email', 'iusetvis' ),
+	    	'edit_pages',
+	    	$this->plugin_name . '_course_mail',
+	    	array( $this, 'course_mail' )
+	    );
+
+	    // Submenu page Log Email
+		add_submenu_page(
+			$this->plugin_name . "_options_page",
+			__( 'Log Email', 'iusetvis' ),
+			__( 'Log Email', 'iusetvis' ),
+			'edit_pages',
+			$this->plugin_name . '_log_email',
+			array( $this, 'log_email' )
+		);
+
+		// Submenu page Force Email Dispatch
+		add_submenu_page(
+			$this->plugin_name . "_options_page",
+			__( 'Force Email Dispatch', 'iusetvis' ),
+			__( 'Force Email Dispatch', 'iusetvis' ),
+			'edit_pages',
+			$this->plugin_name . '_force_email_dispatch',
+			array( $this, 'force_email_dispatch' )
+		);
+
+	}
+
+	/**
+	 * Render the Registrations page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_registrations_page() {
+		include_once 'partials/iusetvis-admin-registrations-display.php';
+	}
+
+	/**
+	 * Render the Upload page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function upload_file() {
+		include_once 'partials/iusetvis-admin-upload-display.php';
+	}
+
+	/**
+	 * Render the Email page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function course_mail() {
+		include_once 'partials/iusetvis-admin-course-mail-display.php';
+	}
+
+	/**
+	 * Render the Log Email page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function log_email() {
+		include_once 'partials/iusetvis-admin-log-email-display.php';
+	}
+
+	/**
+	 * Render the Force Email Dispatch page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function force_email_dispatch() {
+		include_once 'partials/iusetvis-admin-force-email-dispatch-display.php';
+	}
+
+	/**
+	 * Add the required Roles and Capabilities
+	 *
+	 * @since  1.0.0
+	 */
+	public function add_role_and_capabilities() {
+		add_role(
+			__( 'associate', 'iusetvis' ),
+			__( 'Associate', 'iusetvis' ),
+			array( __( 'associate', 'iusetvis' ) )
+		);
+		$role = & get_role( __( 'associate', 'iusetvis' ) );
+		$role->add_cap('associate_rate');
+		$role->add_cap( 'read_private_pages' );
+	}
+
 }
