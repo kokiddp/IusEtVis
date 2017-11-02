@@ -8,7 +8,7 @@
  * registers the activation and deactivation functions, and defines a function
  * that starts the plugin.
  *
- * @link              http://www.google.it
+ * @link              https://github.com/kokiddp/IusEtVis
  * @since             1.0.0
  * @package           Iusetvis
  *
@@ -18,7 +18,7 @@
  * Description:       This is a short description of what the plugin does. It's displayed in the WordPress admin area.
  * Version:           1.0.0
  * Author:            Gabriele Coquillard, Stefano Bitto
- * Author URI:        http://www.google.it
+ * Author URI:        https://github.com/kokiddp/IusEtVis
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
  * Text Domain:       iusetvis

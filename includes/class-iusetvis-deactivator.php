@@ -3,7 +3,7 @@
 /**
  * Fired during plugin deactivation
  *
- * @link       http://www.google.it
+ * @link       https://github.com/kokiddp/IusEtVis
  * @since      1.0.0
  *
  * @package    Iusetvis
