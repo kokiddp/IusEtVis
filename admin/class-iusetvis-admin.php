@@ -112,13 +112,13 @@ class Iusetvis_Admin {
 			__( 'Courses', 'iusetvis' ),
 			__( 'Registrations', 'iusetvis' ),
 			'edit_pages',
-			$this->plugin_name . '_options_page',
+			$this->plugin_name . '_registrations_page',
 			array( $this, 'display_registrations_page' )
 		);
 
 		// Submenu page Upload
 		add_submenu_page(
-			$this->plugin_name . "_options_page",
+			NULL,
 			__( 'Courses', 'iusetvis' ),
 			__( 'Upload', 'iusetvis' ),
 			'edit_pages',
@@ -128,7 +128,7 @@ class Iusetvis_Admin {
 
 		// Submenu page Email
 	    add_submenu_page(
-	    	$this->plugin_name . "_options_page",
+	    	NULL,
 	    	__( 'Email', 'iusetvis' ),
 	    	__( 'Email', 'iusetvis' ),
 	    	'edit_pages',
@@ -138,7 +138,7 @@ class Iusetvis_Admin {
 
 	    // Submenu page Log Email
 		add_submenu_page(
-			$this->plugin_name . "_options_page",
+			$this->plugin_name . "_registrations_page",
 			__( 'Log Email', 'iusetvis' ),
 			__( 'Log Email', 'iusetvis' ),
 			'edit_pages',
@@ -148,12 +148,21 @@ class Iusetvis_Admin {
 
 		// Submenu page Force Email Dispatch
 		add_submenu_page(
-			$this->plugin_name . "_options_page",
+			$this->plugin_name . "_registrations_page",
 			__( 'Force Email Dispatch', 'iusetvis' ),
 			__( 'Force Email Dispatch', 'iusetvis' ),
 			'edit_pages',
 			$this->plugin_name . '_force_email_dispatch',
 			array( $this, 'force_email_dispatch' )
+		);
+
+		// Main menu page Backup
+		add_menu_page(
+			__( 'Backup', 'iusetvis' ),
+			__( 'Backup', 'iusetvis' ),
+			'edit_pages',
+			$this->plugin_name . '_backup_page',
+			array( $this, 'display_backup_page' )
 		);
 
 	}
@@ -201,6 +210,15 @@ class Iusetvis_Admin {
 	 */
 	public function force_email_dispatch() {
 		include_once 'partials/iusetvis-admin-force-email-dispatch-display.php';
+	}
+
+	/**
+	 * Render the Registrations page for plugin
+	 *
+	 * @since  1.0.0
+	 */
+	public function display_backup_page() {
+		include_once 'partials/iusetvis-admin-backup-display.php';
 	}
 
 	/**

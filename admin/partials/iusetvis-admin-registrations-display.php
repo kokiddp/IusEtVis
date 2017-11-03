@@ -1,7 +1,7 @@
 <?php
 
 /**
- *
+ * Main Menu page Registrations
  *
  * @link       https://github.com/kokiddp/IusEtVis
  * @since      1.0.0
