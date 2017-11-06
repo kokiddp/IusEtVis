@@ -58,6 +58,24 @@ class Iusetvis {
 	protected $version;
 
 	/**
+	 * The custom post type.
+	 *
+	 * @since    1.0.0
+	 * @access   public
+	 * @var      string    $post_type    The custom post type slug.
+	 */
+	public $post_type = 'course';
+
+	/**
+	 * The custom taxonomies.
+	 *
+	 * @since    1.0.0
+	 * @access   public
+	 * @var      array    $taxonomies    The custom taxonomy slug.
+	 */
+	public $taxonomies = array( 'course-category', 'course-tag' );
+
+	/**
 	 * Define the core functionality of the plugin.
 	 *
 	 * Set the plugin name and the plugin version that can be used throughout the plugin.
@@ -78,6 +96,7 @@ class Iusetvis {
 		$this->set_locale();
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
+		$this->define_common_hooks();
 
 	}
 
@@ -122,6 +141,11 @@ class Iusetvis {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-iusetvis-public.php';
 
+		// Require the new class (change to your correct path)
+		if ( ! class_exists( 'Gamajo_Dashboard_Glancer' ) ) {
+		    require plugin_dir_path( dirname( __FILE__ ) ). 'includes/class-gamajo-dashboard-glancer.php';
+		}
+
 		$this->loader = new Iusetvis_Loader();
 
 	}
@@ -159,6 +183,7 @@ class Iusetvis {
 		
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_menu_pages' );
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_role_and_capabilities' );
+		$this->loader->add_action( 'dashboard_glance_items', $this, 'add_glance_counts' );
 
 	}
 
@@ -171,10 +196,25 @@ class Iusetvis {
 	 */
 	private function define_public_hooks() {
 
-		$plugin_public = new Iusetvis_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_common = new Iusetvis_Public( $this->get_plugin_name(), $this->get_version() );
 
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
+
+	}
+
+	/**
+	 * Register all of the hooks related both to the public-facing and to the admin area functionality
+	 * of the plugin.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function define_common_hooks() {
+
+		$this->loader->add_action( 'init', $this, 'register_post_type', 0 );
+		$this->loader->add_action( 'init', $this, 'register_taxonomy_category', 0 );
+		$this->loader->add_action( 'init', $this, 'register_taxonomy_tag', 0 );
 
 	}
 
@@ -216,6 +256,146 @@ class Iusetvis {
 	 */
 	public function get_version() {
 		return $this->version;
+	}
+
+	/**
+	 * Register the custom post type.
+	 *
+	 * @link http://codex.wordpress.org/Function_Reference/register_post_type
+	 */
+	public function register_post_type() {
+		$labels = array(
+			'name'               => __( 'Courses', 'iusetvis' ),
+			'singular_name'      => __( 'Course', 'iusetvis' ),
+			'add_new'            => __( 'Add Course', 'iusetvis' ),
+			'add_new_item'       => __( 'Add Course', 'iusetvis' ),
+			'edit_item'          => __( 'Edit Course', 'iusetvis' ),
+			'new_item'           => __( 'New Course', 'iusetvis' ),
+			'view_item'          => __( 'View Course', 'iusetvis' ),
+			'search_items'       => __( 'Search Course', 'iusetvis' ),
+			'not_found'          => __( 'No Course found', 'iusetvis' ),
+			'not_found_in_trash' => __( 'No Course in the trash', 'iusetvis' ),
+		);
+
+		$supports = array(
+			'title',
+			'editor',
+			'thumbnail',
+			'revisions',
+			'tags',
+			'excerpt',
+			'comments'
+		);
+
+		$args = array(
+			'labels'          => $labels,
+			'supports'        => $supports,
+			'public'          => true,
+			'capability_type' => 'post',
+			'rewrite'         => array( 'slug' => 'course', ), // Permalinks format
+			'menu_position'   => 30,
+			'menu_icon'       => 'dashicons-book',
+		);
+
+		//filter for altering the args
+		$args = apply_filters( 'course_post_type_args', $args );
+
+		register_post_type( $this->post_type, $args );
+	}
+
+	/**
+	 * Register a taxonomy for Course Categories.
+	 *
+	 * @link http://codex.wordpress.org/Function_Reference/register_taxonomy
+	 */
+	public function register_taxonomy_category() {
+		$labels = array(
+			'name'                       => __( 'Course Categories', 'iusetvis' ),
+			'singular_name'              => __( 'Course Category', 'iusetvis' ),
+			'menu_name'                  => __( 'Course Categories', 'iusetvis' ),
+			'edit_item'                  => __( 'Edit Course Category', 'iusetvis' ),
+			'update_item'                => __( 'Update Course Category', 'iusetvis' ),
+			'add_new_item'               => __( 'Add New Course Category', 'iusetvis' ),
+			'new_item_name'              => __( 'New Course Category Name', 'iusetvis' ),
+			'parent_item'                => __( 'Parent Course Category', 'iusetvis' ),
+			'parent_item_colon'          => __( 'Parent Course Category:', 'iusetvis' ),
+			'all_items'                  => __( 'All Course Categories', 'iusetvis' ),
+			'search_items'               => __( 'Search Course Categories', 'iusetvis' ),
+			'popular_items'              => __( 'Popular Course Categories', 'iusetvis' ),
+			'separate_items_with_commas' => __( 'Separate Course categories with commas', 'iusetvis' ),
+			'add_or_remove_items'        => __( 'Add or remove Course categories', 'iusetvis' ),
+			'choose_from_most_used'      => __( 'Choose from the most used Course categories', 'iusetvis' ),
+			'not_found'                  => __( 'No Course categories found.', 'iusetvis' ),
+		);
+
+		$args = array(
+			'labels'            => $labels,
+			'public'            => true,
+			'show_in_nav_menus' => true,
+			'show_ui'           => true,
+			'show_tagcloud'     => true,
+			'hierarchical'      => true,
+			'rewrite'           => array( 'slug' => 'course-category' ),
+			'show_admin_column' => true,
+			'query_var'         => true,
+		);
+
+		//filter for altering the args
+		$args = apply_filters( 'course_category_taxonomy_args', $args );
+
+		register_taxonomy( $this->taxonomies[0], $this->post_type, $args );
+	}
+
+	/**
+	 * Register a taxonomy for Course Tags.
+	 *
+	 * @link http://codex.wordpress.org/Function_Reference/register_taxonomy
+	 */
+	public function register_taxonomy_tag() {
+		$labels = array(
+			'name'                       => __( 'Course Tags', 'iusetvis' ),
+			'singular_name'              => __( 'Course Tag', 'iusetvis' ),
+			'menu_name'                  => __( 'Course Tags', 'iusetvis' ),
+			'edit_item'                  => __( 'Edit Course Tag', 'iusetvis' ),
+			'update_item'                => __( 'Update Course Tag', 'iusetvis' ),
+			'add_new_item'               => __( 'Add New Course Tag', 'iusetvis' ),
+			'new_item_name'              => __( 'New Course Tag Name', 'iusetvis' ),
+			'parent_item'                => null,
+			'parent_item_colon'          => null,
+			'all_items'                  => __( 'All Course Categories', 'iusetvis' ),
+			'search_items'               => __( 'Search Course Tag', 'iusetvis' ),
+			'popular_items'              => __( 'Popular Course Tag', 'iusetvis' ),
+			'separate_items_with_commas' => __( 'Separate Course Tags with commas', 'iusetvis' ),
+			'add_or_remove_items'        => __( 'Add or remove Course Tags', 'iusetvis' ),
+			'choose_from_most_used'      => __( 'Choose from the most used Course Tags', 'iusetvis' ),
+			'not_found'                  => __( 'No Course Tag found.', 'iusetvis' ),
+		);
+
+		$args = array(
+			'labels'            => $labels,
+			'public'            => true,
+			'show_in_nav_menus' => true,
+			'show_ui'           => true,
+			'show_tagcloud'     => true,
+			'hierarchical'      => false,
+			'rewrite'           => array( 'slug' => 'course-tag' ),
+			'show_admin_column' => true,
+			'query_var'         => true,
+		);
+
+		//filter for altering the args
+		$args = apply_filters( 'course_tag_taxonomy_args', $args );
+
+		register_taxonomy( $this->taxonomies[1], $this->post_type, $args );
+	}
+
+	/**
+	 * Add counts to "At a Glance" dashboard widget in WP 3.8+
+	 *
+	 */
+	public function add_glance_counts() {
+		$glancer = new Gamajo_Dashboard_Glancer;
+    	$glancer->add( $this->post_type, array( 'publish', 'pending' ) ); // show only published "course" entries
 	}
 
 }

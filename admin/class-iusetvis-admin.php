@@ -113,7 +113,8 @@ class Iusetvis_Admin {
 			__( 'Registrations', 'iusetvis' ),
 			'edit_pages',
 			$this->plugin_name . '_registrations_page',
-			array( $this, 'display_registrations_page' )
+			array( $this, 'display_registrations_page' ),
+			'dashicons-list-view'
 		);
 
 		// Submenu page Upload
@@ -162,7 +163,8 @@ class Iusetvis_Admin {
 			__( 'Backup', 'iusetvis' ),
 			'edit_pages',
 			$this->plugin_name . '_backup_page',
-			array( $this, 'display_backup_page' )
+			array( $this, 'display_backup_page' ),
+			'dashicons-backup'
 		);
 
 	}
