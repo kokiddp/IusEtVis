@@ -19,7 +19,6 @@
 ?>
 
 <div class='wrap'>
-	<?php screen_icon('tools');	?>
 	<h2><?php _e( 'Email', 'iusetvis' ) ?></h2>
 
 

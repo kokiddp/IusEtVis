@@ -37,7 +37,7 @@ class Gamajo_Dashboard_Glancer {
 	 */
 	public function __construct() {
 		add_action( 'dashboard_glance_items', array( $this, 'show' ), 20 );
-		add_action( 'admin_enqueue_scripts', array( $this, 'dashboard_css' ) );
+		//add_action( 'admin_enqueue_scripts', array( $this, 'dashboard_css' ) );
 	}
 
 	/**

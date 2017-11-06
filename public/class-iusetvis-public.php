@@ -100,4 +100,18 @@ class Iusetvis_Public {
 
 	}
 
+	/**
+	 * Register the Course Template.
+	 *
+	 * @since    1.0.0
+	 */
+	public function course_templates( $template ) {
+	    $post_types = array( 'course' );
+
+	    if ( is_singular( $post_types ) )
+	        $template = plugin_dir_path( __FILE__ ) . 'partials/iusetvis-public-single-course-display.php';
+
+	    return $template;
+	}
+
 }

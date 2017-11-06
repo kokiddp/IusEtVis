@@ -234,7 +234,7 @@ class Iusetvis_Admin {
 			__( 'Associate', 'iusetvis' ),
 			array( __( 'associate', 'iusetvis' ) )
 		);
-		$role = & get_role( __( 'associate', 'iusetvis' ) );
+		$role = get_role( __( 'associate', 'iusetvis' ) );
 		$role->add_cap('associate_rate');
 		$role->add_cap( 'read_private_pages' );
 	}
