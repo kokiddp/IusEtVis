@@ -209,6 +209,10 @@ class Iusetvis {
 		$this->loader->add_action( 'show_user_profile', $this, 'usermeta_form_field_association' );
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_association_end_update' );
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_association_state_update' );
+		//BERSI
+		$this->loader->add_action( 'show_user_profile', $this, 'usermeta_form_field_codice_fiscale' );
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_codice_fiscale_update' );
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_vat_number_update' );
 	}
 
 	/**
@@ -1133,13 +1137,13 @@ class Iusetvis {
 
 
 	/**
-	 * The phone number user meta save action.
+	 * The fiscal code user meta save action.
 	 *
 	 * @param $user_id int the ID of the current user.
 	 *
 	 * @return bool Meta ID if the key didn't exist, true on successful update, false on failure.
 	 */
-	function usermeta_form_field_phone_update($user_id)
+	function usermeta_form_field_codice_fiscale_update($user_id)
 	{
 	    // check that the current user have the capability to edit the $user_id
 	    if (!current_user_can('edit_user', $user_id)) {
@@ -1147,7 +1151,7 @@ class Iusetvis {
 	    }
 	 
 	    // create/update user meta for the $user_id
-	    return update_user_meta( $user_id, 'phone', $_POST['phone'] );
+	    return update_user_meta( $user_id, 'fiscal_code', $_POST['fiscal_code'] );
 	}
 
 	/**
