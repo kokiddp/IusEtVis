@@ -181,12 +181,26 @@ class Iusetvis {
 
 		$plugin_admin = new Iusetvis_Admin( $this->get_plugin_name(), $this->get_version() );
 
+		// styles and scripts
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
 		
+		// menu and roles
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_menu_pages' );
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_role_and_capabilities' );
 		$this->loader->add_action( 'dashboard_glance_items', $this, 'add_glance_counts' );
+
+		// metaboxes
+		$this->loader->add_action( 'add_meta_boxes', $this, 'course_time_meta_boxes' );
+		$this->loader->add_action( 'save_post', $this, 'save_time_meta_boxes', 10, 2 );
+		$this->loader->add_action( 'add_meta_boxes', $this, 'course_credits_meta_boxes' );
+		$this->loader->add_action( 'save_post', $this, 'save_credits_meta_boxes', 10, 2 );
+		$this->loader->add_action( 'add_meta_boxes', $this, 'course_price_meta_boxes' );
+		$this->loader->add_action( 'save_post', $this, 'save_price_meta_boxes', 10, 2 );
+		$this->loader->add_action( 'add_meta_boxes', $this, 'course_mod_meta_boxes' );
+		$this->loader->add_action( 'save_post', $this, 'save_mod_meta_boxes', 10, 2 );
+		$this->loader->add_action( 'add_meta_boxes', $this, 'course_rel_meta_boxes' );
+		$this->loader->add_action( 'save_post', $this, 'save_rel_meta_boxes', 10, 2 );
 
 	}
 
@@ -201,9 +215,11 @@ class Iusetvis {
 
 		$plugin_public = new Iusetvis_Public( $this->get_plugin_name(), $this->get_version() );
 
+		// styles and scripts
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_styles' );
 		$this->loader->add_action( 'wp_enqueue_scripts', $plugin_public, 'enqueue_scripts' );
 
+		// templates
 		$this->loader->add_filter( 'template_include', $plugin_public, 'course_templates' );
 
 	}
@@ -217,13 +233,11 @@ class Iusetvis {
 	 */
 	private function define_common_hooks() {
 
+		// post type and taxonomies
 		$this->loader->add_action( 'init', $this, 'register_post_type', 0 );
 		$this->loader->add_action( 'init', $this, 'register_taxonomy_category', 0 );
 		$this->loader->add_action( 'init', $this, 'register_taxonomy_tag', 0 );
 		$this->loader->add_action( 'init', $this, 'register_taxonomy_location', 0 );
-
-		$this->loader->add_action( 'add_meta_boxes', $this, 'course_meta_boxes' );
-		$this->loader->add_action( 'save_post', $this, 'save_meta_boxes', 10, 2 );
 
 	}
 
@@ -452,14 +466,14 @@ class Iusetvis {
 	}
 
 	/**
-	 * Register the metaboxes to be used for the beer post type
+	 * Register the time metaboxes to be used for the course post type
 	 *
 	 */
-	public function course_meta_boxes() {
+	public function course_time_meta_boxes() {
 		add_meta_box(
-			'profile_fields',
-			'Course Profile',
-			array( $this, 'render_meta_boxes' ),
+			'time_fields',
+			__( 'Course Time', 'iusetvis' ),
+			array( $this, 'render_time_meta_boxes' ),
 			$this->post_type,
 			'normal',
 			'high'
@@ -467,25 +481,35 @@ class Iusetvis {
 	}
 
    /**
-	* The HTML for the fields
+	* The HTML for the time fields
 	*/
-	function render_meta_boxes( $post ) {
+	function render_time_meta_boxes( $post ) {
 
 		$meta = get_post_custom( $post->ID );
-		$course_time = ! isset( $meta['course_time'][0] ) ? '' : $meta['course_time'][0];
+		$course_start_time = ! isset( $meta['course_start_time'][0] ) ? '' : $meta['course_start_time'][0];
+		$course_subs_dead_end = ! isset( $meta['course_subs_dead_end'][0] ) ? '' : $meta['course_subs_dead_end'][0];
 
-		wp_nonce_field( basename( __FILE__ ), 'profile_fields' ); ?>
+		wp_nonce_field( basename( __FILE__ ), 'time_fields' ); ?>
 
 		<table class="form-table">
 
 			<tr>
-				<td class="beer_meta_box_td" colspan="1">
-					<label for="course_time" style="font-weight: bold;"><?php _e( 'Time', 'iusetvis' ); ?>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_start_time" style="font-weight: bold;"><?php _e( 'Start Time and Date', 'iusetvis' ); ?>
 					</label>
 				</td>
 				<td colspan="4">
-					<input type="text" name="course_time" class="regular-text" value="<?php echo $course_time; ?>">
-					<p class="description"><?php _e( 'Example: Monday 06/11/2017, 10:00-16:00', 'albTapList' ); ?></p>
+					<input type="datetime-local" name="course_start_time" class="regular-text" value="<?php echo date( 'Y-m-d\TH:i', $course_start_time ); ?>">
+				</td>
+			</tr>
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_subs_dead_end" style="font-weight: bold;"><?php _e( 'Subscriptions dead end Time and Date', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="datetime-local" name="course_subs_dead_end" class="regular-text" value="<?php echo date( 'Y-m-d\TH:i', $course_subs_dead_end ); ?>">
 				</td>
 			</tr>
 
@@ -494,15 +518,15 @@ class Iusetvis {
 	<?php }
 
    /**
-	* Save metaboxes
+	* Save time metaboxes
 	*
 	*/
-	function save_meta_boxes( $post_id ) {
+	function save_time_meta_boxes( $post_id ) {
 
 		global $post;
 
 		// Verify nonce
-		if ( !isset( $_POST['profile_fields'] ) || !wp_verify_nonce( $_POST['profile_fields'], basename(__FILE__) ) ) {
+		if ( !isset( $_POST['time_fields'] ) || !wp_verify_nonce( $_POST['time_fields'], basename(__FILE__) ) ) {
 			return $post_id;
 		}
 
@@ -521,7 +545,422 @@ class Iusetvis {
 			return $post_id;
 		}
 
-		$meta['course_time'] = ( isset( $_POST['course_time'] ) ? esc_textarea( $_POST['course_time'] ) : '' );
+		$meta['course_start_time'] = ( isset( $_POST['course_start_time'] ) ? strtotime( esc_textarea( $_POST['course_start_time'] ) ) : '' );
+		$meta['course_subs_dead_end'] = ( isset( $_POST['course_subs_dead_end'] ) ? strtotime( esc_textarea( $_POST['course_subs_dead_end'] ) ) : '' );
+
+		foreach ( $meta as $key => $value ) {
+			update_post_meta( $post->ID, $key, $value );
+		}
+	}
+
+	/**
+	 * Register the credits metaboxes to be used for the course post type
+	 *
+	 */
+	public function course_credits_meta_boxes() {
+		add_meta_box(
+			'credits_fields',
+			__( 'Course Credits', 'iusetvis' ),
+			array( $this, 'render_credits_meta_boxes' ),
+			$this->post_type,
+			'normal',
+			'high'
+		);
+	}
+
+   /**
+	* The HTML for the credits fields
+	*/
+	function render_credits_meta_boxes( $post ) {
+
+		$meta = get_post_custom( $post->ID );
+		$course_credits_inst = ! isset( $meta['course_credits_inst'][0] ) ? '' : $meta['course_credits_inst'][0];
+		$course_credits_val = ! isset( $meta['course_credits_val'][0] ) ? '' : $meta['course_credits_val'][0];
+		$course_credits_subj = ! isset( $meta['course_credits_subj'][0] ) ? '' : $meta['course_credits_subj'][0];
+
+		wp_nonce_field( basename( __FILE__ ), 'credits_fields' ); ?>
+
+		<table class="form-table">
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_credits_inst" style="font-weight: bold;"><?php _e( 'Institution', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="text" name="course_credits_inst" class="regular-text" value="<?php echo $course_credits_inst; ?>">
+					<p class="description"><?php _e( 'Example: Consiglio dell’Ordine degli Avvocati di Monza', 'iusetvis' ); ?></p>
+				</td>
+			</tr>
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_credits_val" style="font-weight: bold;"><?php _e( 'Credits', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="text" name="course_credits_val" class="regular-text" value="<?php echo $course_credits_val; ?>">
+					<p class="description"><?php _e( 'Example: 5', 'iusetvis' ); ?></p>
+				</td>
+			</tr>
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_credits_subj" style="font-weight: bold;"><?php _e( 'Subject', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="text" name="course_credits_subj" class="regular-text" value="<?php echo $course_credits_subj; ?>">
+					<p class="description"><?php _e( 'Example: Diritto Processuale Penale', 'iusetvis' ); ?></p>
+				</td>
+			</tr>
+
+		</table>
+
+	<?php }
+
+   /**
+	* Save credits metaboxes
+	*
+	*/
+	function save_credits_meta_boxes( $post_id ) {
+
+		global $post;
+
+		// Verify nonce
+		if ( !isset( $_POST['credits_fields'] ) || !wp_verify_nonce( $_POST['credits_fields'], basename(__FILE__) ) ) {
+			return $post_id;
+		}
+
+		// Check Autosave
+		if ( (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || ( defined('DOING_AJAX') && DOING_AJAX) || isset($_REQUEST['bulk_edit']) ) {
+			return $post_id;
+		}
+
+		// Don't save if only a revision
+		if ( isset( $post->post_type ) && $post->post_type == 'revision' ) {
+			return $post_id;
+		}
+
+		// Check permissions
+		if ( !current_user_can( 'edit_post', $post->ID ) ) {
+			return $post_id;
+		}
+
+		$meta['course_credits_inst'] = ( isset( $_POST['course_credits_inst'] ) ? esc_textarea( $_POST['course_credits_inst'] ) : '' );
+		$meta['course_credits_val'] = ( isset( $_POST['course_credits_val'] ) ? esc_textarea( $_POST['course_credits_val'] ) : '' );
+		$meta['course_credits_subj'] = ( isset( $_POST['course_credits_subj'] ) ? esc_textarea( $_POST['course_credits_subj'] ) : '' );
+
+		foreach ( $meta as $key => $value ) {
+			update_post_meta( $post->ID, $key, $value );
+		}
+	}
+
+	/**
+	 * Register the price metaboxes to be used for the course post type
+	 *
+	 */
+	public function course_price_meta_boxes() {
+		add_meta_box(
+			'price_fields',
+			__( 'Course Price', 'iusetvis' ),
+			array( $this, 'render_price_meta_boxes' ),
+			$this->post_type,
+			'normal',
+			'high'
+		);
+	}
+
+   /**
+	* The HTML for the price fields
+	*/
+	function render_price_meta_boxes( $post ) {
+
+		$meta = get_post_custom( $post->ID );
+		$course_price_assoc = ! isset( $meta['course_price_assoc'][0] ) ? '' : $meta['course_price_assoc'][0];
+		$course_price_reg = ! isset( $meta['course_price_reg'][0] ) ? '' : $meta['course_price_reg'][0];
+
+		wp_nonce_field( basename( __FILE__ ), 'price_fields' ); ?>
+
+		<table class="form-table">
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_price_assoc" style="font-weight: bold;"><?php _e( 'Price for associates', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="text" name="course_price_assoc" class="regular-text" value="<?php echo $course_price_assoc; ?>">
+					<p class="description"><?php _e( 'Example: 10€', 'iusetvis' ); ?></p>
+				</td>
+			</tr>
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_price_reg" style="font-weight: bold;"><?php _e( 'Regular price', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="text" name="course_price_reg" class="regular-text" value="<?php echo $course_price_reg; ?>">
+					<p class="description"><?php _e( 'Example: 25€', 'iusetvis' ); ?></p>
+				</td>
+			</tr>
+
+		</table>
+
+	<?php }
+
+   /**
+	* Save price metaboxes
+	*
+	*/
+	function save_price_meta_boxes( $post_id ) {
+
+		global $post;
+
+		// Verify nonce
+		if ( !isset( $_POST['price_fields'] ) || !wp_verify_nonce( $_POST['price_fields'], basename(__FILE__) ) ) {
+			return $post_id;
+		}
+
+		// Check Autosave
+		if ( (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || ( defined('DOING_AJAX') && DOING_AJAX) || isset($_REQUEST['bulk_edit']) ) {
+			return $post_id;
+		}
+
+		// Don't save if only a revision
+		if ( isset( $post->post_type ) && $post->post_type == 'revision' ) {
+			return $post_id;
+		}
+
+		// Check permissions
+		if ( !current_user_can( 'edit_post', $post->ID ) ) {
+			return $post_id;
+		}
+
+		$meta['course_price_assoc'] = ( isset( $_POST['course_price_assoc'] ) ? esc_textarea( $_POST['course_price_assoc'] ) : '' );
+		$meta['course_price_reg'] = ( isset( $_POST['course_price_reg'] ) ? esc_textarea( $_POST['course_price_reg'] ) : '' );
+
+		foreach ( $meta as $key => $value ) {
+			update_post_meta( $post->ID, $key, $value );
+		}
+	}
+	
+	/**
+	 * Register the moderator metaboxes to be used for the course post type
+	 *
+	 */
+	public function course_mod_meta_boxes() {
+		add_meta_box(
+			'moderator_fields',
+			__( 'Course Moderator', 'iusetvis' ),
+			array( $this, 'render_mod_meta_boxes' ),
+			$this->post_type,
+			'normal',
+			'high'
+		);
+	}
+
+   /**
+	* The HTML for the moderator fields
+	*/
+	function render_mod_meta_boxes( $post ) {
+
+		$meta = get_post_custom( $post->ID );
+		$course_mod_title = ! isset( $meta['course_mod_title'][0] ) ? '' : $meta['course_mod_title'][0];
+		$course_mod_name = ! isset( $meta['course_mod_name'][0] ) ? '' : $meta['course_mod_name'][0];
+		$course_mod_extra = ! isset( $meta['course_mod_extra'][0] ) ? '' : $meta['course_mod_extra'][0];
+
+		wp_nonce_field( basename( __FILE__ ), 'moderator_fields' ); ?>
+
+		<table class="form-table">
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_mod_title" style="font-weight: bold;"><?php _e( 'Title', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="text" name="course_mod_title" class="regular-text" value="<?php echo $course_mod_title; ?>">
+					<p class="description"><?php _e( 'Example: Avv.', 'iusetvis' ); ?></p>
+				</td>
+			</tr>
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_mod_name" style="font-weight: bold;"><?php _e( 'Name', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="text" name="course_mod_name" class="regular-text" value="<?php echo $course_mod_name; ?>">
+					<p class="description"><?php _e( 'Example: Mario Rossi', 'iusetvis' ); ?></p>
+				</td>
+			</tr>
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_mod_extra" style="font-weight: bold;"><?php _e( 'Details', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="text" name="course_mod_extra" class="regular-text" value="<?php echo $course_mod_extra; ?>">
+					<p class="description"><?php _e( 'Example: Avvocato del Foro di Milano', 'iusetvis' ); ?></p>
+				</td>
+			</tr>
+
+		</table>
+
+	<?php }
+
+   /**
+	* Save moderator metaboxes
+	*
+	*/
+	function save_mod_meta_boxes( $post_id ) {
+
+		global $post;
+
+		// Verify nonce
+		if ( !isset( $_POST['moderator_fields'] ) || !wp_verify_nonce( $_POST['moderator_fields'], basename(__FILE__) ) ) {
+			return $post_id;
+		}
+
+		// Check Autosave
+		if ( (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || ( defined('DOING_AJAX') && DOING_AJAX) || isset($_REQUEST['bulk_edit']) ) {
+			return $post_id;
+		}
+
+		// Don't save if only a revision
+		if ( isset( $post->post_type ) && $post->post_type == 'revision' ) {
+			return $post_id;
+		}
+
+		// Check permissions
+		if ( !current_user_can( 'edit_post', $post->ID ) ) {
+			return $post_id;
+		}
+
+		$meta['course_mod_title'] = ( isset( $_POST['course_mod_title'] ) ? esc_textarea( $_POST['course_mod_title'] ) : '' );
+		$meta['course_mod_name'] = ( isset( $_POST['course_mod_name'] ) ? esc_textarea( $_POST['course_mod_name'] ) : '' );
+		$meta['course_mod_extra'] = ( isset( $_POST['course_mod_extra'] ) ? esc_textarea( $_POST['course_mod_extra'] ) : '' );
+
+		foreach ( $meta as $key => $value ) {
+			update_post_meta( $post->ID, $key, $value );
+		}
+	}
+
+	/**
+	 * Register the relators metaboxes to be used for the course post type
+	 *
+	 */
+	public function course_rel_meta_boxes() {
+		add_meta_box(
+			'relators_fields',
+			__( 'Course Relators', 'iusetvis' ),
+			array( $this, 'render_rel_meta_boxes' ),
+			$this->post_type,
+			'normal',
+			'high'
+		);
+	}
+
+   /**
+	* The HTML for the relators fields
+	*/
+	function render_rel_meta_boxes( $post ) {
+
+		$meta = get_post_custom( $post->ID );
+		$course_rel_title = ['', '', '', '', ''];
+		$course_rel_name = ['', '', '', '', ''];
+		$course_rel_extra = ['', '', '', '', ''];
+		$course_rel_title = ! isset( $meta['course_rel_title'][0] ) ? ['', '', '', '', ''] : maybe_unserialize( $meta['course_rel_title'][0] );
+		$course_rel_name = ! isset( $meta['course_rel_name'][0] ) ? ['', '', '', '', ''] : maybe_unserialize( $meta['course_rel_name'][0] );
+		$course_rel_extra = ! isset( $meta['course_rel_extra'][0] ) ? ['', '', '', '', ''] : maybe_unserialize( $meta['course_rel_extra'][0] );
+
+		wp_nonce_field( basename( __FILE__ ), 'relators_fields' ); ?>
+
+		<table class="form-table">
+
+			<?php for ($i=0; $i < 5 ; $i++) { ?>
+			
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_rel_title_<?php echo $i ?>" style="font-weight: bold;"><?php _e( 'Title', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="2">
+					<input type="text" name="course_rel_title_<?php echo $i ?>" class="regular-text" value="<?php echo $course_rel_title[$i]; ?>">
+					<p class="description"><?php _e( 'Example: Avv.', 'iusetvis' ); ?></p>
+				</td>
+
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_rel_name_<?php echo $i ?>" style="font-weight: bold;"><?php _e( 'Name', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="2">
+					<input type="text" name="course_rel_name_<?php echo $i ?>" class="regular-text" value="<?php echo $course_rel_name[$i]; ?>">
+					<p class="description"><?php _e( 'Example: Mario Rossi', 'iusetvis' ); ?></p>
+				</td>
+
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_rel_extra_<?php echo $i ?>" style="font-weight: bold;"><?php _e( 'Details', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="2">
+					<input type="text" name="course_rel_extra_<?php echo $i ?>" class="regular-text" value="<?php echo $course_rel_extra[$i]; ?>">
+					<p class="description"><?php _e( 'Example: Avvocato del Foro di Milano', 'iusetvis' ); ?></p>
+				</td>
+			</tr>
+
+			<?php } ?>
+
+		</table>
+
+	<?php }
+
+   /**
+	* Save relators metaboxes
+	*
+	*/
+	function save_rel_meta_boxes( $post_id ) {
+
+		global $post;
+
+		// Verify nonce
+		if ( !isset( $_POST['relators_fields'] ) || !wp_verify_nonce( $_POST['relators_fields'], basename(__FILE__) ) ) {
+			return $post_id;
+		}
+
+		// Check Autosave
+		if ( (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || ( defined('DOING_AJAX') && DOING_AJAX) || isset($_REQUEST['bulk_edit']) ) {
+			return $post_id;
+		}
+
+		// Don't save if only a revision
+		if ( isset( $post->post_type ) && $post->post_type == 'revision' ) {
+			return $post_id;
+		}
+
+		// Check permissions
+		if ( !current_user_can( 'edit_post', $post->ID ) ) {
+			return $post_id;
+		}
+
+		$meta['course_rel_title'] = array();
+		$meta['course_rel_name'] = array();
+		$meta['course_rel_extra'] = array();
+
+		for ($i=0; $i < 5 ; $i++) { 
+			isset( $_POST['course_rel_title_' . $i] ) ?
+				array_push( $meta['course_rel_title'], esc_textarea( $_POST['course_rel_title_' . $i] ) ) :
+				array_push( $meta['course_rel_title'], '' );
+			isset( $_POST['course_rel_name_' . $i] ) ?
+				array_push( $meta['course_rel_name'], esc_textarea( $_POST['course_rel_name_' . $i] ) ) :
+				array_push( $meta['course_rel_name'], '' );
+			isset( $_POST['course_rel_extra_' . $i] ) ?
+				array_push($meta['course_rel_extra'], esc_textarea( $_POST['course_rel_extra_' . $i] ) ) :
+				array_push( $meta['course_rel_extra'], '' );
+		}
 
 		foreach ( $meta as $key => $value ) {
 			update_post_meta( $post->ID, $key, $value );
