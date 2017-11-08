@@ -236,6 +236,10 @@ class Iusetvis {
 		$this->loader->add_action( 'edit_user_profile', $this, 'usermeta_form_field_association' );
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_association_end_update' );
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_association_state_update' );
+		//BERSI
+		$this->loader->add_action( 'edit_user_profile', $this, 'usermeta_form_field_codice_fiscale' );
+		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_codice_fiscale_update' );
+		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_vat_number_update' );
 
 	}
 
@@ -1044,6 +1048,89 @@ class Iusetvis {
 	    // create/update user meta for the $user_id
 	    return update_user_meta( $user_id, 'address', $_POST['address'] );
 	}
+
+	/**
+	 * The phone number user meta save action.
+	 *
+	 * @param $user_id int the ID of the current user.
+	 *
+	 * @return bool Meta ID if the key didn't exist, true on successful update, false on failure.
+	 */
+	function usermeta_form_field_phone_update($user_id)
+	{
+	    // check that the current user have the capability to edit the $user_id
+	    if (!current_user_can('edit_user', $user_id)) {
+	        return false;
+	    }
+	 
+	    // create/update user meta for the $user_id
+	    return update_user_meta( $user_id, 'phone', $_POST['phone'] );
+	}
+
+
+		/**
+	 * The fiscal code user meta field on the editing screens.
+	 *
+	 * @param $user WP_User user object
+	 */
+	function usermeta_form_field_codice_fiscale($user)
+	{
+	    ?>
+	    <h3><?php _e( 'Fiscal data', 'iusetvis' ); ?></h3>
+	    <table class="form-table">
+
+	        <tr>
+	            <th>
+	                <label for="fiscal_code"><?php _e( 'Fiscal code', 'iusetvis' ); ?></label>
+	            </th>
+	            <td>
+	                <input type="text"
+	                       class="regular-text ltr"
+	                       name="fiscal_code"
+	                       value="<?= esc_attr(get_user_meta($user->ID, 'fiscal_code', true)); ?>">
+	                <p class="description">
+	                    <?php _e( 'Please enter your fiscal code', 'iusetvis' ); ?>
+	                </p>
+	            </td>
+	        </tr>
+
+	        <tr>
+	            <th>
+	                <label for="vat"><?php _e( 'VAT number', 'iusetvis' ); ?></label>
+	            </th>
+	            <td>
+	                <input type="tel"
+	                       class="regular-text ltr"
+	                       name="vat"
+	                       value="<?= esc_attr(get_user_meta($user->ID, 'vat', true)); ?>">
+	                <p class="description">
+	                    <?php _e( 'Please enter your VAT number', 'iusetvis' ); ?>
+	                </p>
+	            </td>
+	        </tr>
+
+	    </table>
+	    <?php
+	}
+	 
+	/**
+	 * The fiscal code user meta save action.
+	 *
+	 * @param $user_id int the ID of the current user.
+	 *
+	 * @return bool Meta ID if the key didn't exist, true on successful update, false on failure.
+	 */
+	function usermeta_form_field_vat_number_update($user_id)
+	{
+	    // check that the current user have the capability to edit the $user_id
+	    if (!current_user_can('edit_user', $user_id)) {
+	        return false;
+	    }
+	 
+	    // create/update user meta for the $user_id
+	    return update_user_meta( $user_id, 'vat', $_POST['vat'] );
+	}
+
 
 	/**
 	 * The phone number user meta save action.
