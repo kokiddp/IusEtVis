@@ -201,6 +201,9 @@ class Iusetvis {
 		$this->loader->add_action( 'save_post', $this, 'save_mod_meta_boxes', 10, 2 );
 		$this->loader->add_action( 'add_meta_boxes', $this, 'course_rel_meta_boxes' );
 		$this->loader->add_action( 'save_post', $this, 'save_rel_meta_boxes', 10, 2 );
+		// metaboxes courses BERSI
+		$this->loader->add_action( 'add_meta_boxes', $this, 'course_address_meta_boxes' );
+		$this->loader->add_action( 'save_post', $this, 'save_address_meta_boxes', 10, 2 );
 
 		// meta fields user
 		$this->loader->add_action( 'show_user_profile', $this, 'usermeta_form_field_address_phone' );
@@ -329,8 +332,7 @@ class Iusetvis {
 			'thumbnail',
 			'revisions',
 			'tags',
-			'excerpt',
-			'comments'
+			'excerpt'
 		);
 
 		$args = array(
@@ -989,6 +991,86 @@ class Iusetvis {
 			update_post_meta( $post->ID, $key, $value );
 		}
 	}
+
+
+	/*BERSI*/
+	/**
+	 * Register the address metaboxes to be used for the course post type
+	 * This field is for geolocate the course in map
+	 */
+	public function course_address_meta_boxes() {
+		add_meta_box(
+			'address_fields',
+			__( 'Course Address', 'iusetvis' ),
+			array( $this, 'render_address_meta_boxes' ),
+			$this->post_type,
+			'side',
+			'normal'
+		);
+	}
+
+   /**
+	* The HTML for the address fields
+	*/
+	function render_address_meta_boxes( $post ) {
+
+		$meta = get_post_custom( $post->ID );
+		$course_address = ! isset( $meta['course_address'] ) ? '' : $meta['course_address'];
+		
+		wp_nonce_field( basename( __FILE__ ), 'course_address' ); ?>
+
+		<table class="form-table">
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_address" style="font-weight: bold;"><?php _e( 'Address of location course', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="text" name="course_address" class="regular-text" value="<?php echo $course_address; ?>">
+					<p class="description"><?php _e( 'Example: 20121 Milano Via Montenapoleone 4', 'iusetvis' ); ?></p>
+				</td>
+			</tr>
+
+		</table>
+
+	<?php }
+
+   /**
+	* Save address metaboxes
+	*
+	*/
+	function save_address_meta_boxes( $post_id ) {
+
+		global $post;
+
+		// Verify nonce
+		if ( !isset( $_POST['course_address'] ) || !wp_verify_nonce( $_POST['course_address'], basename(__FILE__) ) ) {
+			return $post_id;
+		}
+
+		// Check Autosave
+		if ( (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || ( defined('DOING_AJAX') && DOING_AJAX) || isset($_REQUEST['bulk_edit']) ) {
+			return $post_id;
+		}
+
+		// Don't save if only a revision
+		if ( isset( $post->post_type ) && $post->post_type == 'revision' ) {
+			return $post_id;
+		}
+
+		// Check permissions
+		if ( !current_user_can( 'edit_post', $post->ID ) ) {
+			return $post_id;
+		}
+
+		$meta['course_address'] = ( isset( $_POST['course_address'] ) ? esc_textarea( $_POST['course_address'] ) : '' );
+
+		foreach ( $meta as $key => $value ) {
+			update_post_meta( $post->ID, $key, $value );
+		}
+	}
+	/*BERSI*/
 
 	/**
 	 * The address and phone number user meta field on the editing screens.
