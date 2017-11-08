@@ -190,7 +190,7 @@ class Iusetvis {
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_role_and_capabilities' );
 		$this->loader->add_action( 'dashboard_glance_items', $this, 'add_glance_counts' );
 
-		// metaboxes
+		// metaboxes courses
 		$this->loader->add_action( 'add_meta_boxes', $this, 'course_time_meta_boxes' );
 		$this->loader->add_action( 'save_post', $this, 'save_time_meta_boxes', 10, 2 );
 		$this->loader->add_action( 'add_meta_boxes', $this, 'course_credits_meta_boxes' );
@@ -202,6 +202,13 @@ class Iusetvis {
 		$this->loader->add_action( 'add_meta_boxes', $this, 'course_rel_meta_boxes' );
 		$this->loader->add_action( 'save_post', $this, 'save_rel_meta_boxes', 10, 2 );
 
+		// meta fields user
+		$this->loader->add_action( 'show_user_profile', $this, 'usermeta_form_field_address_phone' );
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_address_update' );
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_phone_update' );
+		$this->loader->add_action( 'show_user_profile', $this, 'usermeta_form_field_association' );
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_association_end_update' );
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_association_state_update' );
 	}
 
 	/**
@@ -221,6 +228,14 @@ class Iusetvis {
 
 		// templates
 		$this->loader->add_filter( 'template_include', $plugin_public, 'course_templates' );
+
+		// meta fields user
+		$this->loader->add_action( 'edit_user_profile', $this, 'usermeta_form_field_address_phone' );
+		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_address_update' );
+		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_phone_update' );
+		$this->loader->add_action( 'edit_user_profile', $this, 'usermeta_form_field_association' );
+		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_association_end_update' );
+		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_association_state_update' );
 
 	}
 
@@ -965,6 +980,175 @@ class Iusetvis {
 		foreach ( $meta as $key => $value ) {
 			update_post_meta( $post->ID, $key, $value );
 		}
+	}
+
+	/**
+	 * The address and phone number user meta field on the editing screens.
+	 *
+	 * @param $user WP_User user object
+	 */
+	function usermeta_form_field_address_phone($user)
+	{
+	    ?>
+	    <h3><?php _e( 'Additional info', 'iusetvis' ); ?></h3>
+	    <table class="form-table">
+
+	        <tr>
+	            <th>
+	                <label for="address"><?php _e( 'Address', 'iusetvis' ); ?></label>
+	            </th>
+	            <td>
+	                <input type="text"
+	                       class="regular-text ltr"
+	                       name="address"
+	                       value="<?= esc_attr(get_user_meta($user->ID, 'address', true)); ?>">
+	                <p class="description">
+	                    <?php _e( 'Please enter your address', 'iusetvis' ); ?>
+	                </p>
+	            </td>
+	        </tr>
+
+	        <tr>
+	            <th>
+	                <label for="phone"><?php _e( 'Phone number', 'iusetvis' ); ?></label>
+	            </th>
+	            <td>
+	                <input type="tel"
+	                       class="regular-text ltr"
+	                       name="phone"
+	                       value="<?= esc_attr(get_user_meta($user->ID, 'phone', true)); ?>">
+	                <p class="description">
+	                    <?php _e( 'Please enter your telephone number', 'iusetvis' ); ?>
+	                </p>
+	            </td>
+	        </tr>
+
+	    </table>
+	    <?php
+	}
+	 
+	/**
+	 * The address and phone number user meta save action.
+	 *
+	 * @param $user_id int the ID of the current user.
+	 *
+	 * @return bool Meta ID if the key didn't exist, true on successful update, false on failure.
+	 */
+	function usermeta_form_field_address_update($user_id)
+	{
+	    // check that the current user have the capability to edit the $user_id
+	    if (!current_user_can('edit_user', $user_id)) {
+	        return false;
+	    }
+	 
+	    // create/update user meta for the $user_id
+	    return update_user_meta( $user_id, 'address', $_POST['address'] );
+	}
+
+	/**
+	 * The phone number user meta save action.
+	 *
+	 * @param $user_id int the ID of the current user.
+	 *
+	 * @return bool Meta ID if the key didn't exist, true on successful update, false on failure.
+	 */
+	function usermeta_form_field_phone_update($user_id)
+	{
+	    // check that the current user have the capability to edit the $user_id
+	    if (!current_user_can('edit_user', $user_id)) {
+	        return false;
+	    }
+	 
+	    // create/update user meta for the $user_id
+	    return update_user_meta( $user_id, 'phone', $_POST['phone'] );
+	}
+
+	/**
+	 * The association user meta field on the editing screens.
+	 *
+	 * @param $user WP_User user object
+	 */
+	function usermeta_form_field_association($user)
+	{
+	    ?>
+	    <h3><?php _e( 'Association info', 'iusetvis' ); ?></h3>
+	    <table class="form-table">
+
+	    	<tr>
+	            <th scope="row"><?php _e( 'Associated', 'iusetvis' ); ?></th>
+	            <td>
+	            	<label for="association_state">
+		            	<input 	id='association_state'
+		            			type="checkbox"
+		            			name="association_state"
+		            			<?php if ( !current_user_can( 'list_users' ) ) { echo 'readonly'; } ?>
+		            			value="true"
+		            			<?php if ( get_user_meta( $user->ID, 'association_state', true ) == '1' ) { echo('checked="checked"'); } ?> >
+	                    <?php _e( 'Is the user associated?', 'iusetvis' ); ?>
+	                </label>
+	            </td>
+	        </tr>
+
+	        <tr id='association_end_row'>
+	            <th>
+	                <label for="association_end"><?php _e( 'Association end', 'iusetvis' ); ?></label>
+	            </th>
+	            <td>
+	            	<input 	id="association_end"
+	            			type="date"
+	            			name="association_end"
+	            			class="regular-text ltr"
+	            			<?php if ( !current_user_can( 'list_users' ) ) { echo 'readonly'; } ?>
+	            			value="<?= date( 'Y-m-d', esc_attr(get_user_meta($user->ID, 'association_end', true)) ); ?>">
+	                <p class="description">
+	                    <?php _e( 'The date until which the user is associated', 'iusetvis' ); ?>
+	                </p>
+	            </td>
+	        </tr>
+
+	    </table>
+	    <?php
+	}
+	 
+	/**
+	 * The association end user meta save action.
+	 *
+	 * @param $user_id int the ID of the current user.
+	 *
+	 * @return bool Meta ID if the key didn't exist, true on successful update, false on failure.
+	 */
+	function usermeta_form_field_association_end_update($user_id)
+	{
+	    // check that the current user have the capability to edit the $user_id
+	    if (!current_user_can('list_users')) {
+	        return false;
+	    }
+	 
+	    // create/update user meta for the $user_id
+	    return update_user_meta( $user_id, 'association_end', strtotime( $_POST['association_end'] ) + 86399 );
+	}
+
+	/**
+	 * The association state user meta save action.
+	 *
+	 * @param $user_id int the ID of the current user.
+	 *
+	 * @return bool Meta ID if the key didn't exist, true on successful update, false on failure.
+	 */
+	function usermeta_form_field_association_state_update($user_id)
+	{
+	    // check that the current user have the capability to edit the $user_id
+	    if (!current_user_can('list_users')) {
+	        return false;
+	    }
+	 
+	    // create/update user meta for the $user_id
+	    if ( isset( $_POST['association_state'] ) && $_POST['association_state'] == true ) {
+	    	return update_user_meta( $user_id, 'association_state', true );
+	    }
+	    else {
+	    	return update_user_meta( $user_id, 'association_state', '0' );
+	    }
 	}
 
 }

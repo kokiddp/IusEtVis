@@ -29,4 +29,25 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
+	$(function() {
+	 	if ($('#association_state:checkbox:checked')) {
+	 		$('#association_end_row').show();
+	 	}
+	 	else {
+	 		$('#association_end_row').hide();
+	 	}
+
+		$("#association_state").change(function() {
+		    if($(this).is(":checked")) {
+		        $('#association_end_row').show();
+		    }
+		    else {
+		    	$('#association_end_row').hide();
+		    	$('#association_end').text('');
+		    }
+		});
+
+	 });
+	
+
 })( jQuery );
