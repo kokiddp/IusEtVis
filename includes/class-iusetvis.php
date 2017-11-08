@@ -912,7 +912,7 @@ class Iusetvis {
 					</label>
 				</td>
 				<td colspan="2">
-					<input type="text" name="course_rel_title_<?php echo $i ?>" class="regular-text" value="<?php echo $course_rel_title[$i]; ?>">
+					<input type="text" size='10' name="course_rel_title_<?php echo $i ?>" class="regular-text" value="<?php echo $course_rel_title[$i]; ?>">
 					<p class="description"><?php _e( 'Example: Avv.', 'iusetvis' ); ?></p>
 				</td>
 
