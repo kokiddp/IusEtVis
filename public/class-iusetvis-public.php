@@ -129,23 +129,22 @@ class Iusetvis_Public {
 		$course_title = get_the_title($course_id);
 		$course_meta = get_post_meta( $course_id );
 		$course_term = get_post_terms( $course_id, 'course_location' );
-		$course_term_meta = get_term_meta( $course_term[0]->term_id );
 
 		// build object
 		$data = array(
-			'user_title'			=>	$user_meta['title'], // to be added
+			'user_title'			=>	$user_meta['title'],
 			'user_first_name'		=>	$user_meta['first_name'],
 			'user_last_name'		=>	$user_meta['last_name'],
-			'user_birth_place'		=>	$user_meta['birth_place'], // to be added // to be converted
-			'user_birth_date'		=>	$user_meta['birth_date'], // to be added // to be converted
-			'user_forum'			=>	$user_meta['forum'], // to be added
+			'user_birth_place'		=>	$user_meta['birth_place'],
+			'user_birth_date'		=>	$user_meta['birth_date'],
+			'user_forum'			=>	$user_meta['forum'],
 			'course_name'			=>	$course_title,
 			'course_place'			=>	$course_term[0]->name,
-			'course_place_extra'	=>	$course_term[0]->extra, // to be added
+			'course_place_extra'	=>	$course_meta['course_address'],
 			'course_institution'	=>	$course_meta['course_credits_inst'],
 			'course_credits_val'	=>	$course_meta['course_credits_val'],
 			'course_subject'		=>	$course_meta['course_credits_subj'],
-			'course_end_date'		=>	$course_meta['course_end_time'], // to be added // to be converted
+			'course_end_date'		=>	$course_meta['course_end_time'],
 			'course_credits_text'	=>	$course_meta['course_credits_text'] // to be added
 		);
 
@@ -193,7 +192,7 @@ class Iusetvis_Public {
 						<tr>
 						  	<td colspan="4" width="100%" style="text-align:center;">
 							  	<span class="blu">
-							  		'.$data['user_title'].' '.strtoupper($data['user_first_name']).' '.strtoupper($data['user_last_name']).'
+							  		'.$data['user_title'].' '.strtoupper( $data['user_first_name'] ).' '.strtoupper( $data['user_last_name'] ).'
 							  	</span>
 						  	</td>
 						</tr>						
@@ -201,7 +200,7 @@ class Iusetvis_Public {
 							<td colspan="4" width="100%" height="10"></td>
 						</tr>						
 						<tr>
-						  	<td colspan="4" width="100%" style="text-align:center;"><span class="largo">Nato a '.strtoupper($data['user_birth_place']).' il '.($data['user_birth_date']).' del foro di '.strtoupper($data['user_forum']).'</span></td>
+						  	<td colspan="4" width="100%" style="text-align:center;"><span class="largo">Nato a '.strtoupper( $data['user_birth_place'] ).' il '.date( 'Y-m-d', $data['user_birth_date'] ).' del foro di '.strtoupper( $data['user_forum'] ).'</span></td>
 						</tr>
 						<tr>
 							<td colspan="4" width="100%" height="10"></td>
@@ -227,7 +226,7 @@ class Iusetvis_Public {
 							<td colspan="4" width="100%" height="20"></td>
 						</tr>				
 						<tr>
-					  		<td colspan="4" align="left" style="padding-top:10px;padding-left:190px">Monza, li '.$data['course_end_date'].'</td>
+					  		<td colspan="4" align="left" style="padding-top:10px;padding-left:190px">Monza, li '.date( 'Y-m-d', $data['course_end_date'] ).'</td>
 					  	</tr>					
 						<tr>
 							<td colspan="4" align="center">'.$data['course_credits_text'].'</td>

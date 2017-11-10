@@ -211,14 +211,20 @@ class Iusetvis {
 		$this->loader->add_action( 'save_post', $this, 'save_address_meta_boxes', 10, 2 );
 
 		// meta fields user
-		$this->loader->add_action( 'show_user_profile', $this, 'usermeta_form_field_address_phone' );
-		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_address_update' );
-		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_phone_update' );
+		$this->loader->add_action( 'show_user_profile', $this, 'usermeta_form_field_addinfo' );
 		$this->loader->add_action( 'show_user_profile', $this, 'usermeta_form_field_association' );
-		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_association_end_update' );
-		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_association_state_update' );
 		//BERSI
 		$this->loader->add_action( 'show_user_profile', $this, 'usermeta_form_field_codice_fiscale' );
+
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_title_update' );
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_birth_place_update' );
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_birth_date_update' );
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_forum_update' );
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_address_update' );
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_phone_update' );		
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_association_end_update' );
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_association_state_update' );
+		//BERSI		
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_codice_fiscale_update' );
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_vat_number_update' );
 	}
@@ -242,14 +248,20 @@ class Iusetvis {
 		$this->loader->add_filter( 'template_include', $plugin_public, 'course_templates' );
 
 		// meta fields user
-		$this->loader->add_action( 'edit_user_profile', $this, 'usermeta_form_field_address_phone' );
-		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_address_update' );
-		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_phone_update' );
+		$this->loader->add_action( 'edit_user_profile', $this, 'usermeta_form_field_addinfo' );
 		$this->loader->add_action( 'edit_user_profile', $this, 'usermeta_form_field_association' );
+		//BERSI
+		$this->loader->add_action( 'edit_user_profile', $this, 'usermeta_form_field_codice_fiscale' );
+
+		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_title_update' );
+		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_birth_place_update' );
+		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_birth_date_update' );
+		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_forum_update' );
+		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_address_update' );
+		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_phone_update' );		
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_association_end_update' );
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_association_state_update' );
 		//BERSI
-		$this->loader->add_action( 'edit_user_profile', $this, 'usermeta_form_field_codice_fiscale' );
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_codice_fiscale_update' );
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_vat_number_update' );
 
@@ -517,6 +529,7 @@ class Iusetvis {
 
 		$meta = get_post_custom( $post->ID );
 		$course_start_time = ! isset( $meta['course_start_time'][0] ) ? '' : $meta['course_start_time'][0];
+		$course_end_time = ! isset( $meta['course_end_time'][0] ) ? '' : $meta['course_end_time'][0];
 		$course_subs_dead_end = ! isset( $meta['course_subs_dead_end'][0] ) ? '' : $meta['course_subs_dead_end'][0];
 
 		wp_nonce_field( basename( __FILE__ ), 'time_fields' ); ?>
@@ -530,6 +543,16 @@ class Iusetvis {
 				</td>
 				<td colspan="4">
 					<input type="datetime-local" name="course_start_time" class="regular-text" value="<?php echo date( 'Y-m-d\TH:i', $course_start_time ); ?>">
+				</td>
+			</tr>
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_end_time" style="font-weight: bold;"><?php _e( 'End Date', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="date" name="course_end_time" class="regular-text" value="<?php echo date( 'Y-m-d', $course_end_time ); ?>">
 				</td>
 			</tr>
 
@@ -576,6 +599,7 @@ class Iusetvis {
 		}
 
 		$meta['course_start_time'] = ( isset( $_POST['course_start_time'] ) ? strtotime( esc_textarea( $_POST['course_start_time'] ) ) : '' );
+		$meta['course_end_time'] = ( isset( $_POST['course_end_time'] ) ? strtotime( esc_textarea( $_POST['course_end_time'] ) ) : '' );
 		$meta['course_subs_dead_end'] = ( isset( $_POST['course_subs_dead_end'] ) ? strtotime( esc_textarea( $_POST['course_subs_dead_end'] ) ) : '' );
 
 		foreach ( $meta as $key => $value ) {
@@ -607,6 +631,7 @@ class Iusetvis {
 		$course_credits_inst = ! isset( $meta['course_credits_inst'][0] ) ? '' : $meta['course_credits_inst'][0];
 		$course_credits_val = ! isset( $meta['course_credits_val'][0] ) ? '' : $meta['course_credits_val'][0];
 		$course_credits_subj = ! isset( $meta['course_credits_subj'][0] ) ? '' : $meta['course_credits_subj'][0];
+		$course_credits_text = ! isset( $meta['course_credits_text'][0] ) ? '' : $meta['course_credits_text'][0];
 
 		wp_nonce_field( basename( __FILE__ ), 'credits_fields' ); ?>
 
@@ -645,6 +670,17 @@ class Iusetvis {
 				</td>
 			</tr>
 
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_credits_text" style="font-weight: bold;"><?php _e( 'Credits description', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="text" name="course_credits_text" class="regular-text" value="<?php echo $course_credits_text; ?>">
+					<p class="description"><?php _e( 'Example: ***', 'iusetvis' ); ?></p>
+				</td>
+			</tr>
+
 		</table>
 
 	<?php }
@@ -680,6 +716,7 @@ class Iusetvis {
 		$meta['course_credits_inst'] = ( isset( $_POST['course_credits_inst'] ) ? esc_textarea( $_POST['course_credits_inst'] ) : '' );
 		$meta['course_credits_val'] = ( isset( $_POST['course_credits_val'] ) ? esc_textarea( $_POST['course_credits_val'] ) : '' );
 		$meta['course_credits_subj'] = ( isset( $_POST['course_credits_subj'] ) ? esc_textarea( $_POST['course_credits_subj'] ) : '' );
+		$meta['course_credits_text'] = ( isset( $_POST['course_credits_text'] ) ? esc_textarea( $_POST['course_credits_text'] ) : '' );
 
 		foreach ( $meta as $key => $value ) {
 			update_post_meta( $post->ID, $key, $value );
@@ -720,8 +757,8 @@ class Iusetvis {
 					</label>
 				</td>
 				<td colspan="4">
-					<input type="text" name="course_price_assoc" class="regular-text" value="<?php echo $course_price_assoc; ?>">
-					<p class="description"><?php _e( 'Example: 10€', 'iusetvis' ); ?></p>
+					<input type="number" name="course_price_assoc" class="regular-text" value="<?php echo $course_price_assoc; ?>">€
+					<p class="description"><?php _e( 'Example: 10 (numbers only)', 'iusetvis' ); ?></p>
 				</td>
 			</tr>
 
@@ -731,8 +768,8 @@ class Iusetvis {
 					</label>
 				</td>
 				<td colspan="4">
-					<input type="text" name="course_price_reg" class="regular-text" value="<?php echo $course_price_reg; ?>">
-					<p class="description"><?php _e( 'Example: 25€', 'iusetvis' ); ?></p>
+					<input type="number" name="course_price_reg" class="regular-text" value="<?php echo $course_price_reg; ?>">€
+					<p class="description"><?php _e( 'Example: 25 (numbers only)', 'iusetvis' ); ?></p>
 				</td>
 			</tr>
 
@@ -1009,26 +1046,27 @@ class Iusetvis {
 			__( 'Course Address', 'iusetvis' ),
 			array( $this, 'render_address_meta_boxes' ),
 			$this->post_type,
-			'side',
-			'normal'
+			'normal',
+			'high'
 		);
 	}
 
-   /**
-	* The HTML for the address fields
-	*/
+	/**
+	 * The HTML for the address fields
+	 * This field is for geolocate the course in map
+	 */
 	function render_address_meta_boxes( $post ) {
 
 		$meta = get_post_custom( $post->ID );
-		$course_address = ! isset( $meta['course_address'] ) ? '' : $meta['course_address'];
-		
-		wp_nonce_field( basename( __FILE__ ), 'course_address' ); ?>
+		$course_address = ! isset( $meta['course_address'][0] ) ? '' : $meta['course_address'][0];
+
+		wp_nonce_field( basename( __FILE__ ), 'address_fields' ); ?>
 
 		<table class="form-table">
 
 			<tr>
 				<td class="course_meta_box_td" colspan="1">
-					<label for="course_address" style="font-weight: bold;"><?php _e( 'Address of location course', 'iusetvis' ); ?>
+					<label for="course_address" style="font-weight: bold;"><?php _e( 'Course address', 'iusetvis' ); ?>
 					</label>
 				</td>
 				<td colspan="4">
@@ -1041,16 +1079,16 @@ class Iusetvis {
 
 	<?php }
 
-   /**
-	* Save address metaboxes
-	*
-	*/
+    /**
+	 * Save address metaboxes
+	 *
+	 */
 	function save_address_meta_boxes( $post_id ) {
 
 		global $post;
 
 		// Verify nonce
-		if ( !isset( $_POST['course_address'] ) || !wp_verify_nonce( $_POST['course_address'], basename(__FILE__) ) ) {
+		if ( !isset( $_POST['address_fields'] ) || !wp_verify_nonce( $_POST['address_fields'], basename(__FILE__) ) ) {
 			return $post_id;
 		}
 
@@ -1077,16 +1115,77 @@ class Iusetvis {
 	}
 	/*BERSI*/
 
+	
 	/**
 	 * The address and phone number user meta field on the editing screens.
 	 *
 	 * @param $user WP_User user object
 	 */
-	function usermeta_form_field_address_phone($user)
+	function usermeta_form_field_addinfo($user)
 	{
 	    ?>
 	    <h3><?php _e( 'Additional info', 'iusetvis' ); ?></h3>
 	    <table class="form-table">
+
+	        <tr>
+	            <th>
+	                <label for="title"><?php _e( 'Title', 'iusetvis' ); ?></label>
+	            </th>
+	            <td>
+	                <input type="text"
+	                       class="regular-text ltr"
+	                       name="title"
+	                       value="<?= esc_attr(get_user_meta($user->ID, 'title', true)); ?>">
+	                <p class="description">
+	                    <?php _e( 'Please enter your title', 'iusetvis' ); ?>
+	                </p>
+	            </td>
+	        </tr>
+
+	        <tr>
+	            <th>
+	                <label for="birth_place"><?php _e( 'Birth place', 'iusetvis' ); ?></label>
+	            </th>
+	            <td>
+	                <input type="text"
+	                       class="regular-text ltr"
+	                       name="birth_place"
+	                       value="<?= esc_attr(get_user_meta($user->ID, 'birth_place', true)); ?>">
+	                <p class="description">
+	                    <?php _e( 'Please enter your birth place', 'iusetvis' ); ?>
+	                </p>
+	            </td>
+	        </tr>
+
+	        <tr>
+	            <th>
+	                <label for="birth_date"><?php _e( 'Birth date', 'iusetvis' ); ?></label>
+	            </th>
+	            <td>
+	            	<input  type="date"
+	            			name="birth_date"
+	            			class="regular-text ltr"
+	            			value="<?= date( 'Y-m-d', esc_attr( get_user_meta( $user->ID, 'birth_date', true) ) ); ?>">
+	                <p class="description">
+	                    <?php _e( 'Please enter your birth date', 'iusetvis' ); ?>
+	                </p>
+	            </td>
+	        </tr>
+
+	        <tr>
+	            <th>
+	                <label for="forum"><?php _e( 'Forum', 'iusetvis' ); ?></label>
+	            </th>
+	            <td>
+	                <input type="text"
+	                       class="regular-text ltr"
+	                       name="forum"
+	                       value="<?= esc_attr(get_user_meta($user->ID, 'forum', true)); ?>">
+	                <p class="description">
+	                    <?php _e( 'Please enter your forum', 'iusetvis' ); ?>
+	                </p>
+	            </td>
+	        </tr>
 
 	        <tr>
 	            <th>
@@ -1121,7 +1220,61 @@ class Iusetvis {
 	    </table>
 	    <?php
 	}
+
+	/**
+	 * The title user meta save action.
+	 *
+	 * @param $user_id int the ID of the current user.
+	 *
+	 * @return bool Meta ID if the key didn't exist, true on successful update, false on failure.
+	 */
+	function usermeta_form_field_title_update($user_id)
+	{
+	    // check that the current user have the capability to edit the $user_id
+	    if (!current_user_can('edit_user', $user_id)) {
+	        return false;
+	    }
 	 
+	    // create/update user meta for the $user_id
+	    return update_user_meta( $user_id, 'title', $_POST['title'] );
+	}
+
+	/**
+	 * The birth place user meta save action.
+	 *
+	 * @param $user_id int the ID of the current user.
+	 *
+	 * @return bool Meta ID if the key didn't exist, true on successful update, false on failure.
+	 */
+	function usermeta_form_field_birth_place_update($user_id)
+	{
+	    // check that the current user have the capability to edit the $user_id
+	    if (!current_user_can('edit_user', $user_id)) {
+	        return false;
+	    }
+	 
+	    // create/update user meta for the $user_id
+	    return update_user_meta( $user_id, 'birth_place', $_POST['birth_place'] );
+	}
+
+	/**
+	 * The birth date user meta save action.
+	 *
+	 * @param $user_id int the ID of the current user.
+	 *
+	 * @return bool Meta ID if the key didn't exist, true on successful update, false on failure.
+	 */
+	function usermeta_form_field_birth_date_update($user_id)
+	{
+	    // check that the current user have the capability to edit the $user_id
+	    if (!current_user_can('list_users')) {
+	        return false;
+	    }
+	 
+	    // create/update user meta for the $user_id
+	    return update_user_meta( $user_id, 'birth_date', strtotime( $_POST['birth_date'] ) );
+	}
+
 	/**
 	 * The address and phone number user meta save action.
 	 *
@@ -1158,8 +1311,25 @@ class Iusetvis {
 	    return update_user_meta( $user_id, 'phone', $_POST['phone'] );
 	}
 
+	/**
+	 * The forum number user meta save action.
+	 *
+	 * @param $user_id int the ID of the current user.
+	 *
+	 * @return bool Meta ID if the key didn't exist, true on successful update, false on failure.
+	 */
+	function usermeta_form_field_forum_update($user_id)
+	{
+	    // check that the current user have the capability to edit the $user_id
+	    if (!current_user_can('edit_user', $user_id)) {
+	        return false;
+	    }
+	 
+	    // create/update user meta for the $user_id
+	    return update_user_meta( $user_id, 'forum', $_POST['forum'] );
+	}
 
-		/**
+	/**
 	 * The fiscal code user meta field on the editing screens.
 	 *
 	 * @param $user WP_User user object
