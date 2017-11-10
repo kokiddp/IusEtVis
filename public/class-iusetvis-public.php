@@ -96,7 +96,20 @@ class Iusetvis_Public {
 		 * class.
 		 */
 
+		wp_enqueue_script( 'jquery-ajax-native', plugin_dir_url( __FILE__ ) . 'js/jquery-ajax-native.js', array( 'jquery' ) );
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/iusetvis-public.js', array( 'jquery' ), $this->version, false );
+		wp_localize_script( $this->plugin_name, 'pdf_print_diploma_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+
+	}
+
+	/**
+	 * Add the shortcodes for the public-facing dise of the site.
+	 *
+	 * @since    1.0.0
+	 */
+	public function add_shortcodes() {
+
+		add_shortcode("diploma_download", array( $this, 'display_diploma_download_button' ) );
 
 	}
 
@@ -114,38 +127,57 @@ class Iusetvis_Public {
 	    return $template;
 	}
 
+	/*
+	 * Display course diploma download button
+	 *
+	 * @since    1.0.0
+	 */
+	public function display_diploma_download_button() {
+		$output = "
+			<div class='wrap'>
+				<h2>" . __( 'Print course test', 'iusetvis' ) . "</h2>
+				<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='test' value='" . __( 'Test', 'iusetvis' ) . "'></p>
+			</div>"
+		;
+
+		return $output;
+	}
+
 	/**
 	 * PDF print the Diploma Template.
 	 *
 	 * @since    1.0.0
 	 */
-	public function pdf_print_diploma( $user_id, $course_id ) {
+	public function pdf_print_diploma() {
+		
+		// retrieve ajax parameters
+		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : 1 );
+		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : 52 );
+
 		// import and initialize the mpdf library
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php';
-		$mpdf = new \Mpdf\Mpdf();
-
+		$mpdf = new \Mpdf\Mpdf( ['mode' => 'utf-8', 'format' => 'A4-L'] );
+	
 		// get data
 		$user_meta = get_user_meta( $user_id );
 		$course_title = get_the_title($course_id);
 		$course_meta = get_post_meta( $course_id );
-		$course_term = get_post_terms( $course_id, 'course_location' );
 
 		// build object
 		$data = array(
-			'user_title'			=>	$user_meta['title'],
-			'user_first_name'		=>	$user_meta['first_name'],
-			'user_last_name'		=>	$user_meta['last_name'],
-			'user_birth_place'		=>	$user_meta['birth_place'],
-			'user_birth_date'		=>	$user_meta['birth_date'],
-			'user_forum'			=>	$user_meta['forum'],
+			'user_title'			=>	$user_meta['title'][0],
+			'user_first_name'		=>	$user_meta['first_name'][0],
+			'user_last_name'		=>	$user_meta['last_name'][0],
+			'user_birth_place'		=>	$user_meta['birth_place'][0],
+			'user_birth_date'		=>	$user_meta['birth_date'][0],
+			'user_forum'			=>	$user_meta['forum'][0],
 			'course_name'			=>	$course_title,
-			'course_place'			=>	$course_term[0]->name,
-			'course_place_extra'	=>	$course_meta['course_address'],
-			'course_institution'	=>	$course_meta['course_credits_inst'],
-			'course_credits_val'	=>	$course_meta['course_credits_val'],
-			'course_subject'		=>	$course_meta['course_credits_subj'],
-			'course_end_date'		=>	$course_meta['course_end_time'],
-			'course_credits_text'	=>	$course_meta['course_credits_text'] // to be added
+			'course_address'		=>	$course_meta['course_address'][0],
+			'course_institution'	=>	$course_meta['course_credits_inst'][0],
+			'course_credits_val'	=>	$course_meta['course_credits_val'][0],
+			'course_subject'		=>	$course_meta['course_credits_subj'][0],
+			'course_end_date'		=>	$course_meta['course_end_time'][0],
+			'course_credits_text'	=>	$course_meta['course_credits_text'][0]
 		);
 
 		// the template
@@ -156,7 +188,7 @@ class Iusetvis_Public {
 					body {
 						font-family: Times, Arial, sans-serif;
 						font-size: 9pt;
-						background: transparent url(\'asset/sfondo.png\') no-repeat left top;
+						background: transparent url(\''.plugins_url().'/IusEtVis/public/asset/sfondo.png\') no-repeat left top;
 					}
 					
 					span.blu {
@@ -200,7 +232,7 @@ class Iusetvis_Public {
 							<td colspan="4" width="100%" height="10"></td>
 						</tr>						
 						<tr>
-						  	<td colspan="4" width="100%" style="text-align:center;"><span class="largo">Nato a '.strtoupper( $data['user_birth_place'] ).' il '.date( 'Y-m-d', $data['user_birth_date'] ).' del foro di '.strtoupper( $data['user_forum'] ).'</span></td>
+						  	<td colspan="4" width="100%" style="text-align:center;"><span class="largo">Nato a '.strtoupper( $data['user_birth_place'] ).' il '.date( 'd-m-y', $data['user_birth_date'] ).' del foro di '.strtoupper( $data['user_forum'] ).'</span></td>
 						</tr>
 						<tr>
 							<td colspan="4" width="100%" height="10"></td>
@@ -219,14 +251,14 @@ class Iusetvis_Public {
 						</tr>				
 						<tr>
 				          	<td align="center" colspan="4">
-				          		tenutosi a  '.$data['course_place'].' '.$data['course_place_extra'].'<br /><br/>accreditato da '.$data['course_institution'].' in ragione di n. '.$data['course_credits_val'].' crediti formativi'.$data['course_credits_subj'].'
+				          		tenutosi a '.$data['course_address'].'<br /><br/>accreditato da '.$data['course_institution'].' in ragione di n. '.$data['course_credits_val'].' crediti formativi'.$data['course_credits_subj'].'
 							</td>
 						</tr>					
 						<tr>
 							<td colspan="4" width="100%" height="20"></td>
 						</tr>				
 						<tr>
-					  		<td colspan="4" align="left" style="padding-top:10px;padding-left:190px">Monza, li '.date( 'Y-m-d', $data['course_end_date'] ).'</td>
+					  		<td colspan="4" align="left" style="padding-top:10px;padding-left:190px">Monza, li '.date( 'd-m-Y', $data['course_end_date'] ).'</td>
 					  	</tr>					
 						<tr>
 							<td colspan="4" align="center">'.$data['course_credits_text'].'</td>
@@ -235,10 +267,13 @@ class Iusetvis_Public {
 				</body>
 			</html>
 		';
+		
 
 		// output the pdf for download
 		$mpdf->WriteHTML($html);
-		$mpdf->Output('Credito_' . urlencode( $data['course_name'] ) , 'D');
+		return $mpdf->Output('Credito_' . urlencode( $data['course_name'] ), 'D' );
+
+		die();
 
 	}
 

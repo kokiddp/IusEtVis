@@ -97,6 +97,7 @@ class Iusetvis {
 		$this->define_admin_hooks();
 		$this->define_public_hooks();
 		$this->define_common_hooks();
+		$this->add_shortcodes();
 
 	}
 
@@ -227,6 +228,7 @@ class Iusetvis {
 		//BERSI		
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_codice_fiscale_update' );
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_vat_number_update' );
+
 	}
 
 	/**
@@ -265,6 +267,10 @@ class Iusetvis {
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_codice_fiscale_update' );
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_vat_number_update' );
 
+		// ajax
+		$this->loader->add_action( 'wp_ajax_pdf_print_diploma', $plugin_public, 'pdf_print_diploma' );
+		$this->loader->add_action( 'wp_ajax_nopriv_pdf_print_diploma', $plugin_public, 'pdf_print_diploma' );
+
 	}
 
 	/**
@@ -281,6 +287,22 @@ class Iusetvis {
 		$this->loader->add_action( 'init', $this, 'register_taxonomy_category', 0 );
 		$this->loader->add_action( 'init', $this, 'register_taxonomy_tag', 0 );
 		$this->loader->add_action( 'init', $this, 'register_taxonomy_location', 0 );
+
+	}
+
+	/**
+	 * Add shortcodes
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
+	private function add_shortcodes() {
+
+		$plugin_public = new Iusetvis_Public( $this->get_plugin_name(), $this->get_version() );
+		$plugin_admin = new Iusetvis_Admin( $this->get_plugin_name(), $this->get_version() );
+
+		$plugin_public->add_shortcodes();
+		$plugin_admin->add_shortcodes();
 
 	}
 

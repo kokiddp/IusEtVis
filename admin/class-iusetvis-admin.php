@@ -101,6 +101,16 @@ class Iusetvis_Admin {
 	}
 
 	/**
+	 * Add the shortcodes for the admin area.
+	 *
+	 * @since    1.0.0
+	 */
+	public function add_shortcodes() {
+
+
+	}
+
+	/**
 	 * Add an options page under the Settings submenu
 	 *
 	 * @since  1.0.0

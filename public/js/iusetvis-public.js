@@ -29,4 +29,33 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
+	$(document).ready(function() {
+	    $('#test').click(function() {
+
+	        $.ajax({
+	        	dataType: 'native',
+		        url: pdf_print_diploma_ajax.ajaxurl,
+		        xhrFields: {
+				    responseType: 'blob'
+				  },
+		        type: 'POST',
+		        data: {
+		            'action': 'pdf_print_diploma'
+		        },
+		        success: function(blob) {
+		        	console.log(blob);
+		            var link=document.createElement('a');
+				    link.href=window.URL.createObjectURL(blob);
+				    link.download="Crediti.pdf";
+				    link.click();
+		        },
+		        error: function(error) {
+		            console.log(error);
+		        }
+		    });
+
+	    });
+
+	});
+
 })( jQuery );
