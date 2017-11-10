@@ -129,7 +129,7 @@ class Iusetvis_Public {
 		$course_title = get_the_title($course_id);
 		$course_meta = get_post_meta( $course_id );
 		$course_term = get_post_terms( $course_id, 'course_location' );
-		$course_term_meta = get_term_meta( $course_term[0]->term_id )
+		$course_term_meta = get_term_meta( $course_term[0]->term_id );
 
 		// build object
 		$data = array(
