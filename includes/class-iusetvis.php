@@ -149,6 +149,11 @@ class Iusetvis {
 		    require plugin_dir_path( dirname( __FILE__ ) ). 'includes/class-gamajo-dashboard-glancer.php';
 		}
 
+		/**
+		 * Composer
+		 */
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php';
+
 		$this->loader = new Iusetvis_Loader();
 
 	}
