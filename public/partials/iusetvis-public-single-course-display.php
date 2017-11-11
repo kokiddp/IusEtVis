@@ -169,6 +169,26 @@
 
                 </div><!-- .course_profile_wrap -->
 
+                <div class="course_actions_wrap">
+
+                    <div class="course_hidden_fields">
+                        <p id="hidden_user_id">
+                            <?= get_current_user_id() ?>
+                        </p>
+                        <p id="hidden_course_id">
+                            <?= get_the_ID() ?>
+                        </p>
+                    </div><!-- .course_hidden_fields -->
+
+                    <div class="course_actions">                        
+                        <?= do_shortcode('[course_subscribe]'); ?>
+                        <?= do_shortcode('[course_waiting_list_subscribe]'); ?>
+                        <?= do_shortcode('[diploma_download]'); ?>
+                        <h3 id="actions_response_field"></h3>
+                    </div><!-- .course_actions -->
+
+                </div><!-- .course_actions_wrap -->
+
             </div><!-- .cpost-content-inner-wrap .course_post_list .entry-content -->
 
         </article>

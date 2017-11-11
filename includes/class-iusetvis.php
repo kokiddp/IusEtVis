@@ -207,6 +207,8 @@ class Iusetvis {
 		$this->loader->add_action( 'save_post', $this, 'save_mod_meta_boxes', 10, 2 );
 		$this->loader->add_action( 'add_meta_boxes', $this, 'course_rel_meta_boxes' );
 		$this->loader->add_action( 'save_post', $this, 'save_rel_meta_boxes', 10, 2 );
+		$this->loader->add_action( 'add_meta_boxes', $this, 'course_places_meta_boxes' );
+		$this->loader->add_action( 'save_post', $this, 'save_places_meta_boxes', 10, 2 );
 		// metaboxes courses BERSI
 		$this->loader->add_action( 'add_meta_boxes', $this, 'course_address_meta_boxes' );
 		$this->loader->add_action( 'save_post', $this, 'save_address_meta_boxes', 10, 2 );
@@ -268,8 +270,14 @@ class Iusetvis {
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_vat_number_update' );
 
 		// ajax
+		// print diploma
 		$this->loader->add_action( 'wp_ajax_pdf_print_diploma', $plugin_public, 'pdf_print_diploma' );
 		$this->loader->add_action( 'wp_ajax_nopriv_pdf_print_diploma', $plugin_public, 'pdf_print_diploma' );
+		// subscribe to course
+		$this->loader->add_action( 'wp_ajax_course_subscribe', $plugin_public, 'course_subscribe' );
+		$this->loader->add_action( 'wp_ajax_nopriv_course_subscribe', $plugin_public, 'course_subscribe' );
+		$this->loader->add_action( 'wp_ajax_course_waiting_list_subscribe', $plugin_public, 'course_waiting_list_subscribe' );
+		$this->loader->add_action( 'wp_ajax_nopriv_course_waiting_list_subscribe', $plugin_public, 'course_waiting_list_subscribe' );
 
 	}
 
@@ -1137,7 +1145,85 @@ class Iusetvis {
 	}
 	/*BERSI*/
 
-	
+	/**
+	 * Register the address metaboxes to be used for the course post type
+	 * This field is for geolocate the course in map
+	 */
+	public function course_places_meta_boxes() {
+		add_meta_box(
+			'places_fields',
+			__( 'Course available places', 'iusetvis' ),
+			array( $this, 'render_places_meta_boxes' ),
+			$this->post_type,
+			'normal',
+			'high'
+		);
+	}
+
+	/**
+	 * The HTML for the address fields
+	 * This field is for geolocate the course in map
+	 */
+	function render_places_meta_boxes( $post ) {
+
+		$meta = get_post_custom( $post->ID );
+		$course_places = ! isset( $meta['course_places'][0] ) ? '' : $meta['course_places'][0];
+
+		wp_nonce_field( basename( __FILE__ ), 'places_fields' ); ?>
+
+		<table class="form-table">
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_places" style="font-weight: bold;"><?php _e( 'Course available places', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="number" name="course_places" class="regular-text" value="<?php echo $course_places; ?>">
+					<p class="description"><?php _e( 'Example: 20', 'iusetvis' ); ?></p>
+				</td>
+			</tr>
+
+		</table>
+
+	<?php }
+
+    /**
+	 * Save address metaboxes
+	 *
+	 */
+	function save_places_meta_boxes( $post_id ) {
+
+		global $post;
+
+		// Verify nonce
+		if ( !isset( $_POST['places_fields'] ) || !wp_verify_nonce( $_POST['places_fields'], basename(__FILE__) ) ) {
+			return $post_id;
+		}
+
+		// Check Autosave
+		if ( (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || ( defined('DOING_AJAX') && DOING_AJAX) || isset($_REQUEST['bulk_edit']) ) {
+			return $post_id;
+		}
+
+		// Don't save if only a revision
+		if ( isset( $post->post_type ) && $post->post_type == 'revision' ) {
+			return $post_id;
+		}
+
+		// Check permissions
+		if ( !current_user_can( 'edit_post', $post->ID ) ) {
+			return $post_id;
+		}
+
+		$meta['course_places'] = ( isset( $_POST['course_places'] ) ? esc_textarea( $_POST['course_places'] ) : '' );
+
+		foreach ( $meta as $key => $value ) {
+			update_post_meta( $post->ID, $key, $value );
+		}
+	}
+
+
 	/**
 	 * The address and phone number user meta field on the editing screens.
 	 *

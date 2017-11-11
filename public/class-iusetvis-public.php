@@ -99,6 +99,8 @@ class Iusetvis_Public {
 		wp_enqueue_script( 'jquery-ajax-native', plugin_dir_url( __FILE__ ) . 'js/jquery-ajax-native.js', array( 'jquery' ) );
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/iusetvis-public.js', array( 'jquery' ), $this->version, false );
 		wp_localize_script( $this->plugin_name, 'pdf_print_diploma_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+		wp_localize_script( $this->plugin_name, 'course_subscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+		wp_localize_script( $this->plugin_name, 'course_waiting_list_subscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 
 	}
 
@@ -110,6 +112,8 @@ class Iusetvis_Public {
 	public function add_shortcodes() {
 
 		add_shortcode("diploma_download", array( $this, 'display_diploma_download_button' ) );
+		add_shortcode("course_subscribe", array( $this, 'display_course_subscribe_button' ) );
+		add_shortcode("course_waiting_list_subscribe", array( $this, 'display_course_waiting_list_subscribe_button' ) );
 
 	}
 
@@ -136,7 +140,39 @@ class Iusetvis_Public {
 		$output = "
 			<div class='wrap'>
 				<h2>" . __( 'Print course test', 'iusetvis' ) . "</h2>
-				<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='test' value='" . __( 'Test', 'iusetvis' ) . "'></p>
+				<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='download' value='" . __( 'Download', 'iusetvis' ) . "'></p>
+			</div>"
+		;
+
+		return $output;
+	}
+
+	/*
+	 * Display course subscribe button
+	 *
+	 * @since    1.0.0
+	 */
+	public function display_course_subscribe_button() {
+		$output = "
+			<div class='wrap'>
+				<h2>" . __( 'Subscribe to course', 'iusetvis' ) . "</h2>
+				<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='subscribe' value='" . __( 'Subscribe', 'iusetvis' ) . "'></p>
+			</div>"
+		;
+
+		return $output;
+	}
+
+	/*
+	 * Display course waiting list subscribe button
+	 *
+	 * @since    1.0.0
+	 */
+	public function display_course_waiting_list_subscribe_button() {
+		$output = "
+			<div class='wrap'>
+				<h2>" . __( 'Subscribe to waiting list', 'iusetvis' ) . "</h2>
+				<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='subscribe-waiting-list' value='" . __( 'Subscribe', 'iusetvis' ) . "'></p>
 			</div>"
 		;
 
@@ -148,15 +184,25 @@ class Iusetvis_Public {
 	 *
 	 * @since    1.0.0
 	 */
-	public function pdf_print_diploma() {
+	public function pdf_print_diploma( $_user_id = '0', $_course_id = '0' ) {
 		
 		// retrieve ajax parameters
-		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : 1 );
-		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : 52 );
+		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
+		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
+		if ( $user_id == '0' || $course_id == '0' ) {
+			die();
+		}
 
 		// import and initialize the mpdf library
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php';
 		$mpdf = new \Mpdf\Mpdf( ['mode' => 'utf-8', 'format' => 'A4-L'] );
+
+		// check if the user is subscribed to the course
+		$meta = get_post_custom( $course_id );
+		$subscribed_users = !isset( $meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $meta['subscribed_users'][0] );
+		if ( !in_array( $user_id, $subscribed_users ) ) {
+		 	die();
+		}
 	
 		// get data
 		$user_meta = get_user_meta( $user_id );
@@ -274,6 +320,88 @@ class Iusetvis_Public {
 		return $mpdf->Output('Credito_' . urlencode( $data['course_name'] ), 'D' );
 
 		die();
+
+	}
+
+	/**
+	 * Subscribe to the course
+	 *
+	 * @since    1.0.0
+	 */
+	public function course_subscribe( $_user_id = '0', $_course_id = '0' ) {
+		
+		// retrieve ajax parameters
+		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
+		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
+		if ( $user_id == '0' || $course_id == '0' ) {
+			echo __( 'Error: user or course unset!', 'iusetvis' );
+			die();
+		}
+
+		$meta = get_post_custom( $course_id );
+		$subscribed_users = !isset( $meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $meta['subscribed_users'][0] );
+		$waiting_users = !isset( $meta['waiting_users'][0] ) ? array() : maybe_unserialize( $meta['waiting_users'][0] );
+		$available_places = !isset( $meta['course_places'][0] ) ? 0 : ( (int)$meta['course_places'][0] - (int)$subscribed_users );
+
+		if ( in_array( $user_id, $subscribed_users ) ) {
+		 	echo __( 'Error: the user is already subscribed to this course!', 'iusetvis' );
+		 	die();
+		}
+		else if ( in_array( $user_id, $waiting_users ) ) {
+		 	echo __( 'Error: the user is already subscribed to this course\'s waiting list!', 'iusetvis' );
+		 	die();
+		}
+		else if ( $available_places <= 0 ) {
+			echo __( 'Error: there are no available places in this course!', 'iusetvis' );
+		 	die();
+		}
+		else {
+			array_push( $subscribed_users, $user_id );		
+			update_post_meta( $course_id, 'subscribed_users', $subscribed_users );			
+			echo __( 'User succesfully subscribed to this course.', 'iusetvis' );
+		die();
+		}
+
+	}
+
+	/**
+	 * Subscribe to the course's waiting list
+	 *
+	 * @since    1.0.0
+	 */
+	public function course_waiting_list_subscribe( $_user_id = '0', $_course_id = '0' ) {
+		
+		// retrieve ajax parameters
+		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
+		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
+		if ( $user_id == '0' || $course_id == '0' ) {
+			echo __( 'Error: user or course unset!', 'iusetvis' );
+			die();
+		}
+
+		$meta = get_post_custom( $course_id );
+		$subscribed_users = !isset( $meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $meta['subscribed_users'][0] );
+		$waiting_users = !isset( $meta['waiting_users'][0] ) ? array() : maybe_unserialize( $meta['waiting_users'][0] );
+		$available_places = !isset( $meta['course_places'][0] ) ? 0 : ( (int)$meta['course_places'][0] - (int)$subscribed_users );
+
+		if ( in_array( $user_id, $waiting_users ) ) {
+		 	echo __( 'Error: the user is already subscribed to this course\'s waiting list!', 'iusetvis' );
+		 	die();
+		}
+		else if ( in_array( $user_id, $subscribed_users ) ) {
+		 	echo __( 'Error: the user is already subscribed to this course!', 'iusetvis' );
+		 	die();
+		}
+		else if ( $available_places >= 0 ) {
+			echo __( 'Error: there are still available places in this course!', 'iusetvis' );
+		 	die();
+		}
+		else {
+			array_push( $waiting_users, $user_id );		
+			update_post_meta( $course_id, 'waiting_users', $waiting_users );			
+			echo __( 'User succesfully subscribed to this course\'s waiting list.', 'iusetvis' );
+		die();
+		}
 
 	}
 
