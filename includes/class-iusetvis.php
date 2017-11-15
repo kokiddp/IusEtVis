@@ -278,6 +278,9 @@ class Iusetvis {
 		$this->loader->add_action( 'wp_ajax_nopriv_course_subscribe', $plugin_public, 'course_subscribe' );
 		$this->loader->add_action( 'wp_ajax_course_waiting_list_subscribe', $plugin_public, 'course_waiting_list_subscribe' );
 		$this->loader->add_action( 'wp_ajax_nopriv_course_waiting_list_subscribe', $plugin_public, 'course_waiting_list_subscribe' );
+		//unsubscribe
+		$this->loader->add_action( 'wp_ajax_course_unsubscribe', $plugin_public, 'course_unsubscribe' );
+		$this->loader->add_action( 'wp_ajax_nopriv_course_unsubscribe', $plugin_public, 'course_unsubscribe' );
 
 	}
 

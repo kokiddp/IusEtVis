@@ -96,6 +96,30 @@
 
 	    });
 
+	    $('#unsubscribe').click(function() {
+	    	actions_response_field.text("");
+	    	$('#unsubscribe').prop('disabled', true);
+	        $.ajax({
+	        	dataType: 'native',
+		        url: course_unsubscribe_ajax.ajaxurl,
+		        type: 'POST',
+		        data: {
+		            'action': 'course_unsubscribe',
+		            'user_id': user_id,
+		            'course_id': course_id
+		        },
+		        success: function(response) {
+		        	actions_response_field.text(response);
+		        	$('#unsubscribe').prop('disabled', false);
+		        },
+		        error: function(error) {
+		            actions_response_field.text(error);
+		            $('#unsubscribe').prop('disabled', false);
+		        }
+		    });
+
+	    });
+
 	    $('#subscribe-waiting-list').click(function() {
 	    	actions_response_field.text("");
 	    	$('#subscribe-waiting-list').prop('disabled', true);

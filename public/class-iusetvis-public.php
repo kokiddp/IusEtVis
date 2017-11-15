@@ -100,6 +100,7 @@ class Iusetvis_Public {
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/iusetvis-public.js', array( 'jquery' ), $this->version, false );
 		wp_localize_script( $this->plugin_name, 'pdf_print_diploma_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'course_subscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+		wp_localize_script( $this->plugin_name, 'course_unsubscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'course_waiting_list_subscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 
 	}
@@ -113,6 +114,7 @@ class Iusetvis_Public {
 
 		add_shortcode("diploma_download", array( $this, 'display_diploma_download_button' ) );
 		add_shortcode("course_subscribe", array( $this, 'display_course_subscribe_button' ) );
+		add_shortcode("course_unsubscribe", array( $this, 'display_course_unsubscribe_button' ) );
 		add_shortcode("course_waiting_list_subscribe", array( $this, 'display_course_waiting_list_subscribe_button' ) );
 
 	}
@@ -157,6 +159,22 @@ class Iusetvis_Public {
 			<div class='wrap'>
 				<h2>" . __( 'Subscribe to course', 'iusetvis' ) . "</h2>
 				<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='subscribe' value='" . __( 'Subscribe', 'iusetvis' ) . "'></p>
+			</div>"
+		;
+
+		return $output;
+	}
+
+	/*
+	 * Display course unsubscribe button
+	 *
+	 * @since    1.0.0
+	 */
+	public function display_course_unsubscribe_button() {
+		$output = "
+			<div class='wrap'>
+				<h2>" . __( 'Unsubscribe to course', 'iusetvis' ) . "</h2>
+				<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='unsubscribe' value='" . __( 'Unsubscribe', 'iusetvis' ) . "'></p>
 			</div>"
 		;
 
@@ -362,6 +380,55 @@ class Iusetvis_Public {
 		die();
 		}
 
+	}
+
+	/**
+	 * Subscribe to the course
+	 *
+	 * @since    1.0.0
+	 */
+	public function course_unsubscribe( $_user_id = '0', $_course_id = '0' ) {
+
+		// retrieve ajax parameters
+		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
+		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
+		if ( $user_id == '0' || $course_id == '0' ) {
+			echo __( 'Error: user or course unset!', 'iusetvis' );
+			die();
+		}
+
+		$meta = get_post_custom( $course_id );
+		$subscribed_users = !isset( $meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $meta['subscribed_users'][0] );
+		$waiting_users = !isset( $meta['waiting_users'][0] ) ? array() : maybe_unserialize( $meta['waiting_users'][0] );
+		$available_places = !isset( $meta['course_places'][0] ) ? 0 : ( (int)$meta['course_places'][0] - (int)$subscribed_users );
+
+		if ( !in_array( $user_id, $subscribed_users ) && !in_array( $user_id, $waiting_users ) ) {
+		 	echo __( 'Error: the user is not subscribed to this course nor to the waiting list!', 'iusetvis' );
+		 	die();
+		}
+		
+		if ( in_array( $user_id, $subscribed_users ) ) {
+			$key = array_search( $user_id, $subscribed_users );
+			$unsub = array_splice( $subscribed_users, $key, 1 );
+			update_post_meta( $course_id, 'subscribed_users', $subscribed_users );
+		 	echo __( 'User succesfully unsubscribed from this course. ', 'iusetvis' );
+
+		 	//Take another one from the waiting list
+		 	if( count( $waiting_users ) > 0 ) {
+		 		$first_waiting_user = array_splice( $waiting_users, 0, 1 );
+		 		update_post_meta( $course_id, 'waiting_users', $waiting_users );
+		 		echo __( 'Subscribing first user from waiting list to this course... ', 'iusetvis' );
+		 		$this->course_subscribe( $first_waiting_user, $course_id );
+		 	}
+		 	die();
+		}
+		else if ( in_array( $user_id, $waiting_users ) ) {
+			$key = array_search( $user_id, $waiting_users );
+			$new_waiting_users = array_splice( $waiting_users, $key, 1 );
+			update_post_meta( $course_id, 'waiting_users', $waiting_users );
+			echo __( 'User succesfully unsubscribed to this course\'s waiting list.', 'iusetvis' );
+		 	die();
+		}
 	}
 
 	/**
