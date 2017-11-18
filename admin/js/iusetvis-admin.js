@@ -29,6 +29,7 @@
 	 * practising this, we should strive to set a better example in our own work.
 	 */
 
+	/*
 	$(function() {
 	 	if ($('#association_state:checkbox:checked')) {
 	 		$('#association_end_row').show();
@@ -48,6 +49,111 @@
 		});
 
 	 });
-	
+	 */
+
+	$(document).ready(function() {
+
+		var user_id = 1;
+		var course_id = 52;
+
+		var actions_response_field = $("#actions_response_field");
+
+		$('#perfect-subscription').click(function() {
+	    	actions_response_field.text("");
+	    	$('#perfect-subscription').prop('disabled', true);
+	        $.ajax({
+	        	dataType: 'native',
+		        url: perfect_user_subscription_ajax.ajaxurl,
+		        type: 'POST',
+		        data: {
+		            'action': 'perfect_user_subscription',
+		            'user_id': user_id,
+		            'course_id': course_id
+		        },
+		        success: function(response) {
+		        	actions_response_field.text(response);
+		        	$('#perfect-subscription').prop('disabled', false);
+		        },
+		        error: function(error) {
+		            actions_response_field.text(error);
+		            $('#perfect-subscription').prop('disabled', false);
+		        }
+		    });
+
+	    });
+
+	    $('#unperfect-subscription').click(function() {
+	    	actions_response_field.text("");
+	    	$('#unperfect-subscription').prop('disabled', true);
+	        $.ajax({
+	        	dataType: 'native',
+		        url: unperfect_user_subscription_ajax.ajaxurl,
+		        type: 'POST',
+		        data: {
+		            'action': 'unperfect_user_subscription',
+		            'user_id': user_id,
+		            'course_id': course_id
+		        },
+		        success: function(response) {
+		        	actions_response_field.text(response);
+		        	$('#unperfect-subscription').prop('disabled', false);
+		        },
+		        error: function(error) {
+		            actions_response_field.text(error);
+		            $('#unperfect-subscription').prop('disabled', false);
+		        }
+		    });
+
+	    });
+
+	    $('#confirm-attendance').click(function() {
+	    	actions_response_field.text("");
+	    	$('#confirm-attendance').prop('disabled', true);
+	        $.ajax({
+	        	dataType: 'native',
+		        url: confirm_user_attendance_ajax.ajaxurl,
+		        type: 'POST',
+		        data: {
+		            'action': 'confirm_user_attendance',
+		            'user_id': user_id,
+		            'course_id': course_id
+		        },
+		        success: function(response) {
+		        	actions_response_field.text(response);
+		        	$('#confirm-attendance').prop('disabled', false);
+		        },
+		        error: function(error) {
+		            actions_response_field.text(error);
+		            $('#confirm-attendance').prop('disabled', false);
+		        }
+		    });
+
+	    });
+
+	    $('#delete-attendance').click(function() {
+	    	actions_response_field.text("");
+	    	$('#delete-attendance').prop('disabled', true);
+	        $.ajax({
+	        	dataType: 'native',
+		        url: delete_user_attendance_ajax.ajaxurl,
+		        type: 'POST',
+		        data: {
+		            'action': 'delete_user_attendance',
+		            'user_id': user_id,
+		            'course_id': course_id
+		        },
+		        success: function(response) {
+		        	actions_response_field.text(response);
+		        	$('#delete-attendance').prop('disabled', false);
+		        },
+		        error: function(error) {
+		            actions_response_field.text(error);
+		            $('#delete-attendance').prop('disabled', false);
+		        }
+		    });
+
+	    });
+
+	});
 
 })( jQuery );

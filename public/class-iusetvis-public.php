@@ -97,7 +97,7 @@ class Iusetvis_Public {
 		 */
 
 		wp_enqueue_script( 'jquery-ajax-native', plugin_dir_url( __FILE__ ) . 'js/jquery-ajax-native.js', array( 'jquery' ) );
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/iusetvis-public.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/iusetvis-public.js', array( 'jquery', 'jquery-ajax-native' ), $this->version, false );
 		wp_localize_script( $this->plugin_name, 'pdf_print_diploma_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'course_subscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'course_unsubscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
@@ -360,8 +360,13 @@ class Iusetvis_Public {
 		$subscribed_users = !isset( $meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $meta['subscribed_users'][0] );
 		$waiting_users = !isset( $meta['waiting_users'][0] ) ? array() : maybe_unserialize( $meta['waiting_users'][0] );
 		$available_places = !isset( $meta['course_places'][0] ) ? 0 : ( (int)$meta['course_places'][0] - (int)$subscribed_users );
-
-		if ( in_array( $user_id, $subscribed_users ) ) {
+		$course_subs_dead_end = !isset( $meta['course_subs_dead_end'][0] ) ? array() : maybe_unserialize( $meta['course_subs_dead_end'][0] );
+		
+		if ( time() > (int)$course_subs_dead_end ) {
+			echo __( 'Error: the subscriptions are closed!', 'iusetvis' );
+		 	die();
+		}
+		else if ( in_array( $user_id, $subscribed_users ) ) {
 		 	echo __( 'Error: the user is already subscribed to this course!', 'iusetvis' );
 		 	die();
 		}
@@ -375,8 +380,9 @@ class Iusetvis_Public {
 		}
 		else {
 			array_push( $subscribed_users, $user_id );		
-			update_post_meta( $course_id, 'subscribed_users', $subscribed_users );			
+			update_post_meta( $course_id, 'subscribed_users', $subscribed_users );
 			echo __( 'User succesfully subscribed to this course.', 'iusetvis' );
+			$this->start_unsubscribe_cron( $user_id, $course_id );	
 		die();
 		}
 
@@ -450,8 +456,13 @@ class Iusetvis_Public {
 		$subscribed_users = !isset( $meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $meta['subscribed_users'][0] );
 		$waiting_users = !isset( $meta['waiting_users'][0] ) ? array() : maybe_unserialize( $meta['waiting_users'][0] );
 		$available_places = !isset( $meta['course_places'][0] ) ? 0 : ( (int)$meta['course_places'][0] - (int)$subscribed_users );
-
-		if ( in_array( $user_id, $waiting_users ) ) {
+		$course_subs_dead_end = !isset( $meta['course_subs_dead_end'][0] ) ? 0 : maybe_unserialize( $meta['course_subs_dead_end'][0] );
+		
+		if ( time() > (int)$course_subs_dead_end ) {
+			echo __( 'Error: the subscriptions are closed!', 'iusetvis' );
+		 	die();
+		}
+		else if ( in_array( $user_id, $waiting_users ) ) {
 		 	echo __( 'Error: the user is already subscribed to this course\'s waiting list!', 'iusetvis' );
 		 	die();
 		}
@@ -467,7 +478,65 @@ class Iusetvis_Public {
 			array_push( $waiting_users, $user_id );		
 			update_post_meta( $course_id, 'waiting_users', $waiting_users );			
 			echo __( 'User succesfully subscribed to this course\'s waiting list.', 'iusetvis' );
-		die();
+			die();
+		}
+
+	}
+
+	/**
+	 * Start unsubscribe cron
+	 *
+	 * @since    1.0.0
+	 */
+	public function start_unsubscribe_cron( $user_id, $course_id ) {
+
+		$course_meta = get_post_custom( $course_id );
+		$user_meta = get_user_meta( $user_id );
+		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
+		$course_perf_days = !isset( $course_meta['course_perf_days'][0] ) ? 0 : maybe_unserialize( $course_meta['course_perf_days'][0] );
+		$course_subs_dead_end = !isset( $course_meta['course_subs_dead_end'][0] ) ? 0 : maybe_unserialize( $course_meta['course_subs_dead_end'][0] );		
+		$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
+
+		$cron_timer = ( ( (int)time() + $course_perf_days ) < $course_subs_dead_end ? ( (int)time() + $course_perf_days ) : $course_subs_dead_end );
+
+		// if the user is subscribed to the course
+		if ( in_array( $user_id, $subscribed_users ) ) {
+			
+			// if the user hasn't perfected his subscription to the course
+		 	if ( !in_array( $course_id, $perfected_subscriptions ) ) {
+		 		
+		 		wp_clear_scheduled_hook( 'action_unsubscribe_cron', array( $user_id, $course_id ) );
+		 		wp_schedule_single_event( $cron_timer, 'action_unsubscribe_cron', array( $user_id, $course_id ) );
+
+			}
+
+		}
+
+	}
+
+	/**
+	 * The unsubscribe cron method
+	 *
+	 * @since    1.0.0
+	 */
+	public function run_unsubscribe_cron( $user_id, $course_id ) {
+
+		$course_meta = get_post_custom( $course_id );
+		$user_meta = get_user_meta( $user_id );
+		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
+		$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
+
+		// if the user is subscribed to the course
+		if ( in_array( $user_id, $subscribed_users ) ) {
+			
+			// if the user hans't perfected his subscription to the course
+		 	if ( !in_array( $course_id, $perfected_subscriptions ) ) {
+		 		
+		 		$this->course_unsubscribe( $user_id, $course_id );
+		 		wp_clear_scheduled_hook( 'action_unsubscribe_cron', array( $user_id, $course_id ) );
+
+			}
+
 		}
 
 	}

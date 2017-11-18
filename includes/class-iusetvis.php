@@ -231,6 +231,14 @@ class Iusetvis {
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_codice_fiscale_update' );
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_vat_number_update' );
 
+		// ajax
+		//perfect subscription
+		$this->loader->add_action( 'wp_ajax_perfect_user_subscription', $plugin_admin, 'perfect_user_subscription' );
+		$this->loader->add_action( 'wp_ajax_unperfect_user_subscription', $plugin_admin, 'unperfect_user_subscription' );
+		//confirm attendance
+		$this->loader->add_action( 'wp_ajax_confirm_user_attendance', $plugin_admin, 'confirm_user_attendance' );
+		$this->loader->add_action( 'wp_ajax_delete_user_attendance', $plugin_admin, 'delete_user_attendance' );
+
 	}
 
 	/**
@@ -281,6 +289,9 @@ class Iusetvis {
 		//unsubscribe
 		$this->loader->add_action( 'wp_ajax_course_unsubscribe', $plugin_public, 'course_unsubscribe' );
 		$this->loader->add_action( 'wp_ajax_nopriv_course_unsubscribe', $plugin_public, 'course_unsubscribe' );
+
+		// unsunscribe cron
+		$this->loader->add_action( 'action_unsubscribe_cron', $plugin_public, 'run_unsubscribe_cron', 0, 2);
 
 	}
 
@@ -564,6 +575,7 @@ class Iusetvis {
 		$course_start_time = ! isset( $meta['course_start_time'][0] ) ? '' : $meta['course_start_time'][0];
 		$course_end_time = ! isset( $meta['course_end_time'][0] ) ? '' : $meta['course_end_time'][0];
 		$course_subs_dead_end = ! isset( $meta['course_subs_dead_end'][0] ) ? '' : $meta['course_subs_dead_end'][0];
+		$course_perf_days = ! isset( $meta['course_perf_days'][0] ) ? '' : $meta['course_perf_days'][0];
 
 		wp_nonce_field( basename( __FILE__ ), 'time_fields' ); ?>
 
@@ -596,6 +608,16 @@ class Iusetvis {
 				</td>
 				<td colspan="4">
 					<input type="datetime-local" name="course_subs_dead_end" class="regular-text" value="<?php echo date( 'Y-m-d\TH:i', $course_subs_dead_end ); ?>">
+				</td>
+			</tr>
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_perf_days" style="font-weight: bold;"><?php _e( 'Days available to perfect the registration before being excluded fro the course', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="number" step="0.0000001" name="course_perf_days" class="regular-text" value="<?php echo ( (int)$course_perf_days / 86400 ); ?>">
 				</td>
 			</tr>
 
@@ -634,6 +656,7 @@ class Iusetvis {
 		$meta['course_start_time'] = ( isset( $_POST['course_start_time'] ) ? strtotime( esc_textarea( $_POST['course_start_time'] ) ) : '' );
 		$meta['course_end_time'] = ( isset( $_POST['course_end_time'] ) ? strtotime( esc_textarea( $_POST['course_end_time'] ) ) : '' );
 		$meta['course_subs_dead_end'] = ( isset( $_POST['course_subs_dead_end'] ) ? strtotime( esc_textarea( $_POST['course_subs_dead_end'] ) ) : '' );
+		$meta['course_perf_days'] = ( isset( $_POST['course_perf_days'] ) ? ( esc_textarea( $_POST['course_perf_days'] ) * 86400 ) : '' );
 
 		foreach ( $meta as $key => $value ) {
 			update_post_meta( $post->ID, $key, $value );
