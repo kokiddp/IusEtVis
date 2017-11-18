@@ -211,21 +211,23 @@ class Iusetvis_Public {
 			die();
 		}
 
-		// import and initialize the mpdf library
-		require plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php';
-		$mpdf = new \Mpdf\Mpdf( ['mode' => 'utf-8', 'format' => 'A4-L'] );
-
-		// check if the user is subscribed to the course
-		$meta = get_post_custom( $course_id );
-		$subscribed_users = !isset( $meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $meta['subscribed_users'][0] );
-		if ( !in_array( $user_id, $subscribed_users ) ) {
-		 	die();
-		}
-	
 		// get data
 		$user_meta = get_user_meta( $user_id );
 		$course_title = get_the_title($course_id);
 		$course_meta = get_post_meta( $course_id );
+
+		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
+		$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
+		$confirmed_attendances = !isset( $user_meta['confirmed_attendances'][0] ) ? array() : maybe_unserialize( $user_meta['confirmed_attendances'][0] );
+
+		// checks
+		if ( !in_array( $user_id, $subscribed_users ) || !in_array( $course_id, $perfected_subscriptions ) || !in_array( $course_id, $confirmed_attendances ) ) {
+		 	die();
+		}
+
+		// import and initialize the mpdf library
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php';
+		$mpdf = new \Mpdf\Mpdf( ['mode' => 'utf-8', 'format' => 'A4-L'] );
 
 		// build object
 		$data = array(

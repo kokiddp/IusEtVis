@@ -381,12 +381,14 @@ class Iusetvis_Admin {
 		 		if ( !in_array( $course_id, $confirmed_attendances ) ) {
 		 		
 			 		array_push( $confirmed_attendances, $course_id );		
-					update_user_meta( $user_id, '$confirmed_attendances', $confirmed_attendances );			
+					update_user_meta( $user_id, 'confirmed_attendances', $confirmed_attendances );
+					var_dump($confirmed_attendances);		
 					echo __( 'User attendance to this course succesfully confirmed.', 'iusetvis' );
 					die();	
 
 				}
 				else {
+					var_dump($confirmed_attendances);
 					echo __( 'Error: the user attendance to this course has already been confirmed.', 'iusetvis' );
 					die();
 				}	
@@ -434,15 +436,16 @@ class Iusetvis_Admin {
 
 		 		// if the admin has confirmed user attendance to this course
 		 		if ( in_array( $course_id, $confirmed_attendances ) ) {
-		 		
+		 			
 			 		$key = array_search( $course_id, $confirmed_attendances );
 					array_splice( $confirmed_attendances, $key, 1 );		
-					update_user_meta( $user_id, '$confirmed_attendances', $confirmed_attendances );			
+					update_user_meta( $user_id, 'confirmed_attendances', $confirmed_attendances );			
 					echo __( 'User attendance to this course succesfully deleted.', 'iusetvis' );					
 					die();	
 
 				}
 				else {
+					var_dump($confirmed_attendances);
 					echo __( 'Error: the user attendance to this course has not been confirmed yet.', 'iusetvis' );
 					die();
 				}
@@ -450,7 +453,7 @@ class Iusetvis_Admin {
 			}
 			else {
 				echo __( 'Error: the user registration to this course has not been perfected yet.', 'iusetvis' );
-			die();
+				die();
 			}
 
 		}

@@ -53,13 +53,12 @@
 
 	$(document).ready(function() {
 
-		var user_id = 1;
-		var course_id = 52;
-
 		var actions_response_field = $("#actions_response_field");
 
 		$('#perfect-subscription').click(function() {
 	    	actions_response_field.text("");
+	    	var user_id = $("#user_id").val();
+			var course_id = $("#course_id").val();
 	    	$('#perfect-subscription').prop('disabled', true);
 	        $.ajax({
 	        	dataType: 'native',
@@ -84,6 +83,8 @@
 
 	    $('#unperfect-subscription').click(function() {
 	    	actions_response_field.text("");
+	    	var user_id = $("#user_id").val();
+			var course_id = $("#course_id").val();
 	    	$('#unperfect-subscription').prop('disabled', true);
 	        $.ajax({
 	        	dataType: 'native',
@@ -108,6 +109,8 @@
 
 	    $('#confirm-attendance').click(function() {
 	    	actions_response_field.text("");
+	    	var user_id = $("#user_id").val();
+			var course_id = $("#course_id").val();
 	    	$('#confirm-attendance').prop('disabled', true);
 	        $.ajax({
 	        	dataType: 'native',
@@ -132,6 +135,8 @@
 
 	    $('#delete-attendance').click(function() {
 	    	actions_response_field.text("");
+	    	var user_id = $("#user_id").val();
+			var course_id = $("#course_id").val();
 	    	$('#delete-attendance').prop('disabled', true);
 	        $.ajax({
 	        	dataType: 'native',
