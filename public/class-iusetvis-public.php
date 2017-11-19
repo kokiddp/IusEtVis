@@ -384,7 +384,9 @@ class Iusetvis_Public {
 			array_push( $subscribed_users, $user_id );		
 			update_post_meta( $course_id, 'subscribed_users', $subscribed_users );
 			echo __( 'User succesfully subscribed to this course.', 'iusetvis' );
-			$this->start_unsubscribe_cron( $user_id, $course_id );	
+			$this->start_unsubscribe_cron( $user_id, $course_id );
+			//mail
+			wp_mail( 'stebitto@gmail.com', 'Iusetvis', 'Iscritto al corso '.get_the_title( $course_id ) );
 		die();
 		}
 
@@ -427,6 +429,8 @@ class Iusetvis_Public {
 			$unsub = array_splice( $subscribed_users, $key, 1 );
 			update_post_meta( $course_id, 'subscribed_users', $subscribed_users );
 		 	echo __( 'User succesfully unsubscribed from this course. ', 'iusetvis' );
+		 	//email
+		 	wp_mail( 'stebitto@gmail.com', 'Iusetvis', 'Disiscritto dal corso '.get_the_title( $course_id ) );
 
 		 	//Take another one from the waiting list
 		 	if( count( $waiting_users ) > 0 ) {
