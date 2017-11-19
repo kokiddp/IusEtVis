@@ -381,14 +381,12 @@ class Iusetvis_Admin {
 		 		if ( !in_array( $course_id, $confirmed_attendances ) ) {
 		 		
 			 		array_push( $confirmed_attendances, $course_id );		
-					update_user_meta( $user_id, 'confirmed_attendances', $confirmed_attendances );
-					var_dump($confirmed_attendances);		
+					update_user_meta( $user_id, 'confirmed_attendances', $confirmed_attendances );		
 					echo __( 'User attendance to this course succesfully confirmed.', 'iusetvis' );
 					die();	
 
 				}
 				else {
-					var_dump($confirmed_attendances);
 					echo __( 'Error: the user attendance to this course has already been confirmed.', 'iusetvis' );
 					die();
 				}	
@@ -445,7 +443,6 @@ class Iusetvis_Admin {
 
 				}
 				else {
-					var_dump($confirmed_attendances);
 					echo __( 'Error: the user attendance to this course has not been confirmed yet.', 'iusetvis' );
 					die();
 				}
