@@ -358,11 +358,11 @@ class Iusetvis_Public {
 			die();
 		}
 
-		$meta = get_post_custom( $course_id );
-		$subscribed_users = !isset( $meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $meta['subscribed_users'][0] );
-		$waiting_users = !isset( $meta['waiting_users'][0] ) ? array() : maybe_unserialize( $meta['waiting_users'][0] );
-		$available_places = !isset( $meta['course_places'][0] ) ? 0 : ( (int)$meta['course_places'][0] - (int)$subscribed_users );
-		$course_subs_dead_end = !isset( $meta['course_subs_dead_end'][0] ) ? array() : maybe_unserialize( $meta['course_subs_dead_end'][0] );
+		$course_meta = get_post_custom( $course_id );
+		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
+		$waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );
+		$available_places = !isset( $course_meta['course_places'][0] ) ? 0 : ( (int)$course_meta['course_places'][0] - (int)$subscribed_users );
+		$course_subs_dead_end = !isset( $course_meta['course_subs_dead_end'][0] ) ? array() : maybe_unserialize( $course_meta['course_subs_dead_end'][0] );
 		
 		if ( time() > (int)$course_subs_dead_end ) {
 			echo __( 'Error: the subscriptions are closed!', 'iusetvis' );
@@ -405,13 +405,20 @@ class Iusetvis_Public {
 			die();
 		}
 
-		$meta = get_post_custom( $course_id );
-		$subscribed_users = !isset( $meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $meta['subscribed_users'][0] );
-		$waiting_users = !isset( $meta['waiting_users'][0] ) ? array() : maybe_unserialize( $meta['waiting_users'][0] );
-		$available_places = !isset( $meta['course_places'][0] ) ? 0 : ( (int)$meta['course_places'][0] - (int)$subscribed_users );
+		$course_meta = get_post_custom( $course_id );
+		$user_meta = get_user_meta( $user_id );
+		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
+		$waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );
+		$available_places = !isset( $course_meta['course_places'][0] ) ? 0 : ( (int)$course_meta['course_places'][0] - (int)$subscribed_users );
+		$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
 
 		if ( !in_array( $user_id, $subscribed_users ) && !in_array( $user_id, $waiting_users ) ) {
 		 	echo __( 'Error: the user is not subscribed to this course nor to the waiting list!', 'iusetvis' );
+		 	die();
+		}
+
+		if ( in_array( $course_id, $perfected_subscriptions ) ) {
+			echo __( 'Error: the user subscription has already been perfected!', 'iusetvis' );
 		 	die();
 		}
 		
@@ -454,11 +461,11 @@ class Iusetvis_Public {
 			die();
 		}
 
-		$meta = get_post_custom( $course_id );
-		$subscribed_users = !isset( $meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $meta['subscribed_users'][0] );
-		$waiting_users = !isset( $meta['waiting_users'][0] ) ? array() : maybe_unserialize( $meta['waiting_users'][0] );
-		$available_places = !isset( $meta['course_places'][0] ) ? 0 : ( (int)$meta['course_places'][0] - (int)$subscribed_users );
-		$course_subs_dead_end = !isset( $meta['course_subs_dead_end'][0] ) ? 0 : maybe_unserialize( $meta['course_subs_dead_end'][0] );
+		$course_meta = get_post_custom( $course_id );
+		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
+		$waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );
+		$available_places = !isset( $course_meta['course_places'][0] ) ? 0 : ( (int)$course_meta['course_places'][0] - (int)$subscribed_users );
+		$course_subs_dead_end = !isset( $course_meta['course_subs_dead_end'][0] ) ? 0 : maybe_unserialize( $course_meta['course_subs_dead_end'][0] );
 		
 		if ( time() > (int)$course_subs_dead_end ) {
 			echo __( 'Error: the subscriptions are closed!', 'iusetvis' );
