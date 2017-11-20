@@ -383,7 +383,9 @@ class Iusetvis_Admin {
 			 		array_push( $confirmed_attendances, $course_id );		
 					update_user_meta( $user_id, 'confirmed_attendances', $confirmed_attendances );		
 					echo __( 'User attendance to this course succesfully confirmed.', 'iusetvis' );
-					wp_mail( 'stebitto@gmail.com', 'Iusetvis', 'Partecipazione al corso '.get_the_title( $course_id ).' confermata' );
+					//mail
+					$user_info = get_userdata(1);
+					wp_mail( $user_info->user_email, 'Iusetvis', 'Partecipazione al corso '.get_the_title( $course_id ).' confermata' );
 					die();	
 
 				}
