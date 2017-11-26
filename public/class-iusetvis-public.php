@@ -361,7 +361,7 @@ class Iusetvis_Public {
 		$course_meta = get_post_custom( $course_id );
 		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 		$waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );
-		$available_places = !isset( $course_meta['course_places'][0] ) ? 0 : ( (int)$course_meta['course_places'][0] - (int)$subscribed_users );
+		$available_places = !isset( $course_meta['course_places'][0] ) ? 0 : ( (int)$course_meta['course_places'][0] - count( $subscribed_users ) );
 		$course_subs_dead_end = !isset( $course_meta['course_subs_dead_end'][0] ) ? array() : maybe_unserialize( $course_meta['course_subs_dead_end'][0] );
 		
 		if ( time() > (int)$course_subs_dead_end ) {
@@ -386,8 +386,8 @@ class Iusetvis_Public {
 			echo __( 'User succesfully subscribed to this course.', 'iusetvis' );
 			$this->start_unsubscribe_cron( $user_id, $course_id );
 			//mail
-			$user_info = get_userdata(1);
-			wp_mail( $user_info->user_email, 'Iusetvis', 'Iscritto al corso '.get_the_title( $course_id ) );
+			$user_info = get_userdata($user_id);
+			wp_mail( $user_info->user_email, __( 'IusEtVis', 'iusetvis' ), $this->get_subscription_template( $user_id, $course_id) );
 		die();
 		}
 
@@ -412,7 +412,6 @@ class Iusetvis_Public {
 		$user_meta = get_user_meta( $user_id );
 		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 		$waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );
-		$available_places = !isset( $course_meta['course_places'][0] ) ? 0 : ( (int)$course_meta['course_places'][0] - (int)$subscribed_users );
 		$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
 
 		if ( !in_array( $user_id, $subscribed_users ) && !in_array( $user_id, $waiting_users ) ) {
@@ -431,8 +430,8 @@ class Iusetvis_Public {
 			update_post_meta( $course_id, 'subscribed_users', $subscribed_users );
 		 	echo __( 'User succesfully unsubscribed from this course. ', 'iusetvis' );
 		 	//email
-		 	$user_info = get_userdata(1);
-			wp_mail( $user_info->user_email, 'Iusetvis', 'Disiscritto dal corso '.get_the_title( $course_id ) );
+		 	$user_info = get_userdata($user_id);
+			wp_mail( $user_info->user_email, __( 'IusEtVis', 'iusetvis' ), $this->get_unsubscription_template( $user_id, $course_id) );
 
 		 	//Take another one from the waiting list
 		 	if( count( $waiting_users ) > 0 ) {
@@ -470,7 +469,7 @@ class Iusetvis_Public {
 		$course_meta = get_post_custom( $course_id );
 		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 		$waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );
-		$available_places = !isset( $course_meta['course_places'][0] ) ? 0 : ( (int)$course_meta['course_places'][0] - (int)$subscribed_users );
+		$available_places = !isset( $course_meta['course_places'][0] ) ? 0 : ( (int)$course_meta['course_places'][0] - count( $subscribed_users ) );
 		$course_subs_dead_end = !isset( $course_meta['course_subs_dead_end'][0] ) ? 0 : maybe_unserialize( $course_meta['course_subs_dead_end'][0] );
 		
 		if ( time() > (int)$course_subs_dead_end ) {
@@ -485,7 +484,7 @@ class Iusetvis_Public {
 		 	echo __( 'Error: the user is already subscribed to this course!', 'iusetvis' );
 		 	die();
 		}
-		else if ( $available_places >= 0 ) {
+		else if ( $available_places > 0 ) {
 			echo __( 'Error: there are still available places in this course!', 'iusetvis' );
 		 	die();
 		}
@@ -553,6 +552,42 @@ class Iusetvis_Public {
 			}
 
 		}
+
+	}
+
+	/**
+	 * The subscription email template
+	 *
+	 * @since    1.0.0
+	 */
+	public function get_subscription_template( $user_id, $course_id ) {
+
+		//stub
+
+		$template = '
+			<h2> '. __( 'IusEtVis', 'iusetvis' ) . '</h2>
+			<p>' . __( 'Subscribed to course ', 'iusetvis' ) . get_the_title( $course_id ) . '</p>
+		';
+
+		return $template;
+
+	}
+
+	/**
+	 * The unsubscription email template
+	 *
+	 * @since    1.0.0
+	 */
+	public function get_unsubscription_template( $user_id, $course_id ) {
+		
+		//stub
+
+		$template = '
+			<h2> '. __( 'IusEtVis', 'iusetvis' ) . '</h2>
+			<p>' . __( 'Unsubscribed from course ', 'iusetvis' ) . get_the_title( $course_id ) . '</p>
+		';
+
+		return $template;
 
 	}
 

@@ -231,6 +231,10 @@ class Iusetvis {
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_codice_fiscale_update' );
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_vat_number_update' );
 
+		// course custom columns
+		$this->loader->add_filter( 'manage_course_posts_columns', $plugin_admin, 'set_custom_edit_course_columns' );
+		$this->loader->add_action( 'manage_course_posts_custom_column', $plugin_admin, 'custom_course_column', 10, 2 );
+
 		// ajax
 		//perfect subscription
 		$this->loader->add_action( 'wp_ajax_perfect_user_subscription', $plugin_admin, 'perfect_user_subscription' );

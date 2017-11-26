@@ -464,4 +464,68 @@ class Iusetvis_Admin {
 
 	}
 
+	/**
+	 * Set custom course Subscriptions column
+	 *
+	 * @since    1.0.0
+	 */
+	public function set_custom_edit_course_columns($columns) {
+
+		$columns['start_date'] = __( 'Start', 'iusetvis' );
+		$columns['subs_end_date'] = __( 'Subscriptions end', 'iusetvis' );
+	    $columns['subscriptions'] = __( 'Subscriptions', 'iusetvis' );
+	    $columns['waiting'] = __( 'Waiting', 'iusetvis' );
+
+	    return $columns;
+	}
+
+	/**
+	 * Set custom course Subscriptions column content
+	 *
+	 * @since    1.0.0
+	 */
+	public function custom_course_column( $column, $post_id ) {
+
+		$course_meta = get_post_custom( $post_id );
+		$date_format = get_option( 'date_format' );
+		$time_format = get_option( 'time_format' );
+		$datetime_format = $date_format . ' - ' . $time_format;
+
+	    switch ( $column ) {
+
+	        case 'start_date' :
+				$course_start_time = ! isset( $course_meta['course_start_time'][0] ) ? 0 : $course_meta['course_start_time'][0];
+	            if ( isset( $course_start_time ) && $course_start_time > 0 )
+	                echo date( $datetime_format, $course_start_time );
+	            else
+	                _e( 'Unable to get the start date', 'iusetvis' );
+	            break;
+
+	        case 'subs_end_date' :
+				$course_subs_dead_end = ! isset( $course_meta['course_subs_dead_end'][0] ) ? 0 : $course_meta['course_subs_dead_end'][0];
+	            if ( isset( $course_subs_dead_end ) && $course_subs_dead_end > 0 )
+	                echo date( $datetime_format, $course_subs_dead_end );
+	            else
+	                _e( 'Unable to get the subscriptions dead end date', 'iusetvis' );
+	            break;
+
+	        case 'subscriptions' :
+	            $subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
+	            if ( isset( $subscribed_users ) && count( $subscribed_users ) >= 0 )
+	                echo count( $subscribed_users );
+	            else
+	                _e( 'Unable to get the suscribers', 'iusetvis' );
+	            break;
+
+	        case 'waiting' :
+	            $waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );
+	            if ( isset( $waiting_users ) && count( $waiting_users ) >= 0 )
+	                echo count( $waiting_users );
+	            else
+	                _e( 'Unable to get the waiting users', 'iusetvis' );
+	            break;
+
+	    }
+	}
+
 }
