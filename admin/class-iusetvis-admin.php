@@ -183,6 +183,16 @@ class Iusetvis_Admin {
 			'dashicons-backup'
 		);
 
+		// Subscribed users list table
+		add_menu_page(
+			__( 'Course List Table', 'iusetvis' ),
+			__( 'Course List Table', 'iusetvis' ),
+			'edit_pages',
+			$this->plugin_name . '_course_list_table',
+			array( $this, 'course_list_table' ),
+			'dashicons-list-view'
+		);
+
 	}
 
 	/**
@@ -526,6 +536,26 @@ class Iusetvis_Admin {
 	            break;
 
 	    }
+	}
+
+	/**
+	 * Setup and display course list table
+	 *
+	 * @since    1.0.0
+	 */
+	public function course_list_table() { 
+
+		$courseListTable = new Subscribed_Users_List_Table();
+        $courseListTable->prepare_items();
+        ?>
+            <div class="wrap">
+                <div id="icon-users" class="icon32"></div>
+                <h2>Subscribed Users List Table Page</h2>
+                <?php $courseListTable->display(); ?>
+            </div>
+        <?php
+
+
 	}
 
 }

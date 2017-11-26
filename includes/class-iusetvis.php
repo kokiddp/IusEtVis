@@ -155,6 +155,12 @@ class Iusetvis {
 		 */
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php';
 
+		/**
+		 * The class responsible for defining the subscribed users table list
+		 * of the plugin.
+		 */
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-iusetvis-list-table.php';
+
 		$this->loader = new Iusetvis_Loader();
 
 	}
