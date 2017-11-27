@@ -42,12 +42,12 @@ class Subscribed_Users_List_Table extends WP_List_Table
     public function get_columns()
     {
         $columns = array(
-            'title'			=> 'Title',
-            'name'			=> 'Name',
-            'surname'		=> 'Surname',
-            'associated'	=> 'Associate',
-            'perfected'		=> 'Perfected',
-            'confirmed'		=> 'Confirmed'
+            'title'			=> __('Title', 'iusetvis'),
+            'first_name'	=> __('First Name', 'iusetvis'),
+            'last_name'		=> __('Last Name', 'iusetvis'),
+            'associated'	=> __('Associated', 'iusetvis'),
+            'perfected'		=> __('Perfected', 'iusetvis'),
+            'confirmed'		=> __('Confirmed', 'iusetvis')
         );
         return $columns;
     }
@@ -55,14 +55,14 @@ class Subscribed_Users_List_Table extends WP_List_Table
     public function get_hidden_columns()
     {
         $hidden_columns = array(
-            'id'          => 'ID'
+            'id'    => 'ID'
         );
         return $hidden_columns;
     }
 
     public function get_sortable_columns()
     {
-        return array('surname' => array('surname', false));
+        return array('last_name' => array('last_name', false));
     }
 
     private function table_data()
@@ -72,18 +72,37 @@ class Subscribed_Users_List_Table extends WP_List_Table
         {
             $course_id = $_GET['course_id'];
         }
+        $course_meta = get_post_custom( $course_id );
+        $subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );        
 
-    	//stub
         $data = array();
-        $data[] = array(
-            'id'			=> 1,
-            'title'			=> 'Avv.',
-            'name'			=> 'Mario',
-            'surname'		=> 'Rossi',
-            'associated'	=> true,
-            'perfected'		=> false,
-            'confirmed'		=> false
-        );
+
+        foreach ( $subscribed_users as $key => $value ) {
+            $user_id = $value;
+
+            $user_meta = get_user_meta( $user_id );
+
+            $perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
+            $confirmed_attendances = !isset( $user_meta['confirmed_attendances'][0] ) ? array() : maybe_unserialize( $user_meta['confirmed_attendances'][0] );
+            
+            $user_title = !isset( $user_meta['title'][0] ) ? '' : $user_meta['title'][0];
+            $user_first_name = !isset( $user_meta['first_name'][0] ) ? '' : $user_meta['first_name'][0];
+            $user_last_name = !isset( $user_meta['last_name'][0] ) ? '' : $user_meta['last_name'][0];
+            $user_association_state = !isset( $user_meta['association_state'][0] ) ? false : ( $user_meta['association_state'][0] == 0 ? false : true );
+            $user_sub_perfected = in_array( $course_id, $perfected_subscriptions );
+            $user_att_confirmed = in_array( $course_id, $confirmed_attendances );
+
+            $data[] = array(
+                'id'            => $user_id,
+                'title'         => $user_title,
+                'first_name'    => $user_first_name,
+                'last_name'     => $user_last_name,
+                'associated'    => $user_association_state,
+                'perfected'     => $user_sub_perfected,
+                'confirmed'     => $user_att_confirmed
+            );
+        }
+        
         return $data;
     }
 
@@ -92,8 +111,8 @@ class Subscribed_Users_List_Table extends WP_List_Table
         switch( $column_name ) {
             case 'id':
             case 'title':
-            case 'name':
-            case 'surname':
+            case 'first_name':
+            case 'last_name':
                 return $item[ $column_name ];
             case 'associated':
             case 'perfected':
@@ -106,7 +125,7 @@ class Subscribed_Users_List_Table extends WP_List_Table
 
     private function sort_data( $a, $b )
     {
-        $orderby = 'surname';
+        $orderby = 'last_name';
         $order = 'asc';
 
         if(!empty($_GET['orderby']))
