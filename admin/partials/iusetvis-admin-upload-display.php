@@ -17,3 +17,15 @@
 		wp_die( __('You do not have sufficient permissions to access this page.') );
 	}
 ?>
+
+<div class='wrap'>
+	<h1><?php _e( 'Demo', 'iusetvis' ) ?></h1>
+
+	<h3 id="actions_response_field"></h3>
+
+	<h2><?php _e( 'Upload CSV', 'iusetvis' ) ?></h2>
+	<p>
+		<input type="file" name="csv" accept=".csv" id="csv_file">
+		<input type='submit' style='margin-bottom: 20px;' class='button-primary' id='upload-csv' value='<?php _e( 'Upload CSV', 'iusetvis' ) ?>'>
+	</p>
+</div>

@@ -248,6 +248,8 @@ class Iusetvis {
 		//confirm attendance
 		$this->loader->add_action( 'wp_ajax_confirm_user_attendance', $plugin_admin, 'confirm_user_attendance' );
 		$this->loader->add_action( 'wp_ajax_delete_user_attendance', $plugin_admin, 'delete_user_attendance' );
+		//upload csv
+		$this->loader->add_action( 'wp_ajax_upload_csv', $plugin_admin, 'upload_csv' );
 
 	}
 

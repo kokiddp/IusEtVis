@@ -115,9 +115,10 @@ class Subscribed_Users_List_Table extends WP_List_Table
             case 'last_name':
                 return $item[ $column_name ];
             case 'associated':
+                return '<input type="checkbox" name="' . $column_name . '" value="' . $item[ $column_name ] . '" ' . ( ( $item[ $column_name ] == true ) ? 'checked' : '' ) . ' disabled="disabled">';
             case 'perfected':
             case 'confirmed':
-            	return '<input type="checkbox" name="' . $column_name . '" value="' . $item[ $column_name ] . '" ' . ( ( $item[ $column_name ] == true ) ? 'checked' : '' ) . '>';
+            	return '<input class="' . $column_name . '_checkbox" data-user_id="' . $item[ 'id' ] . '" type="checkbox" name="' . $column_name . '" value="' . $item[ $column_name ] . '" ' . ( ( $item[ $column_name ] == true ) ? 'checked' : '' ) . '>';
             default:
                 return print_r( $item, true ) ;
         }

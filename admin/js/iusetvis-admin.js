@@ -159,6 +159,148 @@
 
 	    });
 
+	    $('.perfected_checkbox').change(function() {
+	    	var user_id = $(this).data("user_id");
+			var course_id = getParameterByName('course_id');
+			actions_response_field.text("");
+			var ref = $(this);
+			ref.prop('disabled', 'disabled');
+			if(ref.is(":checked")) {
+				$.ajax({
+		        	dataType: 'native',
+			        url: perfect_user_subscription_ajax.ajaxurl,
+			        type: 'POST',
+			        data: {
+			            'action': 'perfect_user_subscription',
+			            'user_id': user_id,
+			            'course_id': course_id
+			        },
+			        success: function(response) {
+			        	actions_response_field.text(response);
+			        	ref.prop('disabled', false);
+			        },
+			        error: function(error) {
+			            actions_response_field.text(response);
+			            ref.prop('disabled', false);
+			        }
+		    	});
+			}
+			else {
+				$.ajax({
+		        	dataType: 'native',
+			        url: unperfect_user_subscription_ajax.ajaxurl,
+			        type: 'POST',
+			        data: {
+			            'action': 'unperfect_user_subscription',
+			            'user_id': user_id,
+			            'course_id': course_id
+			        },
+			        success: function(response) {
+			        	actions_response_field.text(response);
+			        	ref.prop('disabled', false);
+			        },
+			        error: function(error) {
+			            actions_response_field.text(response);
+			            ref.prop('disabled', false);
+			        }
+			    });
+			}
+
+	    });
+
+	    $('.confirmed_checkbox').change(function() {
+	    	var user_id = $(this).data("user_id");
+			var course_id = getParameterByName('course_id');
+			actions_response_field.text("");
+			var ref = $(this);
+			ref.prop('disabled', 'disabled');
+			if(ref.is(":checked")) {
+				$.ajax({
+		        	dataType: 'native',
+			        url: confirm_user_attendance_ajax.ajaxurl,
+			        type: 'POST',
+			        data: {
+			            'action': 'confirm_user_attendance',
+			            'user_id': user_id,
+			            'course_id': course_id
+			        },
+			        success: function(response) {
+			        	actions_response_field.text(response);
+			        	ref.prop('disabled', false);
+			        },
+			        error: function(error) {
+			            actions_response_field.text(response);
+			            ref.prop('disabled', false);
+			        }
+		    	});
+			}
+			else {
+				$.ajax({
+		        	dataType: 'native',
+			        url: delete_user_attendance_ajax.ajaxurl,
+			        type: 'POST',
+			        data: {
+			            'action': 'delete_user_attendance',
+			            'user_id': user_id,
+			            'course_id': course_id
+			        },
+			        success: function(response) {
+			        	actions_response_field.text(response);
+			        	ref.prop('disabled', false);
+			        },
+			        error: function(error) {
+			            actions_response_field.text(response);
+			            ref.prop('disabled', false);
+			        }
+			    });
+			}
+
+	    });
+
+	    $('#upload-csv').click(function() {
+	    	actions_response_field.text("Uploading csv");
+
+	    	var file = $("#csv_file").prop('files')[0];
+	    	var fr = new FileReader();
+
+			var content;
+
+	    	fr.onload = function(event) {
+	    		content = event.target.result;
+
+		        $.ajax({
+		        	dataType: 'native',
+			        url: upload_csv_ajax.ajaxurl,
+			        type: 'POST',
+			        data: {
+			            'action': 'upload_csv',
+			            'file' : content
+			        },
+			        success: function(response) {
+			        	actions_response_field.text(response);
+
+			        },
+			        error: function(error) {
+			            actions_response_field.text(error);
+
+			        }
+			    });
+	    	}
+
+		    fr.readAsText(file);
+			
+	    });
+
 	});
+
+	function getParameterByName(name, url) {
+	    if (!url) url = window.location.href;
+	    name = name.replace(/[\[\]]/g, "\\$&");
+	    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+	        results = regex.exec(url);
+	    if (!results) return null;
+	    if (!results[2]) return '';
+	    return decodeURIComponent(results[2].replace(/\+/g, " "));
+	}
 
 })( jQuery );

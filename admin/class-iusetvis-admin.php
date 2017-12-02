@@ -102,7 +102,8 @@ class Iusetvis_Admin {
 		wp_localize_script( $this->plugin_name, 'perfect_user_subscription_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'unperfect_user_subscription_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'confirm_user_attendance_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
-		wp_localize_script( $this->plugin_name, 'delete_user_attendance_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );	
+		wp_localize_script( $this->plugin_name, 'delete_user_attendance_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+		wp_localize_script( $this->plugin_name, 'upload_csv_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );	
 
 	}
 
@@ -135,8 +136,8 @@ class Iusetvis_Admin {
 
 		// Submenu page Upload
 		add_submenu_page(
-			NULL,
-			__( 'Courses', 'iusetvis' ),
+			$this->plugin_name . "_registrations_page",
+			__( 'Upload', 'iusetvis' ),
 			__( 'Upload', 'iusetvis' ),
 			'edit_pages',
 			$this->plugin_name . '_upload_file',
@@ -522,7 +523,7 @@ class Iusetvis_Admin {
 	        case 'subscriptions' :
 	            $subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 	            if ( isset( $subscribed_users ) && count( $subscribed_users ) >= 0 )
-	                echo count( $subscribed_users );
+	                echo "<a href='" . site_url('/wp-admin/admin.php?page=iusetvis_course_list_table&course_id=') . $post_id . "'>" . count( $subscribed_users ) . "</a>";
 	            else
 	                _e( 'Unable to get the suscribers', 'iusetvis' );
 	            break;
@@ -550,11 +551,26 @@ class Iusetvis_Admin {
         ?>
             <div class="wrap">
                 <div id="icon-users" class="icon32"></div>
-                <h2>Subscribed Users List Table Page</h2>
+                <h1>Subscribed Users List Table Page</h1>
+                <h3 id="actions_response_field"></h3>
                 <?php $courseListTable->display(); ?>
             </div>
         <?php
 
+
+	}
+
+	/**
+	 * Upload CSV
+	 *
+	 * @since    1.0.0
+	 */
+	public function upload_csv( $_file ) {
+
+		$file = ( isset( $_POST['file'] ) ? $_POST['file'] : $_file );
+		
+		echo $file;
+		die();
 
 	}
 
