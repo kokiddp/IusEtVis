@@ -166,6 +166,7 @@
 			var ref = $(this);
 			ref.prop('disabled', 'disabled');
 			if(ref.is(":checked")) {
+				actions_response_field.text("Perfecting subscription...");
 				$.ajax({
 		        	dataType: 'native',
 			        url: perfect_user_subscription_ajax.ajaxurl,
@@ -177,15 +178,20 @@
 			        },
 			        success: function(response) {
 			        	actions_response_field.text(response);
+			        	if (response.includes('Error: ')) {
+			        		ref.attr('checked', false);
+			        	}
 			        	ref.prop('disabled', false);
 			        },
 			        error: function(error) {
 			            actions_response_field.text(response);
+			            ref.attr('checked', false);
 			            ref.prop('disabled', false);
 			        }
 		    	});
 			}
 			else {
+				actions_response_field.text("Unperfecting subscription...");
 				$.ajax({
 		        	dataType: 'native',
 			        url: unperfect_user_subscription_ajax.ajaxurl,
@@ -197,10 +203,14 @@
 			        },
 			        success: function(response) {
 			        	actions_response_field.text(response);
+			        	if (response.includes('Error: ')) {
+			        		ref.attr('checked', true);
+			        	}
 			        	ref.prop('disabled', false);
 			        },
 			        error: function(error) {
 			            actions_response_field.text(response);
+			            ref.attr('checked', true);
 			            ref.prop('disabled', false);
 			        }
 			    });
@@ -215,6 +225,7 @@
 			var ref = $(this);
 			ref.prop('disabled', 'disabled');
 			if(ref.is(":checked")) {
+				actions_response_field.text("Confirming attendance...");
 				$.ajax({
 		        	dataType: 'native',
 			        url: confirm_user_attendance_ajax.ajaxurl,
@@ -226,15 +237,20 @@
 			        },
 			        success: function(response) {
 			        	actions_response_field.text(response);
+			        	if (response.includes('Error: ')) {
+			        		ref.attr('checked', false);
+			        	}
 			        	ref.prop('disabled', false);
 			        },
 			        error: function(error) {
 			            actions_response_field.text(response);
+			            ref.attr('checked', false);
 			            ref.prop('disabled', false);
 			        }
 		    	});
 			}
 			else {
+				actions_response_field.text("Deleting attendance...");
 				$.ajax({
 		        	dataType: 'native',
 			        url: delete_user_attendance_ajax.ajaxurl,
@@ -246,10 +262,14 @@
 			        },
 			        success: function(response) {
 			        	actions_response_field.text(response);
+			        	if (response.includes('Error: ')) {
+			        		ref.attr('checked', true);
+			        	}
 			        	ref.prop('disabled', false);
 			        },
 			        error: function(error) {
 			            actions_response_field.text(response);
+			            ref.attr('checked', true);
 			            ref.prop('disabled', false);
 			        }
 			    });
@@ -289,6 +309,37 @@
 
 		    fr.readAsText(file);
 			
+	    });
+
+	    $('.unsubscribe_button').click(function() {
+	    	var user_id = $(this).data("user_id");
+			var course_id = getParameterByName('course_id');
+	    	actions_response_field.text("");
+	    	var ref = $(this);
+	    	ref.prop('disabled', true);
+	    	actions_response_field.text("Unsubscribing user...");
+	        $.ajax({
+	        	dataType: 'native',
+		        url: course_unsubscribe_ajax.ajaxurl,
+		        type: 'POST',
+		        data: {
+		            'action': 'course_unsubscribe',
+		            'user_id': user_id,
+		            'course_id': course_id
+		        },
+		        success: function(response) {
+		        	actions_response_field.text(response);
+		        	ref.prop('disabled', false);
+		        	if (!response.includes('Error: ')) {
+		        		location.reload(true);
+		        	}		        	
+		        },
+		        error: function(error) {
+		            actions_response_field.text(error);
+		            ref.prop('disabled', false);
+		        }
+		    });
+
 	    });
 
 	});

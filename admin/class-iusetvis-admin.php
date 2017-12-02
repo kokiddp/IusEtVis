@@ -103,7 +103,12 @@ class Iusetvis_Admin {
 		wp_localize_script( $this->plugin_name, 'unperfect_user_subscription_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'confirm_user_attendance_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'delete_user_attendance_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
-		wp_localize_script( $this->plugin_name, 'upload_csv_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );	
+		wp_localize_script( $this->plugin_name, 'upload_csv_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+
+		wp_localize_script( $this->plugin_name, 'pdf_print_diploma_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+		wp_localize_script( $this->plugin_name, 'course_subscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+		wp_localize_script( $this->plugin_name, 'course_unsubscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+		wp_localize_script( $this->plugin_name, 'course_waiting_list_subscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 
 	}
 
@@ -381,6 +386,7 @@ class Iusetvis_Admin {
 		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 		$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
 		$confirmed_attendances = !isset( $user_meta['confirmed_attendances'][0] ) ? array() : maybe_unserialize( $user_meta['confirmed_attendances'][0] );
+		$course_end_time = ! isset( $course_meta['course_end_time'][0] ) ? '' : $course_meta['course_end_time'][0];
 
 		// if the user is subscribed to the course
 		if ( in_array( $user_id, $subscribed_users ) ) {
@@ -388,23 +394,30 @@ class Iusetvis_Admin {
 			// if the user has perfected his subscription to the course
 		 	if ( in_array( $course_id, $perfected_subscriptions ) ) {
 
-		 		// if the admin hasn't confirmed user attendance to this course
-		 		if ( !in_array( $course_id, $confirmed_attendances ) ) {
-		 		
-			 		array_push( $confirmed_attendances, $course_id );		
-					update_user_meta( $user_id, 'confirmed_attendances', $confirmed_attendances );		
-					echo __( 'User attendance to this course succesfully confirmed.', 'iusetvis' );
-					//mail
-					$user_info = get_userdata(1);
-					wp_mail( $user_info->user_email, 'Iusetvis', 'Partecipazione al corso '.get_the_title( $course_id ).' confermata' );
-					die();	
+			 	// if the course is finished 
+			 	if ( $course_end_time <= time() ) {			 	
 
+			 		// if the admin hasn't confirmed user attendance to this course
+			 		if ( !in_array( $course_id, $confirmed_attendances ) ) {
+			 		
+				 		array_push( $confirmed_attendances, $course_id );		
+						update_user_meta( $user_id, 'confirmed_attendances', $confirmed_attendances );		
+						echo __( 'User attendance to this course succesfully confirmed.', 'iusetvis' );
+						//mail
+						$user_info = get_userdata(1);
+						wp_mail( $user_info->user_email, 'Iusetvis', 'Partecipazione al corso '.get_the_title( $course_id ).' confermata' );
+						die();	
+
+					}
+					else {
+						echo __( 'Error: the user attendance to this course has already been confirmed.', 'iusetvis' );
+						die();
+					}
 				}
 				else {
-					echo __( 'Error: the user attendance to this course has already been confirmed.', 'iusetvis' );
-					die();
-				}	
-
+					echo __( 'Error: the course is not finished yet.', 'iusetvis' );
+						die();
+				}
 			}
 			else {
 				echo __( 'Error: the user registration to this course has not been perfected yet.', 'iusetvis' );

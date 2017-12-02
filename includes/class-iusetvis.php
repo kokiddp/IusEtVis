@@ -291,15 +291,11 @@ class Iusetvis {
 
 		// ajax
 		// print diploma
-		$this->loader->add_action( 'wp_ajax_pdf_print_diploma', $plugin_public, 'pdf_print_diploma' );
 		$this->loader->add_action( 'wp_ajax_nopriv_pdf_print_diploma', $plugin_public, 'pdf_print_diploma' );
 		// subscribe to course
-		$this->loader->add_action( 'wp_ajax_course_subscribe', $plugin_public, 'course_subscribe' );
 		$this->loader->add_action( 'wp_ajax_nopriv_course_subscribe', $plugin_public, 'course_subscribe' );
-		$this->loader->add_action( 'wp_ajax_course_waiting_list_subscribe', $plugin_public, 'course_waiting_list_subscribe' );
 		$this->loader->add_action( 'wp_ajax_nopriv_course_waiting_list_subscribe', $plugin_public, 'course_waiting_list_subscribe' );
 		//unsubscribe
-		$this->loader->add_action( 'wp_ajax_course_unsubscribe', $plugin_public, 'course_unsubscribe' );
 		$this->loader->add_action( 'wp_ajax_nopriv_course_unsubscribe', $plugin_public, 'course_unsubscribe' );
 
 		// unsunscribe cron
@@ -316,11 +312,23 @@ class Iusetvis {
 	 */
 	private function define_common_hooks() {
 
+		$plugin_admin = new Iusetvis_Admin( $this->get_plugin_name(), $this->get_version() );
+		$plugin_public = new Iusetvis_Public( $this->get_plugin_name(), $this->get_version() );
+
 		// post type and taxonomies
 		$this->loader->add_action( 'init', $this, 'register_post_type', 0 );
 		$this->loader->add_action( 'init', $this, 'register_taxonomy_category', 0 );
 		$this->loader->add_action( 'init', $this, 'register_taxonomy_tag', 0 );
 		$this->loader->add_action( 'init', $this, 'register_taxonomy_location', 0 );
+
+		// ajax
+		// print diploma
+		$this->loader->add_action( 'wp_ajax_pdf_print_diploma', $plugin_public, 'pdf_print_diploma' );
+		// subscribe to course
+		$this->loader->add_action( 'wp_ajax_course_subscribe', $plugin_public, 'course_subscribe' );
+		$this->loader->add_action( 'wp_ajax_course_waiting_list_subscribe', $plugin_public, 'course_waiting_list_subscribe' );
+		//unsubscribe
+		$this->loader->add_action( 'wp_ajax_course_unsubscribe', $plugin_public, 'course_unsubscribe' );
 
 	}
 

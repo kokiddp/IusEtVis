@@ -42,12 +42,13 @@ class Subscribed_Users_List_Table extends WP_List_Table
     public function get_columns()
     {
         $columns = array(
-            'title'			=> __('Title', 'iusetvis'),
-            'first_name'	=> __('First Name', 'iusetvis'),
-            'last_name'		=> __('Last Name', 'iusetvis'),
+            'name'	        => __('Name', 'iusetvis'),
+            'address'		=> __('Address', 'iusetvis'),
+            'phone'         => __('Telephone', 'iusetvis'),
             'associated'	=> __('Associated', 'iusetvis'),
             'perfected'		=> __('Perfected', 'iusetvis'),
-            'confirmed'		=> __('Confirmed', 'iusetvis')
+            'confirmed'		=> __('Confirmed', 'iusetvis'),
+            'unsubscribe'   => __('Unsubscribe', 'iusetvis')
         );
         return $columns;
     }
@@ -62,7 +63,7 @@ class Subscribed_Users_List_Table extends WP_List_Table
 
     public function get_sortable_columns()
     {
-        return array('last_name' => array('last_name', false));
+        return array('name' => array('name', false));
     }
 
     private function table_data()
@@ -85,18 +86,20 @@ class Subscribed_Users_List_Table extends WP_List_Table
             $perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
             $confirmed_attendances = !isset( $user_meta['confirmed_attendances'][0] ) ? array() : maybe_unserialize( $user_meta['confirmed_attendances'][0] );
             
-            $user_title = !isset( $user_meta['title'][0] ) ? '' : $user_meta['title'][0];
             $user_first_name = !isset( $user_meta['first_name'][0] ) ? '' : $user_meta['first_name'][0];
             $user_last_name = !isset( $user_meta['last_name'][0] ) ? '' : $user_meta['last_name'][0];
+            $user_name = $user_last_name . ' ' . $user_first_name;
+            $user_address = !isset( $user_meta['address'][0] ) ? '' : $user_meta['address'][0];
+            $user_phone = !isset( $user_meta['phone'][0] ) ? '' : $user_meta['phone'][0];
             $user_association_state = !isset( $user_meta['association_state'][0] ) ? false : ( $user_meta['association_state'][0] == 0 ? false : true );
             $user_sub_perfected = in_array( $course_id, $perfected_subscriptions );
             $user_att_confirmed = in_array( $course_id, $confirmed_attendances );
 
             $data[] = array(
                 'id'            => $user_id,
-                'title'         => $user_title,
-                'first_name'    => $user_first_name,
-                'last_name'     => $user_last_name,
+                'name'          => $user_name,
+                'address'       => $user_address,
+                'phone'         => $user_phone,
                 'associated'    => $user_association_state,
                 'perfected'     => $user_sub_perfected,
                 'confirmed'     => $user_att_confirmed
@@ -110,15 +113,17 @@ class Subscribed_Users_List_Table extends WP_List_Table
     {
         switch( $column_name ) {
             case 'id':
-            case 'title':
-            case 'first_name':
-            case 'last_name':
+            case 'name':
+            case 'address':
+            case 'phone':
                 return $item[ $column_name ];
             case 'associated':
                 return '<input type="checkbox" name="' . $column_name . '" value="' . $item[ $column_name ] . '" ' . ( ( $item[ $column_name ] == true ) ? 'checked' : '' ) . ' disabled="disabled">';
             case 'perfected':
             case 'confirmed':
             	return '<input class="' . $column_name . '_checkbox" data-user_id="' . $item[ 'id' ] . '" type="checkbox" name="' . $column_name . '" value="' . $item[ $column_name ] . '" ' . ( ( $item[ $column_name ] == true ) ? 'checked' : '' ) . '>';
+            case 'unsubscribe':
+                return '<input class="' . $column_name . '_button button button-primary button-large" data-user_id="' . $item[ 'id' ] . '" type="submit" name="' . $column_name . '" value="' . __('Unsubscribe', 'iusetvis') . '">';
             default:
                 return print_r( $item, true ) ;
         }
@@ -126,7 +131,7 @@ class Subscribed_Users_List_Table extends WP_List_Table
 
     private function sort_data( $a, $b )
     {
-        $orderby = 'last_name';
+        $orderby = 'name';
         $order = 'asc';
 
         if(!empty($_GET['orderby']))
