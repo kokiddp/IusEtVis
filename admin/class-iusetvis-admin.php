@@ -557,7 +557,12 @@ class Iusetvis_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function course_list_table() { 
+	public function course_list_table( $_course_id = '0' ) { 
+
+		if(!empty($_GET['course_id']))
+        {
+            $course_id = $_GET['course_id'];
+        }
 
 		$courseListTable = new Subscribed_Users_List_Table();
         $courseListTable->prepare_items();
@@ -566,6 +571,7 @@ class Iusetvis_Admin {
                 <div id="icon-users" class="icon32"></div>
                 <h1>Subscribed Users List Table Page</h1>
                 <h3 id="actions_response_field"></h3>
+                <a href="./admin.php?page=iusetvis_upload_file&course_id=<?php echo $course_id ?>" class="btn btn-default">Accreditamento CSV</a>
                 <?php $courseListTable->display(); ?>
             </div>
         <?php
@@ -578,12 +584,58 @@ class Iusetvis_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function upload_csv( $_file ) {
+	public function upload_csv( $_file, $_course_id = '0' ) {
 
 		$file = ( isset( $_POST['file'] ) ? $_POST['file'] : $_file );
+		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
 		
-		echo $file;
-		die();
+		$strings = preg_split('/\s+/', $file);
+		array_pop($strings);
+
+		foreach ($strings as $string) {
+			$parts = explode(',', $string);
+			$user = get_user_by( 'email', $parts[4] );
+			//echo 'User is ' . $user->id . ' '. $user->first_name . ' ' . $user->last_name;
+
+			$course_meta = get_post_custom( $course_id );
+			$user_meta = get_user_meta( $user->id );
+			$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
+			$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
+			$confirmed_attendances = !isset( $user_meta['confirmed_attendances'][0] ) ? array() : maybe_unserialize( $user_meta['confirmed_attendances'][0] );
+			
+
+			if($parts[2] == '1'){
+				//perfect_user_subscription
+				array_push( $perfected_subscriptions, $course_id );
+				update_user_meta( $user->id, 'perfected_subscriptions', $perfected_subscriptions );			
+				echo __( 'User ' . $user->first_name . ' ' . $user->last_name . ' registration to this course succesfully perfected.', 'iusetvis' );
+			}
+			else{
+				//unperfect_user_subscription
+				$key = array_search( $course_id, $perfected_subscriptions );
+				array_splice( $perfected_subscriptions, $key, 1 );
+				update_user_meta( $user->id, 'perfected_subscriptions', $perfected_subscriptions );			
+				echo __( 'User ' . $user->first_name . ' ' . $user->last_name . ' registration to this course succesfully unperfected.', 'iusetvis' );
+			}
+
+			if($parts[5] == 'SI'){
+				//confirm_user_attendance
+				array_push( $confirmed_attendances, $course_id );		
+				update_user_meta( $user->id, 'confirmed_attendances', $confirmed_attendances );		
+				echo __( 'User ' . $user->first_name . ' ' . $user->last_name . ' attendance to this course succesfully confirmed.', 'iusetvis' );
+				//mail
+				$user_info = get_userdata(1);
+				wp_mail( $parts[4], 'Iusetvis', 'Partecipazione al corso '.get_the_title( $course_id ).' confermata' );
+			}
+			else {
+				//delete user attendance
+				$key = array_search( $course_id, $confirmed_attendances );
+				array_splice( $confirmed_attendances, $key, 1 );		
+				update_user_meta( $user->id, 'confirmed_attendances', $confirmed_attendances );			
+				echo __( 'User ' . $user->first_name . ' ' . $user->last_name . ' attendance to this course succesfully deleted.', 'iusetvis' );
+			}
+
+		}
 
 	}
 
