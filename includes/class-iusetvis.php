@@ -201,6 +201,7 @@ class Iusetvis {
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_menu_pages' );
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_role_and_capabilities' );
 		$this->loader->add_action( 'dashboard_glance_items', $this, 'add_glance_counts' );
+		$this->loader->add_action( 'admin_init', $plugin_admin, 'init_settings' );
 
 		// metaboxes courses
 		$this->loader->add_action( 'add_meta_boxes', $this, 'course_time_meta_boxes' );
@@ -215,6 +216,8 @@ class Iusetvis {
 		$this->loader->add_action( 'save_post', $this, 'save_rel_meta_boxes', 10, 2 );
 		$this->loader->add_action( 'add_meta_boxes', $this, 'course_places_meta_boxes' );
 		$this->loader->add_action( 'save_post', $this, 'save_places_meta_boxes', 10, 2 );
+		$this->loader->add_action( 'add_meta_boxes', $this, 'course_internal_meta_boxes' );
+		$this->loader->add_action( 'save_post', $this, 'save_internal_meta_boxes', 10, 2 );
 		// metaboxes courses BERSI
 		$this->loader->add_action( 'add_meta_boxes', $this, 'course_address_meta_boxes' );
 		$this->loader->add_action( 'save_post', $this, 'save_address_meta_boxes', 10, 2 );
@@ -1263,6 +1266,85 @@ class Iusetvis {
 		}
 
 		$meta['course_places'] = ( isset( $_POST['course_places'] ) ? esc_textarea( $_POST['course_places'] ) : '' );
+
+		foreach ( $meta as $key => $value ) {
+			update_post_meta( $post->ID, $key, $value );
+		}
+	}
+
+	/**
+	 * Register the credits metaboxes to be used for the course post type
+	 *
+	 */
+	public function course_internal_meta_boxes() {
+		add_meta_box(
+			'internal_fields',
+			__( 'Course Internal Settings', 'iusetvis' ),
+			array( $this, 'render_internal_meta_boxes' ),
+			$this->post_type,
+			'normal',
+			'high'
+		);
+	}
+
+   /**
+	* The HTML for the internal fields
+	*/
+	function render_internal_meta_boxes( $post ) {
+
+		$meta = get_post_custom( $post->ID );
+		$options = get_option( $this->plugin_name . '_settings' );
+		$course_president_name = ! isset( $meta['course_president_name'][0] ) ? $options['iusetvis_president'] : $meta['course_president_name'][0];
+
+		wp_nonce_field( basename( __FILE__ ), 'internal_fields' ); ?>
+
+		<table class="form-table">
+
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_president_name" style="font-weight: bold;"><?php _e( 'President name', 'iusetvis' ); ?>
+					</label>
+				</td>
+				<td colspan="4">
+					<input type="text" name="course_president_name" class="regular-text" value="<?php echo $course_president_name; ?>" readonly>
+				</td>
+			</tr>
+
+		</table>
+
+	<?php }
+
+   /**
+	* Save internal metaboxes
+	*
+	*/
+	function save_internal_meta_boxes( $post_id ) {
+
+		global $post;
+
+		// Verify nonce
+		if ( !isset( $_POST['internal_fields'] ) || !wp_verify_nonce( $_POST['internal_fields'], basename(__FILE__) ) ) {
+			return $post_id;
+		}
+
+		// Check Autosave
+		if ( (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || ( defined('DOING_AJAX') && DOING_AJAX) || isset($_REQUEST['bulk_edit']) ) {
+			return $post_id;
+		}
+
+		// Don't save if only a revision
+		if ( isset( $post->post_type ) && $post->post_type == 'revision' ) {
+			return $post_id;
+		}
+
+		// Check permissions
+		if ( !current_user_can( 'edit_post', $post->ID ) ) {
+			return $post_id;
+		}
+
+		$options = get_option( $this->plugin_name . '_settings' );
+
+		$meta['course_president_name'] = ( isset( $_POST['course_president_name'] ) ? esc_textarea( $_POST['course_president_name'] ) : $options['iusetvis_president'] );
 
 		foreach ( $meta as $key => $value ) {
 			update_post_meta( $post->ID, $key, $value );

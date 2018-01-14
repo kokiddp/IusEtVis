@@ -131,23 +131,45 @@ class Iusetvis_Admin {
 		
 		// Main menu page Registrations
 		add_menu_page(
-			__( 'Courses', 'iusetvis' ),
-			__( 'Registrations', 'iusetvis' ),
+			__( 'IusEtVis', 'iusetvis' ),
+			__( 'IusEtVis', 'iusetvis' ),
 			'edit_pages',
 			$this->plugin_name . '_registrations_page',
 			array( $this, 'display_registrations_page' ),
-			'dashicons-list-view'
+			'dashicons-welcome-learn-more'
+		);
+
+		// Submenu page general settings
+		add_submenu_page( 
+			$this->plugin_name . "_registrations_page",
+			__( 'General Settings', 'iusetvis' ),
+			__( 'General Settings', 'iusetvis' ),
+			'edit_pages', 
+			'iusetvis_options_page',
+			array( $this, 'render_options_page' )
 		);
 
 		// Submenu page Upload
 		add_submenu_page(
-			$this->plugin_name . "_registrations_page",
+			NULL,
 			__( 'Upload', 'iusetvis' ),
 			__( 'Upload', 'iusetvis' ),
 			'edit_pages',
 			$this->plugin_name . '_upload_file',
 			array( $this, 'upload_file' )
+		);		
+
+		// Subscribed users list table
+		add_submenu_page(
+			NULL,
+			__( 'Course List Table', 'iusetvis' ),
+			__( 'Course List Table', 'iusetvis' ),
+			'edit_pages',
+			$this->plugin_name . '_course_list_table',
+			array( $this, 'course_list_table' )
 		);
+
+		/*
 
 		// Submenu page Email
 	    add_submenu_page(
@@ -158,7 +180,7 @@ class Iusetvis_Admin {
 	    	$this->plugin_name . '_course_mail',
 	    	array( $this, 'course_mail' )
 	    );
-
+	    
 	    // Submenu page Log Email
 		add_submenu_page(
 			$this->plugin_name . "_registrations_page",
@@ -179,6 +201,7 @@ class Iusetvis_Admin {
 			array( $this, 'force_email_dispatch' )
 		);
 
+
 		// Main menu page Backup
 		add_menu_page(
 			__( 'Backup', 'iusetvis' ),
@@ -188,17 +211,7 @@ class Iusetvis_Admin {
 			array( $this, 'display_backup_page' ),
 			'dashicons-backup'
 		);
-
-		// Subscribed users list table
-		add_menu_page(
-			__( 'Course List Table', 'iusetvis' ),
-			__( 'Course List Table', 'iusetvis' ),
-			'edit_pages',
-			$this->plugin_name . '_course_list_table',
-			array( $this, 'course_list_table' ),
-			'dashicons-list-view'
-		);
-
+		*/
 	}
 
 	/**
@@ -269,6 +282,89 @@ class Iusetvis_Admin {
 		$role = get_role( __( 'associate', 'iusetvis' ) );
 		$role->add_cap('associate_rate');
 		$role->add_cap( 'read_private_pages' );
+	}
+
+	/**
+	 * Init the settings fields for the settings admin area.
+	 *
+	 * @since    1.0.0
+	 */
+	public function init_settings(  ) { 
+
+		register_setting( 'iusetvis_options_page', 'iusetvis_settings' );
+
+		add_settings_section(
+			'iusetvis_options_page_section_general', 
+			__( 'General Settings', 'iusetvis' ), 
+			array( $this, 'iusetvis_options_page_section_general_callback' ), 
+			'iusetvis_options_page'
+		);
+
+		add_settings_field( 
+			'iusetvis_president', 
+			__( 'President name', 'iusetvis' ), 
+			array( $this, 'iusetvis_president_render' ), 
+			'iusetvis_options_page', 
+			'iusetvis_options_page_section_general' 
+		);
+
+	}
+
+	/**
+	 * Add the description for the general section of the settings area.
+	 *
+	 * @since    1.0.0
+	 */
+	function iusetvis_options_page_section_general_callback(  ) { 
+
+		?>
+
+		<p><?php echo __( 'Theese are the general settings for IusEtVis.', 'iusetvis' ); ?></p>
+
+		<?php
+
+	}
+
+	/**
+	 * Add the President text area for the settings page.
+	 *
+	 * @since    1.0.0
+	 */
+	function iusetvis_president_render(  ) { 
+
+		$options = get_option( $this->plugin_name . '_settings' );
+
+		?>
+
+		<input type="text" name="iusetvis_settings[iusetvis_president]" value="<?= $options['iusetvis_president'] ?>">
+
+		<?php
+
+	}
+
+	/**
+	 * Render the settings area.
+	 *
+	 * @since    1.0.0
+	 */
+	function render_options_page(  ) { 
+
+		?>
+		<form action='options.php' method='post'>
+
+			<h2><?php _e( 'IusEtVis Settings', 'iusetvis' ) ?></h2>
+
+			<?php
+			settings_fields( $this->plugin_name . '_options_page' );
+			do_settings_sections( $this->plugin_name . '_options_page' );
+			submit_button();
+			?>
+
+
+
+		</form>
+		<?php
+
 	}
 
 	/**
@@ -569,7 +665,7 @@ class Iusetvis_Admin {
         ?>
             <div class="wrap">
                 <div id="icon-users" class="icon32"></div>
-                <h1>Subscribed Users List Table Page</h1>
+                <h1><?php _e('Subscribed Users List Table Page', 'iusetvis')?></h1>
                 <h3 id="actions_response_field"></h3>
                 <a href="./admin.php?page=iusetvis_upload_file&course_id=<?php echo $course_id ?>" class="btn btn-default">Accreditamento CSV</a>
                 <?php $courseListTable->display(); ?>

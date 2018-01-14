@@ -215,6 +215,7 @@ class Iusetvis_Public {
 		$user_meta = get_user_meta( $user_id );
 		$course_title = get_the_title($course_id);
 		$course_meta = get_post_meta( $course_id );
+		$options = get_option( 'iusetvis_settings' );
 
 		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 		$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
@@ -328,7 +329,10 @@ class Iusetvis_Public {
 					  	</tr>					
 						<tr>
 							<td colspan="4" align="center">'.$data['course_credits_text'].'</td>
-						</tr>					  
+						</tr>
+						<tr>
+							<td colspan="4" align="center">'.$options['iusetvis_president'].'</td>
+						</tr>				  
 					</table>
 				</body>
 			</html>

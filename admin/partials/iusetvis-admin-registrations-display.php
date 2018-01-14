@@ -22,31 +22,21 @@
 
 <div class='wrap'>
 	<label for="user-id"><?php _e( 'User ID', 'iusetvis' ) ?></label>
-	<input type="number" name ="user-id" id="user_id" value="1">
+	<input type="number" name="user-id" id="user_id" value="1">
 	<label for="course-id"><?php _e( 'Course ID', 'iusetvis' ) ?></label>
 	<input type="number" name ="course-id" id="course_id" value="52">
-</div>
 
-<div class='wrap'>
 	<h3 id="actions_response_field"></h3>
-</div>
 
-<div class='wrap'>
 	<h2><?php _e( 'Perfect subscription', 'iusetvis' ) ?></h2>
 	<p><input type='submit' style='margin-bottom: 20px;' class='button-primary' id='perfect-subscription' value='<?php _e( 'Perfect subscription', 'iusetvis' ) ?>'></p>
-</div>
 
-<div class='wrap'>
 	<h2><?php _e( 'Unperfect subscription', 'iusetvis' ) ?></h2>
 	<p><input type='submit' style='margin-bottom: 20px;' class='button-primary' id='unperfect-subscription' value='<?php _e( 'Unperfect subscription', 'iusetvis' ) ?>'></p>
-</div>
 
-<div class='wrap'>
 	<h2><?php _e( 'Confirm attendance', 'iusetvis' ) ?></h2>
 	<p><input type='submit' style='margin-bottom: 20px;' class='button-primary' id='confirm-attendance' value='<?php _e( 'Confirm attendance', 'iusetvis' ) ?>'></p>
-</div>
 
-<div class='wrap'>
 	<h2><?php _e( 'Delete attendance', 'iusetvis' ) ?></h2>
 	<p><input type='submit' style='margin-bottom: 20px;' class='button-primary' id='delete-attendance' value='<?php _e( 'Delete attendance', 'iusetvis' ) ?>'></p>
 </div>
