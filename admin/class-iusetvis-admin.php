@@ -162,11 +162,21 @@ class Iusetvis_Admin {
 		// Subscribed users list table
 		add_submenu_page(
 			NULL,
-			__( 'Course List Table', 'iusetvis' ),
-			__( 'Course List Table', 'iusetvis' ),
+			__( 'Course Subscribed Users List Table', 'iusetvis' ),
+			__( 'Course Subscribed Users List Table', 'iusetvis' ),
 			'edit_pages',
-			$this->plugin_name . '_course_list_table',
-			array( $this, 'course_list_table' )
+			$this->plugin_name . '_course_subscribed_list_table',
+			array( $this, 'course_subscribed_list_table' )
+		);
+
+		// Waiting users list table
+		add_submenu_page(
+			NULL,
+			__( 'Course Waiting Users List Table', 'iusetvis' ),
+			__( 'Course Waiting Users List Table', 'iusetvis' ),
+			'edit_pages',
+			$this->plugin_name . '_course_waiting_list_table',
+			array( $this, 'course_waiting_list_table' )
 		);
 
 		/*
@@ -667,7 +677,7 @@ class Iusetvis_Admin {
 	        case 'subscriptions' :
 	            $subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 	            if ( isset( $subscribed_users ) && count( $subscribed_users ) >= 0 )
-	                echo "<a href='" . site_url('/wp-admin/admin.php?page=iusetvis_course_list_table&course_id=') . $post_id . "'>" . count( $subscribed_users ) . "</a>";
+	                echo "<a href='" . site_url('/wp-admin/admin.php?page=iusetvis_course_subscribed_list_table&course_id=') . $post_id . "'>" . count( $subscribed_users ) . "</a>";
 	            else
 	                _e( 'Unable to get the suscribers', 'iusetvis' );
 	            break;
@@ -675,7 +685,7 @@ class Iusetvis_Admin {
 	        case 'waiting' :
 	            $waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );
 	            if ( isset( $waiting_users ) && count( $waiting_users ) >= 0 )
-	                echo count( $waiting_users );
+	                echo "<a href='" . site_url('/wp-admin/admin.php?page=iusetvis_course_waiting_list_table&course_id=') . $post_id . "'>" . count( $waiting_users ) . "</a>";
 	            else
 	                _e( 'Unable to get the waiting users', 'iusetvis' );
 	            break;
@@ -688,26 +698,48 @@ class Iusetvis_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function course_list_table( $_course_id = '0' ) { 
+	public function course_subscribed_list_table( $_course_id = '0' ) { 
 
 		if(!empty($_GET['course_id']))
         {
             $course_id = $_GET['course_id'];
         }
 
-		$courseListTable = new Subscribed_Users_List_Table();
-        $courseListTable->prepare_items();
+		$table = new Subscribed_Users_List_Table();
+        $table->prepare_items();
         ?>
             <div class="wrap">
                 <div id="icon-users" class="icon32"></div>
                 <h1><?php _e('Subscribed Users List Table Page', 'iusetvis')?></h1>
                 <h3 id="actions_response_field"></h3>
                 <a href="./admin.php?page=iusetvis_upload_file&course_id=<?php echo $course_id ?>" class="btn btn-default">Accreditamento CSV</a>
-                <?php $courseListTable->display(); ?>
+                <?php $table->display(); ?>
             </div>
         <?php
+	}
 
+	/**
+	 * Setup and display course list table
+	 *
+	 * @since    1.0.0
+	 */
+	public function course_waiting_list_table( $_course_id = '0' ) { 
 
+		if(!empty($_GET['course_id']))
+        {
+            $course_id = $_GET['course_id'];
+        }
+
+		$table = new Waiting_Users_List_Table();
+        $table->prepare_items();
+        ?>
+            <div class="wrap">
+                <div id="icon-users" class="icon32"></div>
+                <h1><?php _e('Waiting Users List Table Page', 'iusetvis')?></h1>
+                <h3 id="actions_response_field"></h3>
+                <?php $table->display(); ?>
+            </div>
+        <?php
 	}
 
 	/**
