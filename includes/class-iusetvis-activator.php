@@ -31,8 +31,6 @@ class Iusetvis_Activator {
 	 */
 	public static function activate() {
 		flush_rewrite_rules();
-
-		wp_enqueue_media();
 	}
 
 }

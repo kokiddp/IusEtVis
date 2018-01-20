@@ -202,13 +202,13 @@ class Iusetvis_Public {
 	 *
 	 * @since    1.0.0
 	 */
-	public function pdf_print_diploma( $_user_id = '0', $_course_id = '0' ) {
+	public function pdf_print_diploma( $_user_id = '0', $_course_id = '0', $_data = array() ) {
 		
 		// retrieve ajax parameters
 		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
 		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
-		if ( $user_id == '0' || $course_id == '0' ) {
-			die();
+		if ( $user_id == '0' || $course_id == '0' ) {			
+			die();		
 		}
 
 		// get data
@@ -232,20 +232,25 @@ class Iusetvis_Public {
 
 		// build object
 		$data = array(
-			'user_title'			=>	$user_meta['title'][0],
-			'user_first_name'		=>	$user_meta['first_name'][0],
-			'user_last_name'		=>	$user_meta['last_name'][0],
-			'user_birth_place'		=>	$user_meta['birth_place'][0],
-			'user_birth_date'		=>	$user_meta['birth_date'][0],
-			'user_forum'			=>	$user_meta['forum'][0],
-			'course_name'			=>	$course_title,
-			'course_address'		=>	$course_meta['course_address'][0],
-			'course_institution'	=>	$course_meta['course_credits_inst'][0],
-			'course_credits_val'	=>	$course_meta['course_credits_val'][0],
-			'course_subject'		=>	$course_meta['course_credits_subj'][0],
-			'course_end_date'		=>	$course_meta['course_end_time'][0],
-			'course_credits_text'	=>	$course_meta['course_credits_text'][0]
+			'user_title'					=>	! isset( $user_meta['title'][0] ) ? '' : $user_meta['title'][0],
+			'user_first_name'				=>	! isset( $user_meta['first_name'][0] ) ? '' : $user_meta['first_name'][0],
+			'user_last_name'				=>	! isset( $user_meta['last_name'][0] ) ? '' : $user_meta['last_name'][0],
+			'user_birth_place'				=>	! isset( $user_meta['birth_place'][0] ) ? '' : $user_meta['birth_place'][0],
+			'user_birth_date'				=>	! isset( $user_meta['birth_date'][0] ) ? '' : $user_meta['birth_date'][0],
+			'user_forum'					=>	! isset( $user_meta['forum'][0] ) ? '' : $user_meta['forum'][0],
+			'course_name'					=>	! isset( $course_title ) ? '' : $course_title,
+			'course_address'				=>	! isset( $course_meta['course_address'][0] ) ? '' : $course_meta['course_address'][0],
+			'course_institution'			=>	! isset( $course_meta['course_credits_inst'][0] ) ? '' : $course_meta['course_credits_inst'][0],
+			'course_credits_val'			=>	! isset( $course_meta['course_credits_val'][0] ) ? '' : $course_meta['course_credits_val'][0],
+			'course_subject'				=>	! isset( $course_meta['course_credits_subj'][0] ) ? '' : $course_meta['course_credits_subj'][0],
+			'course_end_date'				=>	! isset( $course_meta['course_end_time'][0] ) ? '' : $course_meta['course_end_time'][0],
+			'course_credits_text'			=>	! isset( $course_meta['course_credits_text'][0] ) ? '' : $course_meta['course_credits_text'][0],
+			'iusetvis_president_name'		=>	! isset( $options['iusetvis_president'] ) ? '' : $options['iusetvis_president'],
+			'iusetvis_president_signature'	=>	! isset( $options['iusetvis_signature'] ) ? '' : wp_get_attachment_url( $options['iusetvis_signature'] )
 		);
+		if ( !empty( $_data ) ) {
+			$data = array_merge($data, $_data);
+		}		
 
 		// the template
 		$html = '
@@ -331,7 +336,10 @@ class Iusetvis_Public {
 							<td colspan="4" align="center">'.$data['course_credits_text'].'</td>
 						</tr>
 						<tr>
-							<td colspan="4" align="center">'.$options['iusetvis_president'].'</td>
+							<td colspan="4" align="right">'.$data['iusetvis_president_name'].'</td>
+						</tr>
+						<tr>
+							<td colspan="4" align="right"><img src="'.$data['iusetvis_president_signature'].'" style="height: 100px; max-width: 500px;"></td>
 						</tr>				  
 					</table>
 				</body>

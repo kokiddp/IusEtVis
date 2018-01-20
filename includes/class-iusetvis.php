@@ -321,8 +321,8 @@ class Iusetvis {
 		// post type and taxonomies
 		$this->loader->add_action( 'init', $this, 'register_post_type', 0 );
 		$this->loader->add_action( 'init', $this, 'register_taxonomy_category', 0 );
-		$this->loader->add_action( 'init', $this, 'register_taxonomy_tag', 0 );
-		$this->loader->add_action( 'init', $this, 'register_taxonomy_location', 0 );
+		//$this->loader->add_action( 'init', $this, 'register_taxonomy_tag', 0 );
+		//$this->loader->add_action( 'init', $this, 'register_taxonomy_location', 0 );
 
 		// ajax
 		// print diploma

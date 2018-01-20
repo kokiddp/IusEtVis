@@ -308,6 +308,14 @@ class Iusetvis_Admin {
 			'iusetvis_options_page_section_general' 
 		);
 
+		add_settings_field( 
+			'iusetvis_signature', 
+			__( 'President\'s signature', 'iusetvis' ), 
+			array( $this, 'iusetvis_signature_render' ), 
+			'iusetvis_options_page', 
+			'iusetvis_options_page_section_general' 
+		);
+
 	}
 
 	/**
@@ -333,10 +341,36 @@ class Iusetvis_Admin {
 	function iusetvis_president_render(  ) { 
 
 		$options = get_option( $this->plugin_name . '_settings' );
+		$iusetvis_president = ! isset( $options['iusetvis_president'] ) ? '' : $options['iusetvis_president'];
 
 		?>
 
-		<input type="text" name="iusetvis_settings[iusetvis_president]" value="<?= $options['iusetvis_president'] ?>">
+		<input type="text" name="iusetvis_settings[iusetvis_president]" value="<?= $iusetvis_president ?>">
+
+		<?php
+
+	}
+
+	/**
+	 * Add the Signature media uploader for the settings page.
+	 *
+	 * @since    1.0.0
+	 */
+	function iusetvis_signature_render(  ) { 
+
+		$options = get_option( $this->plugin_name . '_settings' );
+		$iusetvis_signature = ! isset( $options['iusetvis_signature'] ) ? '' : $options['iusetvis_signature'];
+		$iusetvis_signature_src = $iusetvis_signature == '' ? '' : wp_get_attachment_url( $iusetvis_signature );
+
+		wp_enqueue_media();
+
+		?>
+
+		<div class="image-preview-wrapper">
+			<img id="image-preview" src="<?= $iusetvis_signature_src ?>" style="height: 100px; max-width: 500px;">
+		</div>
+		<input id="upload_image_button" type="button" class="button" value="<?php _e( 'Upload image', 'iusetvis' ); ?>" />
+		<input type="hidden" name="iusetvis_settings[iusetvis_signature]" id="image_attachment_id" value="<?= $iusetvis_signature ?>"">
 
 		<?php
 
