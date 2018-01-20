@@ -1295,6 +1295,7 @@ class Iusetvis {
 		$meta = get_post_custom( $post->ID );
 		$options = get_option( $this->plugin_name . '_settings' );
 		$course_president_name = ! isset( $meta['course_president_name'][0] ) ? $options['iusetvis_president'] : $meta['course_president_name'][0];
+		$course_president_signature = ! isset( $meta['course_president_signature'][0] ) ? $options['iusetvis_signature'] : $meta['course_president_signature'][0];
 
 		wp_nonce_field( basename( __FILE__ ), 'internal_fields' ); ?>
 
@@ -1307,6 +1308,7 @@ class Iusetvis {
 				</td>
 				<td colspan="4">
 					<input type="text" name="course_president_name" class="regular-text" value="<?php echo $course_president_name; ?>" readonly>
+					<input type="hidden" name="course_president_signature" value="<?= $course_president_signature ?>"">
 				</td>
 			</tr>
 
@@ -1345,6 +1347,7 @@ class Iusetvis {
 		$options = get_option( $this->plugin_name . '_settings' );
 
 		$meta['course_president_name'] = ( isset( $_POST['course_president_name'] ) ? esc_textarea( $_POST['course_president_name'] ) : $options['iusetvis_president'] );
+		$meta['course_president_signature'] = ( isset( $_POST['course_president_signature'] ) ? esc_textarea( $_POST['course_president_signature'] ) : $options['course_president_signature'] );
 
 		foreach ( $meta as $key => $value ) {
 			update_post_meta( $post->ID, $key, $value );

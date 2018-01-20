@@ -116,6 +116,7 @@ class Iusetvis_Public {
 		add_shortcode("course_subscribe", array( $this, 'display_course_subscribe_button' ) );
 		add_shortcode("course_unsubscribe", array( $this, 'display_course_unsubscribe_button' ) );
 		add_shortcode("course_waiting_list_subscribe", array( $this, 'display_course_waiting_list_subscribe_button' ) );
+		add_shortcode("user_courses", array( $this, 'display_user_course_list' ) );
 
 	}
 
@@ -139,14 +140,14 @@ class Iusetvis_Public {
 	 * @since    1.0.0
 	 */
 	public function display_diploma_download_button() {
-		$output = "
-			<div class='wrap'>
-				<h2>" . __( 'Print course test', 'iusetvis' ) . "</h2>
-				<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='download' value='" . __( 'Download', 'iusetvis' ) . "'></p>
-			</div>"
-		;
+		?>
 
-		return $output;
+		<div class='wrap'>
+			<h2><?php _e( 'Print course test', 'iusetvis' ) ?></h2>
+			<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='download' value='<?php _e( 'Download', 'iusetvis' ) ?>'></p>
+		</div>
+		
+		<?php
 	}
 
 	/*
@@ -155,14 +156,14 @@ class Iusetvis_Public {
 	 * @since    1.0.0
 	 */
 	public function display_course_subscribe_button() {
-		$output = "
-			<div class='wrap'>
-				<h2>" . __( 'Subscribe to course', 'iusetvis' ) . "</h2>
-				<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='subscribe' value='" . __( 'Subscribe', 'iusetvis' ) . "'></p>
-			</div>"
-		;
+		?>
 
-		return $output;
+		<div class='wrap'>
+			<h2><?php _e( 'Subscribe to course', 'iusetvis' ) ?></h2>
+			<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='subscribe' value='<?php _e( 'Subscribe', 'iusetvis' ) ?>'></p>
+		</div>
+		
+		<?php
 	}
 
 	/*
@@ -171,14 +172,14 @@ class Iusetvis_Public {
 	 * @since    1.0.0
 	 */
 	public function display_course_unsubscribe_button() {
-		$output = "
-			<div class='wrap'>
-				<h2>" . __( 'Unsubscribe to course', 'iusetvis' ) . "</h2>
-				<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='unsubscribe' value='" . __( 'Unsubscribe', 'iusetvis' ) . "'></p>
-			</div>"
-		;
+		?>
 
-		return $output;
+		<div class='wrap'>
+			<h2><?php _e( 'Unsubscribe to course', 'iusetvis' ) ?></h2>
+			<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='unsubscribe' value='<?php _e( 'Unsubscribe', 'iusetvis' ) ?>'></p>
+		</div>
+		
+		<?php
 	}
 
 	/*
@@ -187,14 +188,57 @@ class Iusetvis_Public {
 	 * @since    1.0.0
 	 */
 	public function display_course_waiting_list_subscribe_button() {
-		$output = "
-			<div class='wrap'>
-				<h2>" . __( 'Subscribe to waiting list', 'iusetvis' ) . "</h2>
-				<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='subscribe-waiting-list' value='" . __( 'Subscribe', 'iusetvis' ) . "'></p>
-			</div>"
-		;
+		?>
+		
+		<div class='wrap'>
+			<h2><?php _e( 'Subscribe to waiting list', 'iusetvis' ) ?></h2>
+			<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='subscribe-waiting-list' value='<?php _e( 'Subscribe', 'iusetvis' ) ?>'></p>
+		</div>
 
-		return $output;
+		<?php
+	}
+
+	/*
+	 * Display user course list
+	 *
+	 * @since    1.0.0
+	 */
+	public function display_user_course_list( $atts = array() ) {
+		
+		// retrieve and merge shortcode args
+		$atts = shortcode_atts(
+			array(
+				'user_id' => isset( $_POST['user_id'] ) ? $_POST['user_id'] : get_current_user_id()
+			), $atts, 'user_courses' );
+
+		$courses = get_posts(
+			array(
+			  'numberposts' => -1,
+			  'post_type'   => 'course'
+			)
+		);
+
+		$user_courses = array();
+		foreach ( $courses as $course ) {
+			$subscribed_users = get_post_meta( $course->ID, 'subscribed_users' );
+			if ( in_array( $atts['user_id'], $subscribed_users[0] ) )  {
+				array_push( $user_courses, $course );
+			}
+		}
+		?>
+		
+		<div class='wrap'>
+			<h2><?php _e( 'User courses', 'iusetvis' ) ?></h2>
+			<ul>
+				<?php foreach ($user_courses as $course) { ?>
+					<li>
+						<a href="<?= get_post_permalink( $course->ID ) ?>"><?= $course->post_name ?></a>
+					</li>
+				<?php }	?>
+			</ul>
+		</div>
+
+		<?php
 	}
 
 	/**
@@ -215,7 +259,6 @@ class Iusetvis_Public {
 		$user_meta = get_user_meta( $user_id );
 		$course_title = get_the_title($course_id);
 		$course_meta = get_post_meta( $course_id );
-		$options = get_option( 'iusetvis_settings' );
 
 		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 		$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
@@ -245,9 +288,10 @@ class Iusetvis_Public {
 			'course_subject'				=>	! isset( $course_meta['course_credits_subj'][0] ) ? '' : $course_meta['course_credits_subj'][0],
 			'course_end_date'				=>	! isset( $course_meta['course_end_time'][0] ) ? '' : $course_meta['course_end_time'][0],
 			'course_credits_text'			=>	! isset( $course_meta['course_credits_text'][0] ) ? '' : $course_meta['course_credits_text'][0],
-			'iusetvis_president_name'		=>	! isset( $options['iusetvis_president'] ) ? '' : $options['iusetvis_president'],
-			'iusetvis_president_signature'	=>	! isset( $options['iusetvis_signature'] ) ? '' : wp_get_attachment_url( $options['iusetvis_signature'] )
+			'iusetvis_president_name'		=>	! isset( $course_meta['course_president_name'][0] ) ? '' : $course_meta['course_president_name'][0],
+			'iusetvis_president_signature'	=>	! isset( $course_meta['course_president_signature'][0] ) ? '' : wp_get_attachment_url( $course_meta['course_president_signature'][0] )
 		);
+		//merge array with parameter if provided
 		if ( !empty( $_data ) ) {
 			$data = array_merge($data, $_data);
 		}		

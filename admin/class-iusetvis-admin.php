@@ -394,8 +394,6 @@ class Iusetvis_Admin {
 			submit_button();
 			?>
 
-
-
 		</form>
 		<?php
 
@@ -431,6 +429,9 @@ class Iusetvis_Admin {
 				update_user_meta( $user_id, 'perfected_subscriptions', $perfected_subscriptions );			
 				echo __( 'User registration to this course succesfully perfected.', 'iusetvis' );
 				wp_clear_scheduled_hook( 'action_unsubscribe_cron', array( $user_id, $course_id ) );
+				//mail
+				$user_info = get_userdata($user_id);
+				wp_mail( $user_info->user_email, 'Iusetvis', 'Iscrizione al corso '.get_the_title( $course_id ).' confermata' );
 				die();		 		
 
 			}
@@ -534,7 +535,7 @@ class Iusetvis_Admin {
 						update_user_meta( $user_id, 'confirmed_attendances', $confirmed_attendances );		
 						echo __( 'User attendance to this course succesfully confirmed.', 'iusetvis' );
 						//mail
-						$user_info = get_userdata(1);
+						$user_info = get_userdata($user_id);
 						wp_mail( $user_info->user_email, 'Iusetvis', 'Partecipazione al corso '.get_the_title( $course_id ).' confermata' );
 						die();	
 
@@ -753,9 +754,6 @@ class Iusetvis_Admin {
 				array_push( $confirmed_attendances, $course_id );		
 				update_user_meta( $user->id, 'confirmed_attendances', $confirmed_attendances );		
 				echo __( 'User ' . $user->first_name . ' ' . $user->last_name . ' attendance to this course succesfully confirmed.', 'iusetvis' );
-				//mail
-				$user_info = get_userdata(1);
-				wp_mail( $parts[4], 'Iusetvis', 'Partecipazione al corso '.get_the_title( $course_id ).' confermata' );
 			}
 			else {
 				//delete user attendance
