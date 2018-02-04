@@ -326,6 +326,22 @@ class Iusetvis_Admin {
 			'iusetvis_options_page_section_general' 
 		);
 
+		add_settings_field( 
+			'iusetvis_logo', 
+			__( 'Association Logo', 'iusetvis' ), 
+			array( $this, 'iusetvis_logo_render' ), 
+			'iusetvis_options_page', 
+			'iusetvis_options_page_section_general' 
+		);
+
+		add_settings_field( 
+			'iusetvis_header', 
+			__( 'Header text', 'iusetvis' ), 
+			array( $this, 'iusetvis_header_render' ), 
+			'iusetvis_options_page', 
+			'iusetvis_options_page_section_general' 
+		);
+
 	}
 
 	/**
@@ -377,10 +393,53 @@ class Iusetvis_Admin {
 		?>
 
 		<div class="image-preview-wrapper">
-			<img id="image-preview" src="<?= $iusetvis_signature_src ?>" style="height: 100px; max-width: 500px;">
+			<img id="signature-preview" src="<?= $iusetvis_signature_src ?>" style="height: 100px; max-width: 500px;">
 		</div>
-		<input id="upload_image_button" type="button" class="button" value="<?php _e( 'Upload image', 'iusetvis' ); ?>" />
-		<input type="hidden" name="iusetvis_settings[iusetvis_signature]" id="image_attachment_id" value="<?= $iusetvis_signature ?>"">
+		<input id="upload_signature_button" type="button" class="button" value="<?php _e( 'Upload image', 'iusetvis' ); ?>" />
+		<input type="hidden" name="iusetvis_settings[iusetvis_signature]" id="signature_attachment_id" value="<?= $iusetvis_signature ?>"">
+
+		<?php
+
+	}
+
+	/**
+	 * Add the Logo media uploader for the settings page.
+	 *
+	 * @since    1.0.0
+	 */
+	function iusetvis_logo_render(  ) { 
+
+		$options = get_option( $this->plugin_name . '_settings' );
+		$iusetvis_logo = ! isset( $options['iusetvis_logo'] ) ? '' : $options['iusetvis_logo'];
+		$iusetvis_logo_src = $iusetvis_logo == '' ? '' : wp_get_attachment_url( $iusetvis_logo );
+
+		wp_enqueue_media();
+
+		?>
+
+		<div class="image-preview-wrapper">
+			<img id="logo-preview" src="<?= $iusetvis_logo_src ?>" style="height: 200px; max-width: 500px;">
+		</div>
+		<input id="upload_logo_button" type="button" class="button" value="<?php _e( 'Upload image', 'iusetvis' ); ?>" />
+		<input type="hidden" name="iusetvis_settings[iusetvis_logo]" id="logo_attachment_id" value="<?= $iusetvis_logo ?>"">
+
+		<?php
+
+	}
+
+	/**
+	 * Add the Header text area for the settings page.
+	 *
+	 * @since    1.0.0
+	 */
+	function iusetvis_header_render(  ) { 
+
+		$options = get_option( $this->plugin_name . '_settings' );
+		$iusetvis_header = ! isset( $options['iusetvis_header'] ) ? '' : $options['iusetvis_header'];
+
+		?>
+
+		<textarea name="iusetvis_settings[iusetvis_header]"><?= $iusetvis_header ?></textarea>
 
 		<?php
 

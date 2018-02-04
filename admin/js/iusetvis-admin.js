@@ -346,27 +346,43 @@
 	    	var file_frame;
 			var wp_media_post_id = wp.media.model.settings.post.id;
 			var set_to_post_id = $( '#image_attachment_id' ).val() != '' ? $( '#image_attachment_id' ).val() : 0;
-			$('#upload_image_button').on('click', function( event ){
+			$('#upload_signature_button').on('click', function( event ){
 				event.preventDefault();
-				if ( file_frame ) {
-					file_frame.uploader.uploader.param( 'post_id', set_to_post_id );
-					file_frame.open();
-					return;
-				} else {
-					wp.media.model.settings.post.id = set_to_post_id;
-				}
+				wp.media.model.settings.post.id = set_to_post_id;
 				file_frame = wp.media.frames.file_frame = wp.media({
-					title: 'Select a image to upload',
+					title: 'Signature',
 					button: {
 						text: 'Use this image',
 					},
 					multiple: false
 				});
 				file_frame.on( 'select', function() {
-					var attachment = file_frame.state().get('selection').first().toJSON();
-					$( '#image-preview' ).attr( 'src', attachment.url ).css( 'width', 'auto' );
-					$( '#image_attachment_id' ).val( attachment.id );
-					wp.media.model.settings.post.id = wp_media_post_id;
+					if (file_frame.options.title == 'Signature') {
+						var attachment = file_frame.state().get('selection').first().toJSON();
+						$( '#signature-preview' ).attr( 'src', attachment.url ).css( 'width', 'auto' );
+						$( '#signature_attachment_id' ).val( attachment.id );
+						wp.media.model.settings.post.id = wp_media_post_id;
+					}
+				});
+					file_frame.open();
+			});
+			$('#upload_logo_button').on('click', function( event ){
+				event.preventDefault();				
+				wp.media.model.settings.post.id = set_to_post_id;
+				file_frame = wp.media.frames.file_frame = wp.media({
+					title: 'Logo',
+					button: {
+						text: 'Use this image',
+					},
+					multiple: false
+				});
+				file_frame.on( 'select', function() {
+					if (file_frame.options.title == 'Logo') {
+						var attachment = file_frame.state().get('selection').first().toJSON();
+						$( '#logo-preview' ).attr( 'src', attachment.url ).css( 'width', 'auto' );
+						$( '#logo_attachment_id' ).val( attachment.id );
+						wp.media.model.settings.post.id = wp_media_post_id;
+					}					
 				});
 					file_frame.open();
 			});

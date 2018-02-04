@@ -293,8 +293,9 @@ class Iusetvis {
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_vat_number_update' );
 
 		// ajax
-		// print diploma
+		// print pdf
 		$this->loader->add_action( 'wp_ajax_nopriv_pdf_print_diploma', $plugin_public, 'pdf_print_diploma' );
+		$this->loader->add_action( 'wp_ajax_nopriv_pdf_print_notice', $plugin_public, 'pdf_print_notice' );
 		// subscribe to course
 		$this->loader->add_action( 'wp_ajax_nopriv_course_subscribe', $plugin_public, 'course_subscribe' );
 		$this->loader->add_action( 'wp_ajax_nopriv_course_waiting_list_subscribe', $plugin_public, 'course_waiting_list_subscribe' );
@@ -325,8 +326,9 @@ class Iusetvis {
 		//$this->loader->add_action( 'init', $this, 'register_taxonomy_location', 0 );
 
 		// ajax
-		// print diploma
+		// print pdf
 		$this->loader->add_action( 'wp_ajax_pdf_print_diploma', $plugin_public, 'pdf_print_diploma' );
+		$this->loader->add_action( 'wp_ajax_pdf_print_notice', $plugin_public, 'pdf_print_notice' );
 		// subscribe to course
 		$this->loader->add_action( 'wp_ajax_course_subscribe', $plugin_public, 'course_subscribe' );
 		$this->loader->add_action( 'wp_ajax_course_waiting_list_subscribe', $plugin_public, 'course_waiting_list_subscribe' );
@@ -1296,6 +1298,7 @@ class Iusetvis {
 		$options = get_option( $this->plugin_name . '_settings' );
 		$course_president_name = ! isset( $meta['course_president_name'][0] ) ? $options['iusetvis_president'] : $meta['course_president_name'][0];
 		$course_president_signature = ! isset( $meta['course_president_signature'][0] ) ? $options['iusetvis_signature'] : $meta['course_president_signature'][0];
+		$course_code = ! isset( $meta['course_code'][0] ) ? $post->ID : $meta['course_code'][0];
 
 		wp_nonce_field( basename( __FILE__ ), 'internal_fields' ); ?>
 
@@ -1309,6 +1312,10 @@ class Iusetvis {
 				<td colspan="4">
 					<input type="text" name="course_president_name" class="regular-text" value="<?php echo $course_president_name; ?>" readonly>
 					<input type="hidden" name="course_president_signature" value="<?= $course_president_signature ?>"">
+				</td>
+				<td colspan="4">
+					<input type="text" name="course_code" class="regular-text" value="<?php echo $course_code; ?>">
+					<p class="description"><?php _e( 'Example: ', 'iusetvis' ) . $post->ID; ?></p>
 				</td>
 			</tr>
 
@@ -1348,6 +1355,7 @@ class Iusetvis {
 
 		$meta['course_president_name'] = ( isset( $_POST['course_president_name'] ) ? esc_textarea( $_POST['course_president_name'] ) : $options['iusetvis_president'] );
 		$meta['course_president_signature'] = ( isset( $_POST['course_president_signature'] ) ? esc_textarea( $_POST['course_president_signature'] ) : $options['course_president_signature'] );
+		$meta['course_code'] = ( isset( $_POST['course_code'] ) ? esc_textarea( $_POST['course_code'] ) : $post->ID );
 
 		foreach ( $meta as $key => $value ) {
 			update_post_meta( $post->ID, $key, $value );

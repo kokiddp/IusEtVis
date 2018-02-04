@@ -184,6 +184,7 @@
                         <?= do_shortcode('[course_subscribe]'); ?>
                         <?= do_shortcode('[course_unsubscribe]'); ?>
                         <?= do_shortcode('[course_waiting_list_subscribe]'); ?>
+                        <?= do_shortcode('[notice_download]'); ?>
                         <?= do_shortcode('[diploma_download]'); ?>
                         <h3 id="actions_response_field"></h3>
                     </div><!-- .course_actions -->

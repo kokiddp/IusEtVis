@@ -36,9 +36,9 @@
 
 		var actions_response_field = $("#actions_response_field");
 
-	    $('#download').click(function() {
+	    $('#diploma').click(function() {
 	    	actions_response_field.text("");
-	    	$('#download').prop('disabled', true);
+	    	$('#diploma').prop('disabled', true);
 	        $.ajax({
 	        	dataType: 'native',
 		        url: pdf_print_diploma_ajax.ajaxurl,
@@ -62,11 +62,47 @@
 		        	else {
 		        		actions_response_field.text("Error: unable to download the pdf.");
 		        	}
-		        	$('#download').prop('disabled', false);
+		        	$('#diploma').prop('disabled', false);
 		        },
 		        error: function(error) {
-		            actions_response_field.text(error);
-		            $('#download').prop('disabled', false);
+		            actions_response_field.text(error.status + ' ( ' + error.statusText + ' )');
+		            $('#diploma').prop('disabled', false);
+		        }
+		    });
+
+	    });
+
+	    $('#notice').click(function() {
+	    	actions_response_field.text("");
+	    	$('#notice').prop('disabled', true);
+	        $.ajax({
+	        	dataType: 'native',
+		        url: pdf_print_notice_ajax.ajaxurl,
+		        xhrFields: {
+				    responseType: 'blob'
+				  },
+		        type: 'POST',
+		        data: {
+		            'action': 'pdf_print_notice',
+		            'user_id': user_id,
+		            'course_id': course_id
+		        },
+		        success: function(blob) {
+		        	if (blob.size > 0) {
+		        		console.log(blob);
+			            var link=document.createElement('a');
+					    link.href=window.URL.createObjectURL(blob);
+					    link.download="Notifica.pdf";
+					    link.click();
+		        	}
+		        	else {
+		        		actions_response_field.text("Error: unable to download the pdf.");
+		        	}
+		        	$('#notice').prop('disabled', false);
+		        },
+		        error: function(error) {
+		            actions_response_field.text(error.status + ' ( ' + error.statusText + ' )');
+		            $('#notice').prop('disabled', false);
 		        }
 		    });
 
@@ -89,7 +125,7 @@
 		        	$('#subscribe').prop('disabled', false);
 		        },
 		        error: function(error) {
-		            actions_response_field.text(error);
+		            actions_response_field.text(error.status + ' ( ' + error.statusText + ' )');
 		            $('#subscribe').prop('disabled', false);
 		        }
 		    });
@@ -113,7 +149,7 @@
 		        	$('#unsubscribe').prop('disabled', false);
 		        },
 		        error: function(error) {
-		            actions_response_field.text(error);
+		            actions_response_field.text(error.status + ' ( ' + error.statusText + ' )');
 		            $('#unsubscribe').prop('disabled', false);
 		        }
 		    });
@@ -137,7 +173,7 @@
 		        	$('#subscribe-waiting-list').prop('disabled', false);
 		        },
 		        error: function(error) {
-		            actions_response_field.text(error);
+		            actions_response_field.text(error.status + ' ( ' + error.statusText + ' )');
 		            $('#subscribe-waiting-list').prop('disabled', false);
 		        }
 		    });

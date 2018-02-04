@@ -99,6 +99,7 @@ class Iusetvis_Public {
 		wp_enqueue_script( 'jquery-ajax-native', plugin_dir_url( __FILE__ ) . 'js/jquery-ajax-native.js', array( 'jquery' ) );
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/iusetvis-public.js', array( 'jquery', 'jquery-ajax-native' ), $this->version, false );
 		wp_localize_script( $this->plugin_name, 'pdf_print_diploma_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+		wp_localize_script( $this->plugin_name, 'pdf_print_notice_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'course_subscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'course_unsubscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'course_waiting_list_subscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
@@ -113,6 +114,7 @@ class Iusetvis_Public {
 	public function add_shortcodes() {
 
 		add_shortcode("diploma_download", array( $this, 'display_diploma_download_button' ) );
+		add_shortcode("notice_download", array( $this, 'display_notice_download_button' ) );
 		add_shortcode("course_subscribe", array( $this, 'display_course_subscribe_button' ) );
 		add_shortcode("course_unsubscribe", array( $this, 'display_course_unsubscribe_button' ) );
 		add_shortcode("course_waiting_list_subscribe", array( $this, 'display_course_waiting_list_subscribe_button' ) );
@@ -144,7 +146,23 @@ class Iusetvis_Public {
 
 		<div class='wrap'>
 			<h2><?php _e( 'Print course test', 'iusetvis' ) ?></h2>
-			<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='download' value='<?php _e( 'Download', 'iusetvis' ) ?>'></p>
+			<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='diploma' value='<?php _e( 'Download', 'iusetvis' ) ?>'></p>
+		</div>
+		
+		<?php
+	}
+
+	/*
+	 * Display course notice download button
+	 *
+	 * @since    1.0.0
+	 */
+	public function display_notice_download_button() {
+		?>
+
+		<div class='wrap'>
+			<h2><?php _e( 'Print course notice', 'iusetvis' ) ?></h2>
+			<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='notice' value='<?php _e( 'Download', 'iusetvis' ) ?>'></p>
 		</div>
 		
 		<?php
@@ -394,6 +412,154 @@ class Iusetvis_Public {
 		// output the pdf for download
 		$mpdf->WriteHTML($html);
 		return $mpdf->Output('Credito_' . urlencode( $data['course_name'] ), 'D' );
+
+		die();
+
+	}
+
+	/**
+	 * PDF print the Notice Template.
+	 *
+	 * @since    1.0.0
+	 */
+	public function pdf_print_notice( $_user_id = '0', $_course_id = '0', $_data = array() ) {
+		
+		// retrieve ajax parameters
+		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
+		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
+		if ( $user_id == '0' || $course_id == '0' ) {			
+			die();		
+		}
+
+		// get data
+		$user_meta = get_user_meta( $user_id );
+		$course_title = get_the_title($course_id);
+		$course_meta = get_post_meta( $course_id );
+		$options = get_option( $this->plugin_name . '_settings' );
+		$iusetvis_logo = ! isset( $options['iusetvis_logo'] ) ? '' : $options['iusetvis_logo'];
+		$iusetvis_logo_src = $iusetvis_logo == '' ? '' : wp_get_attachment_url( $iusetvis_logo );
+
+		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
+
+		// checks
+		if ( !in_array( $user_id, $subscribed_users ) ) {
+		 	die();
+		}
+
+		// import and initialize the mpdf library
+		require plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php';
+		$mpdf = new \Mpdf\Mpdf( ['mode' => 'utf-8', 'format' => 'A4-P'] );
+
+		// build object
+		$data = array(
+			'logo'							=>	$iusetvis_logo_src == '' ? '' : $iusetvis_logo_src,
+			'header'						=>	! isset( $options['iusetvis_header'] ) ? '' : $options['iusetvis_header'],
+			'barcode'						=>	! isset( $course_meta['barcode'][$user_id] ) ? '012345678910' : $course_meta['barcode'][$user_id],
+			'user_title'					=>	! isset( $user_meta['title'][0] ) ? '' : $user_meta['title'][0],
+			'user_first_name'				=>	! isset( $user_meta['first_name'][0] ) ? '' : $user_meta['first_name'][0],
+			'user_last_name'				=>	! isset( $user_meta['last_name'][0] ) ? '' : $user_meta['last_name'][0],
+			'course_name'					=>	! isset( $course_title ) ? '' : $course_title,
+			'course_code'					=>	! isset( $course_meta['course_code'][0] ) ? $course_id : $course_meta['course_code'][0],
+			'course_start_date'				=>	! isset( $course_meta['course_start_time'][0] ) ? '' : $course_meta['course_start_time'][0],
+			'course_end_date'				=>	! isset( $course_meta['course_end_time'][0] ) ? '' : $course_meta['course_end_time'][0],
+			'course_address'				=>	! isset( $course_meta['course_address'][0] ) ? '' : $course_meta['course_address'][0]
+		);
+		//merge array with parameter if provided
+		if ( !empty( $_data ) ) {
+			$data = array_merge($data, $_data);
+		}		
+
+		// the template
+		$html = '
+			<html>
+				<head>
+					<style>
+					
+					</style>
+				</head>
+				<body>
+
+					<!--mpdf
+					<htmlpagefooter name="myfooter">
+					<div style="border-top: 1px solid #000000; font-size: 9pt; text-align: center; padding-top: 3mm; ">
+					Page {PAGENO} of {nb}
+					</div>
+					</htmlpagefooter>
+
+					<sethtmlpagefooter name="myfooter" value="on" />
+					mpdf-->
+
+
+						<table width="100%">
+							<tr>
+								<td colspan="2" width="50">'.$data['logo'].'</td>
+							    <td colspan="2">
+								'.$data['header'].'
+							    </p></td>
+							  </tr>
+
+							<tr>
+								<td colspan="4">
+								  <br />
+							    </td>
+							</tr>
+							<tr>
+								<td colspan="4">
+								  <h1>ISCRIZIONE</h1>
+							    </td>
+							</tr>
+							<tr>
+							    <td colspan="3" align="left" class="barcodecell">Codice:'.$data['barcode'].'</td>
+							    <td class="barcodecell"><barcode code="'.$data['barcode'].'"  class="barcode" /></td>
+							</tr>
+							<tr>
+								<td colspan="4">
+								  <br />
+							    </td>
+							</tr>
+								<tr>
+								  <td colspan="1">Corso</td>
+								  <td colspan="3" align="left"><h2>'.$data['course_name'].'</h2><p>Codice corso: '.$data['course_code'].'</td>
+								  </tr>
+
+								<td colspan="4">
+								  <br />
+							    </td>
+							</tr>
+
+							<tr>
+							  <td width="10%">Titolo</td>
+							  <td width="35%" align="left"><strong>'. strtoupper( $data['user_title'] ) .'</strong></td>
+							  <td width="10%" align="left">Cognome</td>
+							  <td width="35%" align="left"><strong>'. strtoupper( $data['user_last_name'] ) .'</strong></td>
+							  <td width="10%" align="left">Nome</td>
+							  <td width="35%" align="left"><strong>'. strtoupper( $data['user_first_name'] ) .'</strong></td>
+							</tr>
+
+							<tr>
+							  <td>Dal</td>
+							  <td align="left">'.date( 'd-m-Y', $data['course_start_date'] ).'</td>
+							  <td align="left">al</td>
+							  <td align="left">'.date( 'd-m-Y', $data['course_end_date'] ).'</td>
+							</tr>
+
+							<tr>
+							  <td colspan="4">
+								Con la presente le confermiamo l\'iscrizione al corso <br />'.$data['course_name'].'
+								<br />
+								Il corso avrà luogo presso '.$data['course_address'].'<br />Le ricordiamo di stampare il presente modulo e di portarlo con sé il giorno dell\'evento formativo per la registrazione</td>
+							  </tr>
+							</table>
+
+
+				</body>
+			</html>
+		';
+		
+
+		// output the pdf for download
+		$mpdf->WriteHTML($html);
+		return $mpdf->Output('Notifica_' . urlencode( $data['course_name'] ), 'D' );
 
 		die();
 
