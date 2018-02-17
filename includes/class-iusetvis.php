@@ -296,6 +296,7 @@ class Iusetvis {
 		// print pdf
 		$this->loader->add_action( 'wp_ajax_nopriv_pdf_print_diploma', $plugin_public, 'pdf_print_diploma' );
 		$this->loader->add_action( 'wp_ajax_nopriv_pdf_print_notice', $plugin_public, 'pdf_print_notice' );
+		$this->loader->add_action( 'wp_ajax_nopriv_pdf_print_bill', $plugin_public, 'pdf_print_bill' );
 		// subscribe to course
 		$this->loader->add_action( 'wp_ajax_nopriv_course_subscribe', $plugin_public, 'course_subscribe' );
 		$this->loader->add_action( 'wp_ajax_nopriv_course_waiting_list_subscribe', $plugin_public, 'course_waiting_list_subscribe' );
@@ -329,6 +330,7 @@ class Iusetvis {
 		// print pdf
 		$this->loader->add_action( 'wp_ajax_pdf_print_diploma', $plugin_public, 'pdf_print_diploma' );
 		$this->loader->add_action( 'wp_ajax_pdf_print_notice', $plugin_public, 'pdf_print_notice' );
+		$this->loader->add_action( 'wp_ajax_pdf_print_bill', $plugin_public, 'pdf_print_bill' );
 		// subscribe to course
 		$this->loader->add_action( 'wp_ajax_course_subscribe', $plugin_public, 'course_subscribe' );
 		$this->loader->add_action( 'wp_ajax_course_waiting_list_subscribe', $plugin_public, 'course_waiting_list_subscribe' );
@@ -642,7 +644,7 @@ class Iusetvis {
 					</label>
 				</td>
 				<td colspan="4">
-					<input type="number" step="0.0000001" name="course_perf_days" class="regular-text" value="<?php echo ( (int)$course_perf_days / 86400 ); ?>">
+					<input type="number" name="course_perf_days" class="regular-text" value="<?php echo (int)( $course_perf_days / 86400 ); ?>">
 				</td>
 			</tr>
 
@@ -1313,9 +1315,15 @@ class Iusetvis {
 					<input type="text" name="course_president_name" class="regular-text" value="<?php echo $course_president_name; ?>" readonly>
 					<input type="hidden" name="course_president_signature" value="<?= $course_president_signature ?>"">
 				</td>
+			</tr>
+			<tr>
+				<td class="course_meta_box_td" colspan="1">
+					<label for="course_code" style="font-weight: bold;"><?php _e( 'Course code', 'iusetvis' ); ?>
+					</label>
+				</td>
 				<td colspan="4">
 					<input type="text" name="course_code" class="regular-text" value="<?php echo $course_code; ?>">
-					<p class="description"><?php _e( 'Example: ', 'iusetvis' ) . $post->ID; ?></p>
+					<p class="description"><?php echo __( 'Example: ', 'iusetvis' ) . $post->ID; ?></p>
 				</td>
 			</tr>
 

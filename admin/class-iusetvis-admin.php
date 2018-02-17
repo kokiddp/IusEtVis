@@ -73,7 +73,7 @@ class Iusetvis_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/iusetvis-admin.css', array( ), $this->version, 'all' );
+		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/iusetvis-admin.css', array( ), time()/*$this->version*/, 'all' );
 		
 
 	}
@@ -98,7 +98,7 @@ class Iusetvis_Admin {
 		 */
 
 		wp_enqueue_script( 'jquery-ajax-native', plugin_dir_url( __FILE__ ) . 'js/jquery-ajax-native.js', array( 'jquery' ) );
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/iusetvis-admin.js', array( 'jquery', 'jquery-ajax-native' ), $this->version, false );
+		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/iusetvis-admin.js', array( 'jquery', 'jquery-ajax-native' ), time()/*$this->version*/, false );
 		wp_localize_script( $this->plugin_name, 'perfect_user_subscription_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'unperfect_user_subscription_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'confirm_user_attendance_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );

@@ -108,6 +108,42 @@
 
 	    });
 
+	    $('#bill').click(function() {
+	    	actions_response_field.text("");
+	    	$('#bill').prop('disabled', true);
+	        $.ajax({
+	        	dataType: 'native',
+		        url: pdf_print_bill_ajax.ajaxurl,
+		        xhrFields: {
+				    responseType: 'blob'
+				  },
+		        type: 'POST',
+		        data: {
+		            'action': 'pdf_print_bill',
+		            'user_id': user_id,
+		            'course_id': course_id
+		        },
+		        success: function(blob) {
+		        	if (blob.size > 0) {
+		        		console.log(blob);
+			            var link=document.createElement('a');
+					    link.href=window.URL.createObjectURL(blob);
+					    link.download="Conto.pdf";
+					    link.click();
+		        	}
+		        	else {
+		        		actions_response_field.text("Error: unable to download the pdf.");
+		        	}
+		        	$('#bill').prop('disabled', false);
+		        },
+		        error: function(error) {
+		            actions_response_field.text(error.status + ' ( ' + error.statusText + ' )');
+		            $('#bill').prop('disabled', false);
+		        }
+		    });
+
+	    });
+
 	    $('#subscribe').click(function() {
 	    	actions_response_field.text("");
 	    	$('#subscribe').prop('disabled', true);
