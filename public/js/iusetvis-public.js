@@ -158,7 +158,7 @@
 		        },
 		        success: function(response) {
 		        	actions_response_field.text(response);
-		        	$('#subscribe').prop('disabled', false);
+		        	$('#subscribe').prop('disabled', true);
 		        },
 		        error: function(error) {
 		            actions_response_field.text(error.status + ' ( ' + error.statusText + ' )');
@@ -182,7 +182,7 @@
 		        },
 		        success: function(response) {
 		        	actions_response_field.text(response);
-		        	$('#unsubscribe').prop('disabled', false);
+		        	$('#unsubscribe').prop('disabled', true);
 		        },
 		        error: function(error) {
 		            actions_response_field.text(error.status + ' ( ' + error.statusText + ' )');
@@ -206,7 +206,7 @@
 		        },
 		        success: function(response) {
 		        	actions_response_field.text(response);
-		        	$('#subscribe-waiting-list').prop('disabled', false);
+		        	$('#subscribe-waiting-list').prop('disabled', true);
 		        },
 		        error: function(error) {
 		            actions_response_field.text(error.status + ' ( ' + error.statusText + ' )');

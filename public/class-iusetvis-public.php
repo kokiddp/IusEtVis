@@ -150,7 +150,7 @@ class Iusetvis_Public {
 			<h2><?php _e( 'Print course diploma', 'iusetvis' ) ?></h2>
 			<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='diploma' value='<?php _e( 'Download', 'iusetvis' ) ?>'></p>
 		</div>
-		
+
 		<?php
 	}
 
@@ -166,7 +166,7 @@ class Iusetvis_Public {
 			<h2><?php _e( 'Print course notice', 'iusetvis' ) ?></h2>
 			<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='notice' value='<?php _e( 'Download', 'iusetvis' ) ?>'></p>
 		</div>
-		
+
 		<?php
 	}
 
@@ -177,12 +177,11 @@ class Iusetvis_Public {
 	 */
 	public function display_bill_download_button() {
 		?>
-
 		<div class='wrap'>
 			<h2><?php _e( 'Print course bill', 'iusetvis' ) ?></h2>
 			<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='bill' value='<?php _e( 'Download', 'iusetvis' ) ?>'></p>
 		</div>
-		
+
 		<?php
 	}
 
@@ -192,14 +191,19 @@ class Iusetvis_Public {
 	 * @since    1.0.0
 	 */
 	public function display_course_subscribe_button() {
-		?>
-
-		<div class='wrap'>
-			<h2><?php _e( 'Subscribe to course', 'iusetvis' ) ?></h2>
-			<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='subscribe' value='<?php _e( 'Subscribe', 'iusetvis' ) ?>'></p>
-		</div>
-		
-		<?php
+			if(!is_user_logged_in()) return;
+			$status=$this->get_status_registration();
+			//$status=null;
+			?>
+			<div class='wrap'>
+				<?php if(is_null($status)){?>
+					<h2><?php _e( 'Subscribe to course', 'iusetvis' ) ?></h2>
+					<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='subscribe' value='<?php _e( 'Subscribe', 'iusetvis' ) ?>'></p>
+				<?php } else { ?>
+					<h2><?=$status?></h2>
+				<?php } ?>
+			</div>
+			<?php
 	}
 
 	/*
@@ -208,14 +212,15 @@ class Iusetvis_Public {
 	 * @since    1.0.0
 	 */
 	public function display_course_unsubscribe_button() {
+		if( !is_user_logged_in() ) return;
+		if($this->get_status_registration() == (__( 'You are already subscribed to this course!', 'iusetvis' ))) {
 		?>
-
 		<div class='wrap'>
 			<h2><?php _e( 'Unsubscribe to course', 'iusetvis' ) ?></h2>
 			<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='unsubscribe' value='<?php _e( 'Unsubscribe', 'iusetvis' ) ?>'></p>
 		</div>
-		
 		<?php
+		}
 	}
 
 	/*
@@ -224,14 +229,15 @@ class Iusetvis_Public {
 	 * @since    1.0.0
 	 */
 	public function display_course_waiting_list_subscribe_button() {
+		if( !is_user_logged_in() ) return;
+		if($this->get_status_registration() == (__( 'There are no available places in this course!', 'iusetvis' ))) {
 		?>
-		
 		<div class='wrap'>
 			<h2><?php _e( 'Subscribe to waiting list', 'iusetvis' ) ?></h2>
 			<p><input type='submit' style='margin-top: 20px;' class='button-primary' id='subscribe-waiting-list' value='<?php _e( 'Subscribe', 'iusetvis' ) ?>'></p>
 		</div>
-
 		<?php
+		}
 	}
 
 	/*
@@ -240,7 +246,7 @@ class Iusetvis_Public {
 	 * @since    1.0.0
 	 */
 	public function display_user_course_list( $atts = array() ) {
-		
+
 		// retrieve and merge shortcode args
 		$atts = shortcode_atts(
 			array(
@@ -262,7 +268,7 @@ class Iusetvis_Public {
 			}
 		}
 		?>
-		
+
 		<div class='wrap'>
 			<h2><?php _e( 'User courses', 'iusetvis' ) ?></h2>
 			<ul>
@@ -277,18 +283,56 @@ class Iusetvis_Public {
 		<?php
 	}
 
+
+	/**
+	 * Verifica lo stato di iscrizione a un corso di un utente
+	 * @return [string] messaggio errore o nullo
+	 */
+	public function get_status_registration(){
+		$status = null;
+		$user_id = ( get_current_user_id() );
+		$course_id = ( get_the_ID() );
+		if ( $user_id == '0' || $course_id == '0' ) {
+			echo __( 'Error: user or course unset!', 'iusetvis' );
+			die();
+		}
+
+		$course_meta = get_post_custom( $course_id );
+		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
+		$waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );
+		$available_places = !isset( $course_meta['course_places'][0] ) ? 0 : ( (int)$course_meta['course_places'][0] - count( $subscribed_users ) );
+		$course_subs_dead_end = !isset( $course_meta['course_subs_dead_end'][0] ) ? array() : maybe_unserialize( $course_meta['course_subs_dead_end'][0] );
+
+		if ( time() > (int)$course_subs_dead_end ) {
+			$status =  __( 'The subscriptions are closed!', 'iusetvis' );
+		}
+		else if ( in_array( $user_id, $subscribed_users ) ) {
+		 	$status =  __( 'You are already subscribed to this course!', 'iusetvis' );
+		}
+		else if ( in_array( $user_id, $waiting_users ) ) {
+		 	$status =  __( 'You are is already subscribed to this course\'s waiting list!', 'iusetvis' );
+		}
+		else if ( $available_places <= 0 ) {
+			$status =  __( 'There are no available places in this course!', 'iusetvis' );
+		}
+
+		//ritorna
+		return $status;
+	}
+
+
 	/**
 	 * PDF print the Diploma Template.
 	 *
 	 * @since    1.0.0
 	 */
 	public function pdf_print_diploma( $_user_id = '0', $_course_id = '0', $_data = array() ) {
-		
+
 		// retrieve ajax parameters
 		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
 		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
-		if ( $user_id == '0' || $course_id == '0' ) {			
-			die();		
+		if ( $user_id == '0' || $course_id == '0' ) {
+			die();
 		}
 
 		// get data
@@ -330,7 +374,7 @@ class Iusetvis_Public {
 		//merge array with parameter if provided
 		if ( !empty( $_data ) ) {
 			$data = array_merge($data, $_data);
-		}		
+		}
 
 		// the template
 		$html = '
@@ -342,23 +386,23 @@ class Iusetvis_Public {
 						font-size: 9pt;
 						background: transparent url(\''.plugins_url().'/IusEtVis/public/asset/sfondo.png\') no-repeat left top;
 					}
-					
+
 					span.blu {
 						font-weight:bold;
 						color:#235893;
 						font-size:44px
 					}
-					
+
 					span.corso {
 						font-size:20px;
 						color:#235893;
 						font-weight:normal;
 						font-style:italic;
-						letter-spacing:1.5px;						
+						letter-spacing:1.5px;
 					}
-					
+
 					span.largo{
-						letter-spacing:1.1px;						
+						letter-spacing:1.1px;
 					}
 					</style>
 				</head>
@@ -366,23 +410,23 @@ class Iusetvis_Public {
 					<table width="100%">
 						<tr>
 							<td colspan="4" width="100%" height="240"></td>
-					  	</tr>					
+					  	</tr>
 						<tr>
 							<td colspan="4" width="100%" style="text-align:center">Si attesta che</td>
 					  	</tr>
 						<tr>
 							<td colspan="4" width="100%" height="10"></td>
-						</tr>						
+						</tr>
 						<tr>
 						  	<td colspan="4" width="100%" style="text-align:center;">
 							  	<span class="blu">
 							  		'.$data['user_title'].' '.strtoupper( $data['user_first_name'] ).' '.strtoupper( $data['user_last_name'] ).'
 							  	</span>
 						  	</td>
-						</tr>						
+						</tr>
 						<tr>
 							<td colspan="4" width="100%" height="10"></td>
-						</tr>						
+						</tr>
 						<tr>
 						  	<td colspan="4" width="100%" style="text-align:center;"><span class="largo">Nato a '.strtoupper( $data['user_birth_place'] ).' il '.date( 'd-m-y', $data['user_birth_date'] ).' del foro di '.strtoupper( $data['user_forum'] ).'</span></td>
 						</tr>
@@ -391,27 +435,27 @@ class Iusetvis_Public {
 						</tr>
 						<tr>
 							<td colspan="4" width="100%" style="text-align:center">ha partecipato al convegno</td>
-						</tr>					
+						</tr>
 						<tr>
 							<td colspan="4" width="100%" height="10"></td>
-						</tr>					
+						</tr>
 						<tr>
 						  	<td colspan="4" align="center"><span class="corso">'.$data['course_name'].'</span></td>
 						</tr>
 						<tr>
 							<td colspan="4" width="100%" height="10"></td>
-						</tr>				
+						</tr>
 						<tr>
 				          	<td align="center" colspan="4">
 				          		tenutosi a '.$data['course_address'].'<br /><br/>accreditato da '.$data['course_institution'].' in ragione di n. '.$data['course_credits_val'].' crediti formativi'.$data['course_credits_subj'].'
 							</td>
-						</tr>					
+						</tr>
 						<tr>
 							<td colspan="4" width="100%" height="20"></td>
-						</tr>				
+						</tr>
 						<tr>
 					  		<td colspan="4" align="left" style="padding-top:10px;padding-left:190px">Monza, li '.date( 'd-m-Y', $data['course_end_date'] ).'</td>
-					  	</tr>					
+					  	</tr>
 						<tr>
 							<td colspan="4" align="center">'.$data['course_credits_text'].'</td>
 						</tr>
@@ -420,12 +464,12 @@ class Iusetvis_Public {
 						</tr>
 						<tr>
 							<td colspan="4" align="right"><img src="'.$data['iusetvis_president_signature'].'" style="height: 100px; max-width: 500px;"></td>
-						</tr>				  
+						</tr>
 					</table>
 				</body>
 			</html>
 		';
-		
+
 
 		// output the pdf for download
 		$mpdf->WriteHTML($html);
@@ -445,8 +489,8 @@ class Iusetvis_Public {
 		// retrieve ajax parameters
 		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
 		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
-		if ( $user_id == '0' || $course_id == '0' ) {			
-			die();		
+		if ( $user_id == '0' || $course_id == '0' ) {
+			die();
 		}
 
 		// get data
@@ -493,7 +537,7 @@ class Iusetvis_Public {
 			<html>
 				<head>
 					<style>
-					
+
 					</style>
 				</head>
 				<body>
@@ -581,8 +625,8 @@ class Iusetvis_Public {
 		// retrieve ajax parameters
 		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
 		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
-		if ( $user_id == '0' || $course_id == '0' ) {			
-			die();		
+		if ( $user_id == '0' || $course_id == '0' ) {
+			die();
 		}
 
 		// get data
@@ -603,14 +647,14 @@ class Iusetvis_Public {
 		$course_price = ! isset( $course_meta['course_price_reg'][0] ) ? '0' : $course_meta['course_price_reg'][0];
 		if ( isset( $user_meta['association_state'][0] ) &&
 			 isset( $user_meta['association_end'][0] ) &&
-			 isset( $course_meta['course_start_time'][0] ) && 
-			 $user_meta['association_state'][0] == 1  && 
-			 $user_meta['association_end'][0] >= $course_meta['course_start_time'][0] ) {			
+			 isset( $course_meta['course_start_time'][0] ) &&
+			 $user_meta['association_state'][0] == 1  &&
+			 $user_meta['association_end'][0] >= $course_meta['course_start_time'][0] ) {
 				$course_price = ! isset( $course_meta['course_price_assoc'][0] ) ? $course_price : $course_meta['course_price_assoc'][0];
 		}
 
 		$course_dead_end = ! isset( $course_meta['course_perf_days'][0] ) ? ( ! isset( $course_meta['course_subs_dead_end'][0] ) ? '0' : ( $course_meta['course_subs_dead_end'][0] - 259200 ) ) : ( time() + $course_meta['course_perf_days'][0] - 259200 );
-		
+
 		// import and initialize the mpdf library
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php';
 		$mpdf = new \Mpdf\Mpdf( ['mode' => 'utf-8', 'format' => 'A4-L'] );
@@ -646,7 +690,7 @@ class Iusetvis_Public {
 			<html>
 				<head>
 					<style>
-					
+
 					</style>
 				</head>
 				<body>
@@ -733,7 +777,7 @@ class Iusetvis_Public {
 	 * @since    1.0.0
 	 */
 	public function course_subscribe( $_user_id = '0', $_course_id = '0' ) {
-		
+
 		// retrieve ajax parameters
 		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
 		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
@@ -747,7 +791,7 @@ class Iusetvis_Public {
 		$waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );
 		$available_places = !isset( $course_meta['course_places'][0] ) ? 0 : ( (int)$course_meta['course_places'][0] - count( $subscribed_users ) );
 		$course_subs_dead_end = !isset( $course_meta['course_subs_dead_end'][0] ) ? array() : maybe_unserialize( $course_meta['course_subs_dead_end'][0] );
-		
+
 		if ( time() > (int)$course_subs_dead_end ) {
 			echo __( 'Error: the subscriptions are closed!', 'iusetvis' );
 		 	die();
@@ -765,7 +809,7 @@ class Iusetvis_Public {
 		 	die();
 		}
 		else {
-			array_push( $subscribed_users, $user_id );		
+			array_push( $subscribed_users, $user_id );
 			update_post_meta( $course_id, 'subscribed_users', $subscribed_users );
 			echo __( 'User succesfully subscribed to this course.', 'iusetvis' );
 			$this->start_unsubscribe_cron( $user_id, $course_id );
@@ -807,7 +851,7 @@ class Iusetvis_Public {
 			echo __( 'Error: the user subscription has already been perfected!', 'iusetvis' );
 		 	die();
 		}
-		
+
 		if ( in_array( $user_id, $subscribed_users ) ) {
 			$key = array_search( $user_id, $subscribed_users );
 			$unsub = array_splice( $subscribed_users, $key, 1 );
@@ -841,7 +885,7 @@ class Iusetvis_Public {
 	 * @since    1.0.0
 	 */
 	public function course_waiting_list_subscribe( $_user_id = '0', $_course_id = '0' ) {
-		
+
 		// retrieve ajax parameters
 		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
 		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
@@ -855,7 +899,7 @@ class Iusetvis_Public {
 		$waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );
 		$available_places = !isset( $course_meta['course_places'][0] ) ? 0 : ( (int)$course_meta['course_places'][0] - count( $subscribed_users ) );
 		$course_subs_dead_end = !isset( $course_meta['course_subs_dead_end'][0] ) ? 0 : maybe_unserialize( $course_meta['course_subs_dead_end'][0] );
-		
+
 		if ( time() > (int)$course_subs_dead_end ) {
 			echo __( 'Error: the subscriptions are closed!', 'iusetvis' );
 		 	die();
@@ -873,8 +917,8 @@ class Iusetvis_Public {
 		 	die();
 		}
 		else {
-			array_push( $waiting_users, $user_id );		
-			update_post_meta( $course_id, 'waiting_users', $waiting_users );			
+			array_push( $waiting_users, $user_id );
+			update_post_meta( $course_id, 'waiting_users', $waiting_users );
 			echo __( 'User succesfully subscribed to this course\'s waiting list.', 'iusetvis' );
 			die();
 		}
@@ -892,17 +936,17 @@ class Iusetvis_Public {
 		$user_meta = get_user_meta( $user_id );
 		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 		$course_perf_days = !isset( $course_meta['course_perf_days'][0] ) ? 0 : maybe_unserialize( $course_meta['course_perf_days'][0] );
-		$course_subs_dead_end = !isset( $course_meta['course_subs_dead_end'][0] ) ? 0 : maybe_unserialize( $course_meta['course_subs_dead_end'][0] );		
+		$course_subs_dead_end = !isset( $course_meta['course_subs_dead_end'][0] ) ? 0 : maybe_unserialize( $course_meta['course_subs_dead_end'][0] );
 		$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
 
 		$cron_timer = ( ( (int)time() + $course_perf_days ) < $course_subs_dead_end ? ( (int)time() + $course_perf_days ) : $course_subs_dead_end );
 
 		// if the user is subscribed to the course
 		if ( in_array( $user_id, $subscribed_users ) ) {
-			
+
 			// if the user hasn't perfected his subscription to the course
 		 	if ( !in_array( $course_id, $perfected_subscriptions ) ) {
-		 		
+
 		 		wp_clear_scheduled_hook( 'action_unsubscribe_cron', array( $user_id, $course_id ) );
 		 		wp_schedule_single_event( $cron_timer, 'action_unsubscribe_cron', array( $user_id, $course_id ) );
 
@@ -926,10 +970,10 @@ class Iusetvis_Public {
 
 		// if the user is subscribed to the course
 		if ( in_array( $user_id, $subscribed_users ) ) {
-			
+
 			// if the user hans't perfected his subscription to the course
 		 	if ( !in_array( $course_id, $perfected_subscriptions ) ) {
-		 		
+
 		 		$this->course_unsubscribe( $user_id, $course_id );
 		 		wp_clear_scheduled_hook( 'action_unsubscribe_cron', array( $user_id, $course_id ) );
 
@@ -949,8 +993,8 @@ class Iusetvis_Public {
 		//stub
 
 		$template = '
-			<h2> '. __( 'IusEtVis', 'iusetvis' ) . '</h2>
-			<p>' . __( 'Subscribed to course ', 'iusetvis' ) . get_the_title( $course_id ) . '</p>
+			<h2> '. __( 'IusEtVis', 'iusetvis' ) . '</h2>';
+			'<p>' . __( 'Subscribed to course ', 'iusetvis' ) . get_the_title( $course_id ) . '</p>
 		';
 
 		return $template;
@@ -963,7 +1007,7 @@ class Iusetvis_Public {
 	 * @since    1.0.0
 	 */
 	public function get_unsubscription_template( $user_id, $course_id ) {
-		
+
 		//stub
 
 		$template = '

@@ -30,10 +30,10 @@
 
                 <?php if ( has_post_thumbnail() ) { ?>
 
-	                <div class="course_image_wrap">	                    
+	                <div class="course_image_wrap">
 	                    <div class="course_image">
 	                        <?php echo get_the_post_thumbnail( get_the_ID(), 'medium' ); ?>
-	                    </div><!-- .course_image -->	                    
+	                    </div><!-- .course_image -->
 	                </div><!-- .course_image_wrap -->
 
                 <?php } // end featured image check ?>
@@ -58,7 +58,7 @@
 	                                <li class="course_start_time">
 	                                    <span class="course_profile_heading"><?php _e('Start Time and Date: ','iusetvis'); ?></span>
 	                                    <span class="course_profile_meta">
-                                            <?php 
+                                            <?php
                                                 echo date_i18n( get_option( 'date_format' )  . ' - '.  get_option( 'time_format' ), $course_start_time );
                                             ?>
                                         </span>
@@ -151,7 +151,7 @@
                                    $course_rel_extra = maybe_unserialize( get_post_meta( get_the_ID(), 'course_rel_extra', true ) );
                                    $rel_format = __('<b>%1$s %2$s</b>, %3$s.', 'iusetvis');
                                    for ($i=0; $i < count( $course_rel_name ); $i++) {
-                                        if ( !empty( $course_rel_title[$i] ) && !empty( $course_rel_name[$i] ) && !empty( $course_rel_extra[$i] ) ) {                            
+                                        if ( !empty( $course_rel_title[$i] ) && !empty( $course_rel_name[$i] ) && !empty( $course_rel_extra[$i] ) ) {
                                 ?>
                                     <li class="course_relators">
                                         <span class="course_profile_heading"><?php _e('Relator: ','iusetvis'); ?></span>
@@ -159,7 +159,7 @@
                                             <?php echo sprintf($rel_format, $course_rel_title[$i], $course_rel_name[$i], $course_rel_extra[$i]); ?>
                                         </span>
                                     </li>
-                                    <?php } 
+                                    <?php }
                                     } ?>
 
                             </div><!-- .course_meta_rel -->
@@ -180,14 +180,14 @@
                         </p>
                     </div><!-- .course_hidden_fields -->
 
-                    <div class="course_actions">                        
+                    <div class="course_actions">
+                        <h3 id="actions_response_field"></h3>
                         <?= do_shortcode('[course_subscribe]'); ?>
                         <?= do_shortcode('[course_unsubscribe]'); ?>
                         <?= do_shortcode('[course_waiting_list_subscribe]'); ?>
                         <?= do_shortcode('[bill_download]'); ?>
                         <?= do_shortcode('[notice_download]'); ?>
                         <?= do_shortcode('[diploma_download]'); ?>
-                        <h3 id="actions_response_field"></h3>
                     </div><!-- .course_actions -->
 
                 </div><!-- .course_actions_wrap -->
