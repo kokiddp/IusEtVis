@@ -196,7 +196,7 @@ class Iusetvis {
 		// styles and scripts
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
-		
+
 		// menu and roles
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_menu_pages' );
 		$this->loader->add_action( 'admin_menu', $plugin_admin, 'add_role_and_capabilities' );
@@ -233,10 +233,10 @@ class Iusetvis {
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_birth_date_update' );
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_forum_update' );
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_address_update' );
-		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_phone_update' );		
+		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_phone_update' );
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_association_end_update' );
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_association_state_update' );
-		//BERSI		
+		//BERSI
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_codice_fiscale_update' );
 		$this->loader->add_action( 'edit_user_profile_update', $this, 'usermeta_form_field_vat_number_update' );
 
@@ -285,7 +285,7 @@ class Iusetvis {
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_birth_date_update' );
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_forum_update' );
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_address_update' );
-		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_phone_update' );		
+		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_phone_update' );
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_association_end_update' );
 		$this->loader->add_action( 'personal_options_update', $this, 'usermeta_form_field_association_state_update' );
 		//BERSI
@@ -895,7 +895,7 @@ class Iusetvis {
 			update_post_meta( $post->ID, $key, $value );
 		}
 	}
-	
+
 	/**
 	 * Register the moderator metaboxes to be used for the course post type
 	 *
@@ -1031,8 +1031,8 @@ class Iusetvis {
 
 		<table class="form-table">
 
-			<?php for ($i=0; $i < 5 ; $i++) { ?>
-			
+			<?php for ($i=0; $i < 3 ; $i++) { ?>
+
 			<tr>
 				<td class="course_meta_box_td" colspan="1">
 					<label for="course_rel_title_<?php echo $i ?>" style="font-weight: bold;"><?php _e( 'Title', 'iusetvis' ); ?>
@@ -1051,13 +1051,14 @@ class Iusetvis {
 					<input type="text" name="course_rel_name_<?php echo $i ?>" class="regular-text" value="<?php echo $course_rel_name[$i]; ?>">
 					<p class="description"><?php _e( 'Example: Mario Rossi', 'iusetvis' ); ?></p>
 				</td>
-
+			</tr>
+			<tr>
 				<td class="course_meta_box_td" colspan="1">
 					<label for="course_rel_extra_<?php echo $i ?>" style="font-weight: bold;"><?php _e( 'Details', 'iusetvis' ); ?>
 					</label>
 				</td>
-				<td colspan="2">
-					<input type="text" name="course_rel_extra_<?php echo $i ?>" class="regular-text" value="<?php echo $course_rel_extra[$i]; ?>">
+				<td colspan="4">
+					<textarea name="course_rel_extra_<?php echo $i ?>" style='width:90%'><?php echo $course_rel_extra[$i]; ?></textarea>
 					<p class="description"><?php _e( 'Example: Avvocato del Foro di Milano', 'iusetvis' ); ?></p>
 				</td>
 			</tr>
@@ -1100,7 +1101,7 @@ class Iusetvis {
 		$meta['course_rel_name'] = array();
 		$meta['course_rel_extra'] = array();
 
-		for ($i=0; $i < 5 ; $i++) { 
+		for ($i=0; $i < 5 ; $i++) {
 			isset( $_POST['course_rel_title_' . $i] ) ?
 				array_push( $meta['course_rel_title'], esc_textarea( $_POST['course_rel_title_' . $i] ) ) :
 				array_push( $meta['course_rel_title'], '' );
@@ -1489,7 +1490,7 @@ class Iusetvis {
 	    if (!current_user_can('edit_user', $user_id)) {
 	        return false;
 	    }
-	 
+
 	    // create/update user meta for the $user_id
 	    return update_user_meta( $user_id, 'title', $_POST['title'] );
 	}
@@ -1507,7 +1508,7 @@ class Iusetvis {
 	    if (!current_user_can('edit_user', $user_id)) {
 	        return false;
 	    }
-	 
+
 	    // create/update user meta for the $user_id
 	    return update_user_meta( $user_id, 'birth_place', $_POST['birth_place'] );
 	}
@@ -1525,7 +1526,7 @@ class Iusetvis {
 	    if (!current_user_can('list_users')) {
 	        return false;
 	    }
-	 
+
 	    // create/update user meta for the $user_id
 	    return update_user_meta( $user_id, 'birth_date', strtotime( $_POST['birth_date'] ) );
 	}
@@ -1543,7 +1544,7 @@ class Iusetvis {
 	    if (!current_user_can('edit_user', $user_id)) {
 	        return false;
 	    }
-	 
+
 	    // create/update user meta for the $user_id
 	    return update_user_meta( $user_id, 'address', $_POST['address'] );
 	}
@@ -1561,7 +1562,7 @@ class Iusetvis {
 	    if (!current_user_can('edit_user', $user_id)) {
 	        return false;
 	    }
-	 
+
 	    // create/update user meta for the $user_id
 	    return update_user_meta( $user_id, 'phone', $_POST['phone'] );
 	}
@@ -1579,7 +1580,7 @@ class Iusetvis {
 	    if (!current_user_can('edit_user', $user_id)) {
 	        return false;
 	    }
-	 
+
 	    // create/update user meta for the $user_id
 	    return update_user_meta( $user_id, 'forum', $_POST['forum'] );
 	}
@@ -1628,7 +1629,7 @@ class Iusetvis {
 	    </table>
 	    <?php
 	}
-	 
+
 	/**
 	 * The fiscal code user meta save action.
 	 *
@@ -1642,7 +1643,7 @@ class Iusetvis {
 	    if (!current_user_can('edit_user', $user_id)) {
 	        return false;
 	    }
-	 
+
 	    // create/update user meta for the $user_id
 	    return update_user_meta( $user_id, 'vat', $_POST['vat'] );
 	}
@@ -1661,7 +1662,7 @@ class Iusetvis {
 	    if (!current_user_can('edit_user', $user_id)) {
 	        return false;
 	    }
-	 
+
 	    // create/update user meta for the $user_id
 	    return update_user_meta( $user_id, 'fiscal_code', $_POST['fiscal_code'] );
 	}
@@ -1712,7 +1713,7 @@ class Iusetvis {
 	    </table>
 	    <?php
 	}
-	 
+
 	/**
 	 * The association end user meta save action.
 	 *
@@ -1726,7 +1727,7 @@ class Iusetvis {
 	    if (!current_user_can('list_users')) {
 	        return false;
 	    }
-	 
+
 	    // create/update user meta for the $user_id
 	    return update_user_meta( $user_id, 'association_end', strtotime( $_POST['association_end'] ) + 86399 );
 	}
@@ -1744,7 +1745,7 @@ class Iusetvis {
 	    if (!current_user_can('list_users')) {
 	        return false;
 	    }
-	 
+
 	    // create/update user meta for the $user_id
 	    if ( isset( $_POST['association_state'] ) && $_POST['association_state'] == true ) {
 	    	return update_user_meta( $user_id, 'association_state', true );
