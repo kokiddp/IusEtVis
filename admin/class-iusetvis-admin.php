@@ -142,6 +142,7 @@ class Iusetvis_Admin {
 			'dashicons-welcome-learn-more'
 		);
 
+
 		// Submenu page general settings
 		add_submenu_page(
 			$this->plugin_name . "_registrations_page",
@@ -151,6 +152,7 @@ class Iusetvis_Admin {
 			'iusetvis_options_page',
 			array( $this, 'render_options_page' )
 		);
+
 
 		// Submenu page Upload
 		add_submenu_page(

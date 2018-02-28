@@ -12,6 +12,13 @@ class Ius_Et_Vis_Util {
 
 	}
 
+  /**
+   * esporta un csv
+   * @param  [type] $header_row intestazione dei campi
+   * @param  [type] $data_rows  data da scrivere
+   * @param  [type] $filename   nome del file
+   * @return [type]             [description]
+   */
   public function export_csv($header_row,$data_rows,$filename=null){
 
     if(is_null($filename)) {
