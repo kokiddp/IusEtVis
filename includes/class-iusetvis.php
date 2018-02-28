@@ -261,6 +261,7 @@ class Iusetvis {
 		$this->loader->add_filter( 'manage_edit-course_sortable_columns', $plugin_admin, 'set_custom_course_sortable_columns' );
 		$this->loader->add_action( 'pre_get_posts', $plugin_admin, 'custom_course_sort' );
 		$this->loader->add_action( 'restrict_manage_posts', $plugin_admin, 'custom_course_add_taxonomy_filters' );
+		$this->loader->add_filter( 'bulk_actions-edit-course', $plugin_admin, 'course_bulk_actions');
 
 		// ajax
 		//perfect subscription
