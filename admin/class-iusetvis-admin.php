@@ -802,6 +802,14 @@ class Iusetvis_Admin {
 	    $query->set( 'orderby', 'meta_value_num' );
 	  }
 	}
+	/**
+	 * rimuove wordpress da admin bar
+	 * @param  [type] $wp_admin_bar [description]
+	 * @return [type]               [description]
+	 */
+	public function remove_wp_logo( $wp_admin_bar ) {
+		$wp_admin_bar->remove_node( 'wp-logo' );
+	}
 
 	/**
 	 * elimina modifica dalle bulk actions

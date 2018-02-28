@@ -262,6 +262,8 @@ class Iusetvis {
 		$this->loader->add_action( 'pre_get_posts', $plugin_admin, 'custom_course_sort' );
 		$this->loader->add_action( 'restrict_manage_posts', $plugin_admin, 'custom_course_add_taxonomy_filters' );
 		$this->loader->add_filter( 'bulk_actions-edit-course', $plugin_admin, 'course_bulk_actions');
+		//via logo wordporess da barra admin
+		$this->loader->add_action( 'admin_bar_menu', $plugin_admin, 'remove_wp_logo' ,99 );
 
 		// ajax
 		//perfect subscription
