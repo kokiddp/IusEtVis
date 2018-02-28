@@ -74,7 +74,7 @@ class Iusetvis_Admin {
 		 */
 
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/iusetvis-admin.css', array( ), time()/*$this->version*/, 'all' );
-		
+
 
 	}
 
@@ -109,6 +109,9 @@ class Iusetvis_Admin {
 		wp_localize_script( $this->plugin_name, 'course_subscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'course_unsubscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 		wp_localize_script( $this->plugin_name, 'course_waiting_list_subscribe_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+		//Bersi
+		//chiusura corsi
+		wp_localize_script( $this->plugin_name, 'course_ended_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
 
 	}
 
@@ -128,7 +131,7 @@ class Iusetvis_Admin {
 	 * @since  1.0.0
 	 */
 	public function add_menu_pages() {
-		
+
 		// Main menu page Registrations
 		add_menu_page(
 			__( 'IusEtVis', 'iusetvis' ),
@@ -140,11 +143,11 @@ class Iusetvis_Admin {
 		);
 
 		// Submenu page general settings
-		add_submenu_page( 
+		add_submenu_page(
 			$this->plugin_name . "_registrations_page",
 			__( 'General Settings', 'iusetvis' ),
 			__( 'General Settings', 'iusetvis' ),
-			'edit_pages', 
+			'edit_pages',
 			'iusetvis_options_page',
 			array( $this, 'render_options_page' )
 		);
@@ -157,7 +160,7 @@ class Iusetvis_Admin {
 			'edit_pages',
 			$this->plugin_name . '_upload_file',
 			array( $this, 'upload_file' )
-		);		
+		);
 
 		// Subscribed users list table
 		add_submenu_page(
@@ -168,6 +171,18 @@ class Iusetvis_Admin {
 			$this->plugin_name . '_course_subscribed_list_table',
 			array( $this, 'course_subscribed_list_table' )
 		);
+
+		// Scarica CSV iscritti
+		/*add_submenu_page(
+			NULL,
+			__( 'Download Subscribed Users List Table', 'iusetvis' ),
+			__( 'Download Subscribed Users List Table', 'iusetvis' ),
+			'edit_pages',
+			$this->plugin_name . '_csv_file',
+			array( $this, 'csv_subscribed_file' )
+		);
+		*/
+
 
 		// Waiting users list table
 		add_submenu_page(
@@ -190,7 +205,7 @@ class Iusetvis_Admin {
 	    	$this->plugin_name . '_course_mail',
 	    	array( $this, 'course_mail' )
 	    );
-	    
+
 	    // Submenu page Log Email
 		add_submenu_page(
 			$this->plugin_name . "_registrations_page",
@@ -299,47 +314,47 @@ class Iusetvis_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function init_settings(  ) { 
+	public function init_settings(  ) {
 
 		register_setting( 'iusetvis_options_page', 'iusetvis_settings' );
 
 		add_settings_section(
-			'iusetvis_options_page_section_general', 
-			__( 'General Settings', 'iusetvis' ), 
-			array( $this, 'iusetvis_options_page_section_general_callback' ), 
+			'iusetvis_options_page_section_general',
+			__( 'General Settings', 'iusetvis' ),
+			array( $this, 'iusetvis_options_page_section_general_callback' ),
 			'iusetvis_options_page'
 		);
 
-		add_settings_field( 
-			'iusetvis_president', 
-			__( 'President name', 'iusetvis' ), 
-			array( $this, 'iusetvis_president_render' ), 
-			'iusetvis_options_page', 
-			'iusetvis_options_page_section_general' 
+		add_settings_field(
+			'iusetvis_president',
+			__( 'President name', 'iusetvis' ),
+			array( $this, 'iusetvis_president_render' ),
+			'iusetvis_options_page',
+			'iusetvis_options_page_section_general'
 		);
 
-		add_settings_field( 
-			'iusetvis_signature', 
-			__( 'President\'s signature', 'iusetvis' ), 
-			array( $this, 'iusetvis_signature_render' ), 
-			'iusetvis_options_page', 
-			'iusetvis_options_page_section_general' 
+		add_settings_field(
+			'iusetvis_signature',
+			__( 'President\'s signature', 'iusetvis' ),
+			array( $this, 'iusetvis_signature_render' ),
+			'iusetvis_options_page',
+			'iusetvis_options_page_section_general'
 		);
 
-		add_settings_field( 
-			'iusetvis_logo', 
-			__( 'Association Logo', 'iusetvis' ), 
-			array( $this, 'iusetvis_logo_render' ), 
-			'iusetvis_options_page', 
-			'iusetvis_options_page_section_general' 
+		add_settings_field(
+			'iusetvis_logo',
+			__( 'Association Logo', 'iusetvis' ),
+			array( $this, 'iusetvis_logo_render' ),
+			'iusetvis_options_page',
+			'iusetvis_options_page_section_general'
 		);
 
-		add_settings_field( 
-			'iusetvis_header', 
-			__( 'Header text', 'iusetvis' ), 
-			array( $this, 'iusetvis_header_render' ), 
-			'iusetvis_options_page', 
-			'iusetvis_options_page_section_general' 
+		add_settings_field(
+			'iusetvis_header',
+			__( 'Header text', 'iusetvis' ),
+			array( $this, 'iusetvis_header_render' ),
+			'iusetvis_options_page',
+			'iusetvis_options_page_section_general'
 		);
 
 	}
@@ -349,7 +364,7 @@ class Iusetvis_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	function iusetvis_options_page_section_general_callback(  ) { 
+	function iusetvis_options_page_section_general_callback(  ) {
 
 		?>
 
@@ -364,7 +379,7 @@ class Iusetvis_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	function iusetvis_president_render(  ) { 
+	function iusetvis_president_render(  ) {
 
 		$options = get_option( $this->plugin_name . '_settings' );
 		$iusetvis_president = ! isset( $options['iusetvis_president'] ) ? '' : $options['iusetvis_president'];
@@ -382,7 +397,7 @@ class Iusetvis_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	function iusetvis_signature_render(  ) { 
+	function iusetvis_signature_render(  ) {
 
 		$options = get_option( $this->plugin_name . '_settings' );
 		$iusetvis_signature = ! isset( $options['iusetvis_signature'] ) ? '' : $options['iusetvis_signature'];
@@ -407,7 +422,7 @@ class Iusetvis_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	function iusetvis_logo_render(  ) { 
+	function iusetvis_logo_render(  ) {
 
 		$options = get_option( $this->plugin_name . '_settings' );
 		$iusetvis_logo = ! isset( $options['iusetvis_logo'] ) ? '' : $options['iusetvis_logo'];
@@ -432,7 +447,7 @@ class Iusetvis_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	function iusetvis_header_render(  ) { 
+	function iusetvis_header_render(  ) {
 
 		$options = get_option( $this->plugin_name . '_settings' );
 		$iusetvis_header = ! isset( $options['iusetvis_header'] ) ? '' : $options['iusetvis_header'];
@@ -450,7 +465,7 @@ class Iusetvis_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	function render_options_page(  ) { 
+	function render_options_page(  ) {
 
 		?>
 		<form action='options.php' method='post'>
@@ -474,7 +489,7 @@ class Iusetvis_Admin {
 	 * @since    1.0.0
 	 */
 	public function perfect_user_subscription( $_user_id = '0', $_course_id = '0' ) {
-		
+
 		// retrieve ajax parameters
 		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
 		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
@@ -490,24 +505,24 @@ class Iusetvis_Admin {
 
 		// if the user is subscribed to the course
 		if ( in_array( $user_id, $subscribed_users ) ) {
-			
+
 			// if the user hans't perfected his subscription to the course
 		 	if ( !in_array( $course_id, $perfected_subscriptions ) ) {
-		 		
-		 		array_push( $perfected_subscriptions, $course_id );		
-				update_user_meta( $user_id, 'perfected_subscriptions', $perfected_subscriptions );			
+
+		 		array_push( $perfected_subscriptions, $course_id );
+				update_user_meta( $user_id, 'perfected_subscriptions', $perfected_subscriptions );
 				echo __( 'User registration to this course succesfully perfected.', 'iusetvis' );
 				wp_clear_scheduled_hook( 'action_unsubscribe_cron', array( $user_id, $course_id ) );
 				//mail
 				$user_info = get_userdata($user_id);
 				wp_mail( $user_info->user_email, 'Iusetvis', 'Iscrizione al corso '.get_the_title( $course_id ).' confermata' );
-				die();		 		
+				die();
 
 			}
 			else {
 				echo __( 'Error: the user registration to this course has already been perfected.', 'iusetvis' );
 				die();
-			}	
+			}
 
 		}
 		else {
@@ -523,7 +538,7 @@ class Iusetvis_Admin {
 	 * @since    1.0.0
 	 */
 	public function unperfect_user_subscription( $_user_id = '0', $_course_id = '0' ) {
-		
+
 		// retrieve ajax parameters
 		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
 		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
@@ -541,22 +556,22 @@ class Iusetvis_Admin {
 
 		// if the user is subscribed to the course
 		if ( in_array( $user_id, $subscribed_users ) ) {
-			
+
 			// if the user han perfected his subscription to the course
 		 	if ( in_array( $course_id, $perfected_subscriptions ) ) {
 
 				$key = array_search( $course_id, $perfected_subscriptions );
 				array_splice( $perfected_subscriptions, $key, 1 );
-				update_user_meta( $user_id, 'perfected_subscriptions', $perfected_subscriptions );			
+				update_user_meta( $user_id, 'perfected_subscriptions', $perfected_subscriptions );
 				echo __( 'User registration to this course succesfully unperfected.', 'iusetvis' );
 				$plugin_public->start_unsubscribe_cron( $user_id, $course_id );
-				die();		 		
+				die();
 
 			}
 			else {
 				echo __( 'Error: the user registration to this course has not been perfected yet.', 'iusetvis' );
 				die();
-			}	
+			}
 
 		}
 		else {
@@ -572,7 +587,7 @@ class Iusetvis_Admin {
 	 * @since    1.0.0
 	 */
 	public function confirm_user_attendance( $_user_id = '0', $_course_id = '0' ) {
-		
+
 		// retrieve ajax parameters
 		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
 		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
@@ -590,23 +605,23 @@ class Iusetvis_Admin {
 
 		// if the user is subscribed to the course
 		if ( in_array( $user_id, $subscribed_users ) ) {
-			
+
 			// if the user has perfected his subscription to the course
 		 	if ( in_array( $course_id, $perfected_subscriptions ) ) {
 
-			 	// if the course is finished 
-			 	if ( $course_end_time <= time() ) {			 	
+			 	// if the course is finished
+			 	if ( $course_end_time <= time() ) {
 
 			 		// if the admin hasn't confirmed user attendance to this course
 			 		if ( !in_array( $course_id, $confirmed_attendances ) ) {
-			 		
-				 		array_push( $confirmed_attendances, $course_id );		
-						update_user_meta( $user_id, 'confirmed_attendances', $confirmed_attendances );		
+
+				 		array_push( $confirmed_attendances, $course_id );
+						update_user_meta( $user_id, 'confirmed_attendances', $confirmed_attendances );
 						echo __( 'User attendance to this course succesfully confirmed.', 'iusetvis' );
 						//mail
 						$user_info = get_userdata($user_id);
 						wp_mail( $user_info->user_email, 'Iusetvis', 'Partecipazione al corso '.get_the_title( $course_id ).' confermata' );
-						die();	
+						die();
 
 					}
 					else {
@@ -633,12 +648,31 @@ class Iusetvis_Admin {
 	}
 
 	/**
+	 * AJAX
+	 * chiude un corso impostando il meta relativo
+	 * @return [string] [description]
+	 */
+	public function course_ended($_course_id = '0'){
+		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
+		if ( $course_id == '0' ) {
+			echo __( 'Error: course unset!', 'iusetvis' );
+			die();
+		}
+
+		update_post_meta( $course_id, 'course_ended', 1 );
+		update_post_meta( $course_id, 'course_ended_at', time() );
+
+		echo __( 'The course is now closed!', 'iusetvis' );
+		die();
+	}
+
+	/**
 	 * Delete user's course attendance
 	 *
 	 * @since    1.0.0
 	 */
 	public function delete_user_attendance( $_user_id = '0', $_course_id = '0' ) {
-		
+
 		// retrieve ajax parameters
 		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
 		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
@@ -655,18 +689,18 @@ class Iusetvis_Admin {
 
 		// if the user is subscribed to the course
 		if ( in_array( $user_id, $subscribed_users ) ) {
-			
+
 			// if the user has perfected his subscription to the course
 		 	if ( in_array( $course_id, $perfected_subscriptions ) ) {
 
 		 		// if the admin has confirmed user attendance to this course
 		 		if ( in_array( $course_id, $confirmed_attendances ) ) {
-		 			
+
 			 		$key = array_search( $course_id, $confirmed_attendances );
-					array_splice( $confirmed_attendances, $key, 1 );		
-					update_user_meta( $user_id, 'confirmed_attendances', $confirmed_attendances );			
-					echo __( 'User attendance to this course succesfully deleted.', 'iusetvis' );					
-					die();	
+					array_splice( $confirmed_attendances, $key, 1 );
+					update_user_meta( $user_id, 'confirmed_attendances', $confirmed_attendances );
+					echo __( 'User attendance to this course succesfully deleted.', 'iusetvis' );
+					die();
 
 				}
 				else {
@@ -697,12 +731,87 @@ class Iusetvis_Admin {
 
 		$columns['start_date'] = __( 'Start', 'iusetvis' );
 		$columns['subs_end_date'] = __( 'Subscriptions end', 'iusetvis' );
-	    $columns['subscriptions'] = __( 'Subscriptions', 'iusetvis' );
-	    $columns['waiting'] = __( 'Waiting', 'iusetvis' );
+	  $columns['subscriptions'] = __( 'Subscriptions', 'iusetvis' );
+	  $columns['waiting'] = __( 'Waiting', 'iusetvis' );
+		//$columns['closed'] = __( 'Close', 'iusetvis' );
 
-	    return $columns;
+	  return $columns;
 	}
 
+	/**
+	 * rende sortable le colonne dei corsi
+	 * @param [type] $columns [description]
+	 */
+	public function set_custom_course_sortable_columns($columns){
+		$columns['start_date'] = __( 'Start', 'iusetvis' );
+		$columns['subscriptions'] = __( 'Subscriptions', 'iusetvis' );
+		$columns['subs_end_date'] = __( 'Subscriptions end', 'iusetvis' );
+		return $columns;
+	}
+
+	/**
+	 * Snippet Name: Admin filter for custom taxonomies
+	 * Snippet URL: http://www.wpcustoms.net/snippets/admin-filter-for-custom-taxonomies/
+	 */
+	 // add filtering option
+	public function custom_course_add_taxonomy_filters() {
+	    global $typenow;
+	    // an array of all the taxonomies you want to display. Use the taxonomy name or slug - each item gets its own select box.
+	    $taxonomies = array('course-category');
+	    // use the custom post type here
+	    if( $typenow == 'course' ){
+	        foreach ($taxonomies as $tax_slug) {
+	            $tax_obj = get_taxonomy($tax_slug);
+	            $tax_name = $tax_obj->labels->name;
+	            $terms = get_terms($tax_slug);
+	            if(count($terms) > 0) {
+	                echo "<select name=".$tax_slug." id=".$tax_slug." class=\"postform\">";
+	                echo "<option value=''>". __("Show All Course Categories",'iusetvis'). "</option>";
+	                foreach ($terms as $term) {
+	                echo '<option value="'. $term->slug.'"';
+							    if($_GET[$tax_slug] == $term->slug ) echo  ' selected="selected"';
+									echo ">". $term->name .' (' . $term->count .')</option>'; }
+	                echo "</select>";
+	            }
+	        }
+	    }
+	}
+
+	/**
+	 * Ordina i course sulla base della colonna cliccata
+	 * @param  [type] $query [description]
+	 * @return [type]        [description]
+	 */
+	public function custom_course_sort($query){
+		if ( ! is_admin() )  return;
+
+		$orderby = $query->get( 'orderby');
+		//ordina per campo
+	  if ( 'start_date' == $orderby ) {
+	    $query->set( 'meta_key', 'start_date' );
+	    $query->set( 'orderby', 'meta_value_num' );
+	  }
+
+		if ( 'subscriptions' == $orderby ) {
+	    $query->set( 'meta_key', 'subscriptions' );
+	    $query->set( 'orderby', 'meta_value_num' );
+	  }
+
+		if ( 'subs_end_date' == $orderby ) {
+	    $query->set( 'meta_key', 'subs_end_date' );
+	    $query->set( 'orderby', 'meta_value_num' );
+	  }
+	}
+
+	/**
+	 * elimina modifica dalle bulk actions
+	 * @param  [type] $actions [description]
+	 * @return [type]          [description]
+	 */
+	public function course_bulk_actions( $actions ){
+        unset( $actions[ 'edit' ] );
+        return $actions;
+  }
 	/**
 	 * Set custom course Subscriptions column content
 	 *
@@ -717,29 +826,42 @@ class Iusetvis_Admin {
 
 	    switch ( $column ) {
 
-	        case 'start_date' :
-				$course_start_time = ! isset( $course_meta['course_start_time'][0] ) ? 0 : $course_meta['course_start_time'][0];
-	            if ( isset( $course_start_time ) && $course_start_time > 0 )
+	      case 'start_date' :
+							$course_start_time = ! isset( $course_meta['course_start_time'][0] ) ? 0 : $course_meta['course_start_time'][0];
+	            if ( isset( $course_start_time ) && $course_start_time > 0 ){
+									if((int)$course_meta['course_ended'][0]){
+										echo "<span style='color:red'>";
+									}
 	                echo date( $datetime_format, $course_start_time );
-	            else
+									if((int)$course_meta['course_ended'][0]){
+										echo "</span>";
+									}
+	            } else
 	                _e( 'Unable to get the start date', 'iusetvis' );
 	            break;
 
 	        case 'subs_end_date' :
-				$course_subs_dead_end = ! isset( $course_meta['course_subs_dead_end'][0] ) ? 0 : $course_meta['course_subs_dead_end'][0];
-	            if ( isset( $course_subs_dead_end ) && $course_subs_dead_end > 0 )
-	                echo date( $datetime_format, $course_subs_dead_end );
-	            else
+							$course_subs_dead_end = ! isset( $course_meta['course_subs_dead_end'][0] ) ? 0 : $course_meta['course_subs_dead_end'][0];
+	            if ( isset( $course_subs_dead_end ) && $course_subs_dead_end > 0 ){
+								if((int)$course_meta['course_ended'][0]){
+									echo "<span style='color:red'>";
+								}
+	              echo date( $datetime_format, $course_subs_dead_end );
+								if((int)$course_meta['course_ended'][0]){
+									echo "</span>";
+								}
+	            } else
 	                _e( 'Unable to get the subscriptions dead end date', 'iusetvis' );
 	            break;
 
 	        case 'subscriptions' :
 	            $subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 	            if ( isset( $subscribed_users ) && count( $subscribed_users ) >= 0 )
-	                echo "<a href='" . site_url('/wp-admin/admin.php?page=iusetvis_course_subscribed_list_table&course_id=') . $post_id . "'>" . count( $subscribed_users ) . "</a>";
+	                echo "<a href='" . site_url('/wp-admin/admin.php?page=iusetvis_course_subscribed_list_table&course_id=') . $post_id . "'>" . count( $subscribed_users ) . "  su " . $course_meta['course_places'][0]. "</a>";
 	            else
 	                _e( 'Unable to get the suscribers', 'iusetvis' );
 	            break;
+
 
 	        case 'waiting' :
 	            $waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );
@@ -749,6 +871,14 @@ class Iusetvis_Admin {
 	                _e( 'Unable to get the waiting users', 'iusetvis' );
 	            break;
 
+					/*case 'closed' :
+									$closed = !isset( $meta['course_ended'][0] ) ? FALSE : maybe_unserialize( $course_meta['course_ended'][0] );
+									if ( isset( $closed ) && ( $closed )  )
+											echo "SI";
+									else
+											echo "NO";
+									break;
+									*/
 	    }
 	}
 
@@ -757,7 +887,7 @@ class Iusetvis_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function course_subscribed_list_table( $_course_id = '0' ) { 
+	public function course_subscribed_list_table( $_course_id = '0' ) {
 
 		if(!empty($_GET['course_id']))
         {
@@ -769,12 +899,88 @@ class Iusetvis_Admin {
         ?>
             <div class="wrap">
                 <div id="icon-users" class="icon32"></div>
-                <h1><?php _e('Subscribed Users List Table Page', 'iusetvis')?></h1>
+                <h1><a href="post.php?post=<?=$course_id?>&action=edit"><?php echo strtoupper(get_the_title($course_id))?></a>: <?php _e('Subscribed Users List Table Page', 'iusetvis')?></h1>
                 <h3 id="actions_response_field"></h3>
-                <a href="./admin.php?page=iusetvis_upload_file&course_id=<?php echo $course_id ?>" class="btn btn-default">Accreditamento CSV</a>
-                <?php $table->display(); ?>
+                <a class='button' href="./admin.php?page=iusetvis_upload_file&course_id=<?php echo $course_id ?>" class="btn btn-default">Accreditamento CSV</a>
+								<a class='button' href="<?php echo admin_url( 'admin.php?page=iusetvis_options_page' ) ?>&action=csv_subscribed_file&amp;course_id=<?php echo $course_id ?>&amp;_wpnonce=<?php echo wp_create_nonce( 'download_csv' )?>"><?php _e("Download CSV of the users for the course",'iusetvis')?></a>
+								<?php $table->display(); ?>
             </div>
         <?php
+	}
+
+
+	/**
+	 * Scarica un csv degli iscritti
+	 *
+	 * @since    1.0.0
+	 */
+	public function csv_subscribed_file() {
+		// Check for current user privileges
+	 if( !current_user_can( 'manage_options' ) ){ return false; }
+	 // Check if we are in WP-Admin
+	 if( !is_admin() ){ return false; }
+	 // Nonce Check
+	 $nonce = isset( $_GET['_wpnonce'] ) ? $_GET['_wpnonce'] : '';
+	 if ( ! wp_verify_nonce( $nonce, 'download_csv' ) ) {
+			 die( 'Security check error' );
+	 }
+
+		$util = new Ius_Et_Vis_Util;
+		if(!empty($_GET['course_id']))
+				{
+						$course_id = $_GET['course_id'];
+				}
+    		$filename = 'iscritti-' . get_the_title($course_id) . '-' . time() . '.csv';
+
+				$course_meta = get_post_custom( $course_id );
+				$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
+
+				$data_rows = array();
+				$header_row = array(
+						 'Utente',
+						 'Indirizzo',
+						 'Email',
+						 'Telefono',
+						 'Associato',
+						 'Iscrizione perfezionata',
+						 'Iscrizione confermata'
+				);
+				$i=1;
+				foreach ( $subscribed_users as $key => $value ) {
+						$user_id = $value;
+
+						$user_meta = get_user_meta( $user_id );
+						$user_data = get_userdata( $user_id );
+
+						$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
+						$confirmed_attendances = !isset( $user_meta['confirmed_attendances'][0] ) ? array() : maybe_unserialize( $user_meta['confirmed_attendances'][0] );
+
+						$user_first_name = !isset( $user_meta['first_name'][0] ) ? '' : $user_meta['first_name'][0];
+						$user_last_name = !isset( $user_meta['last_name'][0] ) ? '' : $user_meta['last_name'][0];
+						$user_name = $user_last_name . ' ' . $user_first_name;
+						$user_address = !isset( $user_meta['address'][0] ) ? '' : $user_meta['address'][0];
+						$user_email = $user_data->user_email;
+						$user_phone = !isset( $user_meta['phone'][0] ) ? '' : $user_meta['phone'][0];
+						$user_association_state = !isset( $user_meta['association_state'][0] ) ? false : ( $user_meta['association_state'][0] == 0 ? false : true );
+						$user_sub_perfected = in_array( $course_id, $perfected_subscriptions );
+						$user_att_confirmed = in_array( $course_id, $confirmed_attendances );
+
+						$row = array(
+							$i,
+							$user_name,
+							$user_address,
+							$user_email,
+							$user_phone,
+							$user_association_state,
+							$user_sub_perfected,
+							$user_att_confirmed
+		        );
+						$i++;
+		        $data_rows[] = $row;
+
+				}
+				//sparo l'utilità che fa CSV
+				$util->export_csv($header_row,$data_rows,$filename);
 	}
 
 	/**
@@ -782,7 +988,7 @@ class Iusetvis_Admin {
 	 *
 	 * @since    1.0.0
 	 */
-	public function course_waiting_list_table( $_course_id = '0' ) { 
+	public function course_waiting_list_table( $_course_id = '0' ) {
 
 		if(!empty($_GET['course_id']))
         {
@@ -810,7 +1016,7 @@ class Iusetvis_Admin {
 
 		$file = ( isset( $_POST['file'] ) ? $_POST['file'] : $_file );
 		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
-		
+
 		$strings = preg_split('/\s+/', $file);
 		array_pop($strings);
 
@@ -824,33 +1030,33 @@ class Iusetvis_Admin {
 			$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 			$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
 			$confirmed_attendances = !isset( $user_meta['confirmed_attendances'][0] ) ? array() : maybe_unserialize( $user_meta['confirmed_attendances'][0] );
-			
+
 
 			if($parts[2] == '1'){
 				//perfect_user_subscription
 				array_push( $perfected_subscriptions, $course_id );
-				update_user_meta( $user->id, 'perfected_subscriptions', $perfected_subscriptions );			
+				update_user_meta( $user->id, 'perfected_subscriptions', $perfected_subscriptions );
 				echo __( 'User ' . $user->first_name . ' ' . $user->last_name . ' registration to this course succesfully perfected.', 'iusetvis' );
 			}
 			else{
 				//unperfect_user_subscription
 				$key = array_search( $course_id, $perfected_subscriptions );
 				array_splice( $perfected_subscriptions, $key, 1 );
-				update_user_meta( $user->id, 'perfected_subscriptions', $perfected_subscriptions );			
+				update_user_meta( $user->id, 'perfected_subscriptions', $perfected_subscriptions );
 				echo __( 'User ' . $user->first_name . ' ' . $user->last_name . ' registration to this course succesfully unperfected.', 'iusetvis' );
 			}
 
 			if($parts[5] == 'SI'){
 				//confirm_user_attendance
-				array_push( $confirmed_attendances, $course_id );		
-				update_user_meta( $user->id, 'confirmed_attendances', $confirmed_attendances );		
+				array_push( $confirmed_attendances, $course_id );
+				update_user_meta( $user->id, 'confirmed_attendances', $confirmed_attendances );
 				echo __( 'User ' . $user->first_name . ' ' . $user->last_name . ' attendance to this course succesfully confirmed.', 'iusetvis' );
 			}
 			else {
 				//delete user attendance
 				$key = array_search( $course_id, $confirmed_attendances );
-				array_splice( $confirmed_attendances, $key, 1 );		
-				update_user_meta( $user->id, 'confirmed_attendances', $confirmed_attendances );			
+				array_splice( $confirmed_attendances, $key, 1 );
+				update_user_meta( $user->id, 'confirmed_attendances', $confirmed_attendances );
 				echo __( 'User ' . $user->first_name . ' ' . $user->last_name . ' attendance to this course succesfully deleted.', 'iusetvis' );
 			}
 

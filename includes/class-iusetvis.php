@@ -151,6 +151,13 @@ class Iusetvis {
 		}
 
 		/**
+		 * utilità varie BERSI
+		 */
+		if ( ! class_exists( 'Ius_Et_Vis_Util' ) ) {
+				require plugin_dir_path( dirname( __FILE__ ) ). 'includes/class-utility-bersi.php';
+		}
+
+		/**
 		 * Composer
 		 */
 		require plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php';
@@ -203,6 +210,11 @@ class Iusetvis {
 		$this->loader->add_action( 'dashboard_glance_items', $this, 'add_glance_counts' );
 		$this->loader->add_action( 'admin_init', $plugin_admin, 'init_settings' );
 
+		if ( isset($_GET['action'] ) && $_GET['action'] == 'csv_subscribed_file' )  {
+			// Handle CSV Export
+			$this->loader->add_action( 'admin_init', $plugin_admin, 'csv_subscribed_file' );
+		}
+
 		// metaboxes courses
 		$this->loader->add_action( 'add_meta_boxes', $this, 'course_time_meta_boxes' );
 		$this->loader->add_action( 'save_post', $this, 'save_time_meta_boxes', 10, 2 );
@@ -221,6 +233,8 @@ class Iusetvis {
 		// metaboxes courses BERSI
 		$this->loader->add_action( 'add_meta_boxes', $this, 'course_address_meta_boxes' );
 		$this->loader->add_action( 'save_post', $this, 'save_address_meta_boxes', 10, 2 );
+		//BERSI
+		$this->loader->add_action( 'add_meta_boxes', $this, 'course_manage_users_boxes' );
 
 		// meta fields user
 		$this->loader->add_action( 'show_user_profile', $this, 'usermeta_form_field_addinfo' );
@@ -243,6 +257,10 @@ class Iusetvis {
 		// course custom columns
 		$this->loader->add_filter( 'manage_course_posts_columns', $plugin_admin, 'set_custom_edit_course_columns' );
 		$this->loader->add_action( 'manage_course_posts_custom_column', $plugin_admin, 'custom_course_column', 10, 2 );
+		//BERSI filtri colonne courses
+		$this->loader->add_filter( 'manage_edit-course_sortable_columns', $plugin_admin, 'set_custom_course_sortable_columns' );
+		$this->loader->add_action( 'pre_get_posts', $plugin_admin, 'custom_course_sort' );
+		$this->loader->add_action( 'restrict_manage_posts', $plugin_admin, 'custom_course_add_taxonomy_filters' );
 
 		// ajax
 		//perfect subscription
@@ -253,6 +271,9 @@ class Iusetvis {
 		$this->loader->add_action( 'wp_ajax_delete_user_attendance', $plugin_admin, 'delete_user_attendance' );
 		//upload csv
 		$this->loader->add_action( 'wp_ajax_upload_csv', $plugin_admin, 'upload_csv' );
+		//BERSI
+		//chiusura corso
+		$this->loader->add_action( 'wp_ajax_course_ended', $plugin_admin, 'course_ended' );
 
 	}
 
@@ -577,6 +598,70 @@ class Iusetvis {
 		$glancer = new Gamajo_Dashboard_Glancer;
     	$glancer->add( $this->post_type );
 	}
+
+	/**
+	 * Metabox gestione utenti SOLO se non nuovo
+	 *
+	 */
+	public function course_manage_users_boxes() {
+		$screen = get_current_screen();
+    if( 'add' != $screen->action ){
+			add_meta_box(
+				'manage_users_fields',
+				__( 'Manage users', 'iusetvis' ),
+				array( $this, 'render_manage_users_meta_boxes' ),
+				$this->post_type,
+				'side',
+				'high'
+			);
+		}
+	}
+
+	/**
+ * The HTML for the manage user metabox
+ */
+ function render_manage_users_meta_boxes( $post ) {
+	 $meta = get_post_custom( $post->ID );
+	 ?>
+	 <table class="form-table">
+		 <tr>
+			 <td class="course_meta_box_td" colspan="2">
+				 <a class='button' href='admin.php?page=iusetvis_course_subscribed_list_table&course_id=<?php echo $post->ID ?>'><?php _e("Manage users of the course",'iusetvis');?></a>
+			 </td>
+		 </tr>
+		 <tr>
+		 	<td class="course_meta_box_td" colspan="2">
+			 <a class='button' href="<?php echo admin_url( 'admin.php?page=iusetvis_options_page' ) ?>&action=csv_subscribed_file&amp;course_id=<?php echo $course_id ?>&amp;_wpnonce=<?php echo wp_create_nonce( 'download_csv' )?>"><?php _e("Download CSV",'iusetvis')?></a>
+		 	</td>
+	 	</tr>
+		 <tr>
+			 <td class="course_meta_box_td" colspan="2">
+				 <?php _e("Subscribed users",'iusetvis')?> : <?php echo  count($meta['subscribed_users'])?> /
+				 <?php echo $meta['course_places'][0]?>
+			 	<br  />
+				 <?php _e("Waiting list users",'iusetvis')?> : <?php echo  count($meta['waiting_users'])?>
+			 </td>
+		 </tr>
+		 <tr>
+			<td>
+			<?php
+	 		 if ($meta['course_end_time'][0] < time() ){
+				if($meta['course_ended'][0]!=='1'){
+	 			 ?>
+				 	<span id='actions_response_field'></span>
+	 			 	<button id='course_ended' class='button' data-rel='<?php echo $post->ID?>'><?php _e("Close course",'iusetvis')?></button>
+	 			 	<?php
+			 	}else{
+				 	echo "<span style='font-weight:bold;font-size:0.8em'>" . sprintf(__("The course is closed at %s",'iusetvis'),date("d/m/Y H:i",$meta['course_ended_at'][0])) . "</span>";
+			 	}
+	 		 }
+	 		 ?>
+			</td>
+		 </tr>
+
+	 </table>
+
+ <?php }
 
 	/**
 	 * Register the time metaboxes to be used for the course post type
@@ -1039,7 +1124,7 @@ class Iusetvis {
 					</label>
 				</td>
 				<td colspan="2">
-					<input type="text" size='10' name="course_rel_title_<?php echo $i ?>" class="regular-text" value="<?php echo $course_rel_title[$i]; ?>">
+					<input type="text" size='10' name="course_rel_title_<?php echo $i ?>"  value="<?php echo $course_rel_title[$i]; ?>">
 					<p class="description"><?php _e( 'Example: Avv.', 'iusetvis' ); ?></p>
 				</td>
 

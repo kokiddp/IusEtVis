@@ -55,10 +55,38 @@
 
 		var actions_response_field = $("#actions_response_field");
 
+		/* BERSI */
+		$('#course_ended').click(function() {
+	    	actions_response_field.text("");
+	    	var course_id = $("#course_ended").attr('data-rel');
+				var response = confirm("Confermi?");
+				if(response){
+					$('#course_ended').prop('disabled', true);
+					$.ajax({
+	        	dataType: 'native',
+		        url: course_ended_ajax.ajaxurl,
+		        type: 'POST',
+		        data: {
+		            'action': 'course_ended',
+		            'course_id': course_id
+		        },
+		        success: function(response) {
+		        	actions_response_field.text(response);
+		        	$('#course_ended').prop('disabled', true);
+		        },
+		        error: function(error) {
+		            actions_response_field.text(error);
+		            $('#course_ended').prop('disabled', false);
+		        }
+				});
+			}
+	  });
+		/* BERSI STOP */
+
 		$('#perfect-subscription').click(function() {
 	    	actions_response_field.text("");
 	    	var user_id = $("#user_id").val();
-			var course_id = $("#course_id").val();
+				var course_id = $("#course_id").val();
 	    	$('#perfect-subscription').prop('disabled', true);
 	        $.ajax({
 	        	dataType: 'native',
@@ -71,14 +99,13 @@
 		        },
 		        success: function(response) {
 		        	actions_response_field.text(response);
-		        	$('#perfect-subscription').prop('disabled', false);
+		        	$('#perfect-subscription').prop('disabled', true);
 		        },
 		        error: function(error) {
 		            actions_response_field.text(error);
 		            $('#perfect-subscription').prop('disabled', false);
 		        }
 		    });
-
 	    });
 
 	    $('#unperfect-subscription').click(function() {
@@ -308,7 +335,7 @@
 	    	}
 
 		    fr.readAsText(file);
-			
+
 	    });
 
 	    $('.unsubscribe_button').click(function() {
@@ -332,7 +359,7 @@
 		        	ref.prop('disabled', false);
 		        	if (!response.includes('Error: ')) {
 		        		location.reload(true);
-		        	}		        	
+		        	}
 		        },
 		        error: function(error) {
 		            actions_response_field.text(error);
@@ -367,7 +394,7 @@
 					file_frame.open();
 			});
 			$('#upload_logo_button').on('click', function( event ){
-				event.preventDefault();				
+				event.preventDefault();
 				wp.media.model.settings.post.id = set_to_post_id;
 				file_frame = wp.media.frames.file_frame = wp.media({
 					title: 'Logo',
@@ -382,15 +409,15 @@
 						$( '#logo-preview' ).attr( 'src', attachment.url ).css( 'width', 'auto' );
 						$( '#logo_attachment_id' ).val( attachment.id );
 						wp.media.model.settings.post.id = wp_media_post_id;
-					}					
+					}
 				});
 					file_frame.open();
 			});
 			$( 'a.add_media' ).on( 'click', function() {
 				wp.media.model.settings.post.id = wp_media_post_id;
-			});	    	
+			});
 	    }
-		
+
 
 	});
 

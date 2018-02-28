@@ -15,7 +15,7 @@ if( ! class_exists( 'WP_List_Table' ) ) {
 }
 
 /**
- * The subscribed users table class 
+ * The subscribed users table class
  */
 class Subscribed_Users_List_Table extends WP_List_Table
 {
@@ -44,6 +44,7 @@ class Subscribed_Users_List_Table extends WP_List_Table
         $columns = array(
             'name'	        => __('Name', 'iusetvis'),
             'address'		=> __('Address', 'iusetvis'),
+            'email'     => __ ('Email','iusetvis'),
             'phone'         => __('Telephone', 'iusetvis'),
             'associated'	=> __('Associated', 'iusetvis'),
             'perfected'		=> __('Perfected', 'iusetvis'),
@@ -74,7 +75,7 @@ class Subscribed_Users_List_Table extends WP_List_Table
             $course_id = $_GET['course_id'];
         }
         $course_meta = get_post_custom( $course_id );
-        $subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );        
+        $subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 
         $data = array();
 
@@ -82,14 +83,16 @@ class Subscribed_Users_List_Table extends WP_List_Table
             $user_id = $value;
 
             $user_meta = get_user_meta( $user_id );
+            $user_data = get_userdata( $user_id );
 
             $perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
             $confirmed_attendances = !isset( $user_meta['confirmed_attendances'][0] ) ? array() : maybe_unserialize( $user_meta['confirmed_attendances'][0] );
-            
+
             $user_first_name = !isset( $user_meta['first_name'][0] ) ? '' : $user_meta['first_name'][0];
             $user_last_name = !isset( $user_meta['last_name'][0] ) ? '' : $user_meta['last_name'][0];
             $user_name = $user_last_name . ' ' . $user_first_name;
             $user_address = !isset( $user_meta['address'][0] ) ? '' : $user_meta['address'][0];
+            $user_email = $user_data->user_email;
             $user_phone = !isset( $user_meta['phone'][0] ) ? '' : $user_meta['phone'][0];
             $user_association_state = !isset( $user_meta['association_state'][0] ) ? false : ( $user_meta['association_state'][0] == 0 ? false : true );
             $user_sub_perfected = in_array( $course_id, $perfected_subscriptions );
@@ -99,13 +102,14 @@ class Subscribed_Users_List_Table extends WP_List_Table
                 'id'            => $user_id,
                 'name'          => $user_name,
                 'address'       => $user_address,
+                'email'         => $user_email,
                 'phone'         => $user_phone,
                 'associated'    => $user_association_state,
                 'perfected'     => $user_sub_perfected,
                 'confirmed'     => $user_att_confirmed
             );
         }
-        
+
         return $data;
     }
 
@@ -115,6 +119,9 @@ class Subscribed_Users_List_Table extends WP_List_Table
             case 'id':
             case 'name':
             case 'address':
+              return $item[ $column_name ];
+            case 'email':
+              return "<a href='mailto:" . $item[$column_name] ."'>" . $item[$column_name] ."</a>";
             case 'phone':
                 return $item[ $column_name ];
             case 'associated':
@@ -156,7 +163,7 @@ class Subscribed_Users_List_Table extends WP_List_Table
 }
 
 /**
- * The waiting users table class 
+ * The waiting users table class
  */
 class Waiting_Users_List_Table extends WP_List_Table
 {
@@ -212,7 +219,7 @@ class Waiting_Users_List_Table extends WP_List_Table
             $course_id = $_GET['course_id'];
         }
         $course_meta = get_post_custom( $course_id );
-        $waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );        
+        $waiting_users = !isset( $course_meta['waiting_users'][0] ) ? array() : maybe_unserialize( $course_meta['waiting_users'][0] );
 
         $data = array();
 
@@ -220,7 +227,7 @@ class Waiting_Users_List_Table extends WP_List_Table
             $user_id = $value;
 
             $user_meta = get_user_meta( $user_id );
-            
+
             $user_first_name = !isset( $user_meta['first_name'][0] ) ? '' : $user_meta['first_name'][0];
             $user_last_name = !isset( $user_meta['last_name'][0] ) ? '' : $user_meta['last_name'][0];
             $user_name = $user_last_name . ' ' . $user_first_name;
@@ -236,7 +243,7 @@ class Waiting_Users_List_Table extends WP_List_Table
                 'associated'    => $user_association_state
             );
         }
-        
+
         return $data;
     }
 

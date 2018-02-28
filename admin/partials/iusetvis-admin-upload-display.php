@@ -19,11 +19,11 @@
 ?>
 
 <div class='wrap'>
-	<h1><?php _e( 'Demo', 'iusetvis' ) ?></h1>
+	<h1><?php echo get_the_title($_GET['course_id']) ?></h1>
 
 	<h3 id="actions_response_field"></h3>
 
-	<h2><?php _e( 'Upload CSV', 'iusetvis' ) ?></h2>
+	<h2><?php _e( 'Upload CSV of credits', 'iusetvis' ) ?></h2>
 	<p>
 		<input type="file" name="csv" accept=".csv" id="csv_file">
 		<input type='submit' style='margin-bottom: 20px;' class='button-primary' id='upload-csv' value='<?php _e( 'Upload CSV', 'iusetvis' ) ?>'>
