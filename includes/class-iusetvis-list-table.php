@@ -64,7 +64,7 @@ class Subscribed_Users_List_Table extends WP_List_Table
 
     public function get_sortable_columns()
     {
-        return array('name' => array('name', false));
+        return array();
     }
 
     private function table_data()
@@ -125,10 +125,11 @@ class Subscribed_Users_List_Table extends WP_List_Table
             case 'phone':
                 return $item[ $column_name ];
             case 'associated':
-                return '<input type="checkbox" name="' . $column_name . '" value="' . $item[ $column_name ] . '" ' . ( ( $item[ $column_name ] == true ) ? 'checked' : '' ) . ' disabled="disabled">';
+                return '<input type="checkbox" name="' . $column_name . '" value="' . $item[ $column_name ] . '" ' . ( ( $item[ $column_name ] == true ) ? 'checked' : '' ) . ' disabled="disabled"><span style="color:#ffffff">' . $item[ $column_name ] . '</span>';
             case 'perfected':
             case 'confirmed':
-            	return '<input class="' . $column_name . '_checkbox" data-user_id="' . $item[ 'id' ] . '" type="checkbox" name="' . $column_name . '" value="' . $item[ $column_name ] . '" ' . ( ( $item[ $column_name ] == true ) ? 'checked' : '' ) . '>';
+              //aggiungo span con testo bianco pewr permettere ordinamento di datatables
+            	return '<input class="' . $column_name . '_checkbox" data-user_id="' . $item[ 'id' ] . '" type="checkbox" name="' . $column_name . '" value="' . $item[ $column_name ] . '" ' . ( ( $item[ $column_name ] == true ) ? 'checked' : '' ) . '><span style="color:#ffffff">' . $item[ $column_name ] . '</span>';
             case 'unsubscribe':
                 return '<input class="' . $column_name . '_button button button-primary button-large" data-user_id="' . $item[ 'id' ] . '" type="submit" name="' . $column_name . '" value="' . __('Unsubscribe', 'iusetvis') . '">';
             default:

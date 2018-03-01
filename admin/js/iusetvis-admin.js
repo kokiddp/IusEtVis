@@ -56,6 +56,9 @@
 		var actions_response_field = $("#actions_response_field");
 
 		/* BERSI */
+		$('table.admin_page_iusetvis_course_subscribed_list_table').DataTable();
+
+
 		$('#course_ended').click(function() {
 	    	actions_response_field.text("");
 	    	var course_id = $("#course_ended").attr('data-rel');
@@ -81,6 +84,32 @@
 				});
 			}
 	  });
+
+
+		$('#subscribe').click(function() {
+	    	actions_response_field.text("");
+				var user_id = $("#user_id").val();
+				var course_id = $("#course_id").val();
+	    	$('#subscribe').prop('disabled', true);
+	        $.ajax({
+	        	dataType: 'native',
+		        url: course_subscribe_ajax.ajaxurl,
+		        type: 'POST',
+		        data: {
+		            'action': 'course_subscribe',
+		            'user_id': user_id,
+		            'course_id': course_id
+		        },
+		        success: function(response) {
+		        	actions_response_field.text(response);
+		        	$('#subscribe').prop('disabled', true);
+		        },
+		        error: function(error) {
+		            actions_response_field.text(error.status + ' ( ' + error.statusText + ' )');
+		            $('#subscribe').prop('disabled', false);
+		        }
+		    });
+		});
 		/* BERSI STOP */
 
 		$('#perfect-subscription').click(function() {

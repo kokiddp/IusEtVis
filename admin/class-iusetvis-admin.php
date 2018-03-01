@@ -74,6 +74,8 @@ class Iusetvis_Admin {
 		 */
 
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/iusetvis-admin.css', array( ), time()/*$this->version*/, 'all' );
+		//BERSI
+		wp_enqueue_style( 'datatables', plugin_dir_url( __FILE__ ) . 'js/DataTables/datatables.min.css', array( ), time()/*$this->version*/, 'all' );
 
 
 	}
@@ -112,6 +114,7 @@ class Iusetvis_Admin {
 		//Bersi
 		//chiusura corsi
 		wp_localize_script( $this->plugin_name, 'course_ended_ajax', array( 'ajaxurl' => admin_url( 'admin-ajax.php' ) ) );
+		wp_enqueue_script( 'datatables', plugin_dir_url( __FILE__ ) . 'js/DataTables/datatables.min.js' );
 
 	}
 
@@ -484,6 +487,7 @@ class Iusetvis_Admin {
 		<?php
 
 	}
+
 
 	/**
 	 * Perfect user subscription

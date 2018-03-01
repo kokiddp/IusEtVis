@@ -28,6 +28,9 @@
 
 	<h3 id="actions_response_field"></h3>
 
+	<h2><?php _e( 'Subscribe', 'iusetvis' ) ?></h2>
+	<p><input type='submit' style='margin-bottom: 20px;' class='button-primary' id='subscribe' value='<?php _e( 'Subscribe', 'iusetvis' ) ?>'></p>
+
 	<h2><?php _e( 'Perfect subscription', 'iusetvis' ) ?></h2>
 	<p><input type='submit' style='margin-bottom: 20px;' class='button-primary' id='perfect-subscription' value='<?php _e( 'Perfect subscription', 'iusetvis' ) ?>'></p>
 
