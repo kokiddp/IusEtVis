@@ -56,7 +56,12 @@
 		var actions_response_field = $("#actions_response_field");
 
 		/* BERSI */
-		$('table.admin_page_iusetvis_course_subscribed_list_table').DataTable();
+		$('table.admin_page_iusetvis_course_subscribed_list_table').DataTable({
+			"language": {
+            "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/Italian.json"
+        },
+			"pageLength": 50
+		});
 
 
 		$('#course_ended').click(function() {

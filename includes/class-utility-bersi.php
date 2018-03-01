@@ -19,7 +19,7 @@ class Ius_Et_Vis_Util {
    * @param  [type] $filename   nome del file
    * @return [type]             [description]
    */
-  public function export_csv($header_row,$data_rows,$filename=null){
+  public function export_csv( $header_row , $data_rows , $filename=null ){
 
     if(is_null($filename)) {
       $domain = $_SERVER['SERVER_NAME'];
@@ -44,4 +44,37 @@ class Ius_Et_Vis_Util {
 
     die();
   }
+
+  /**
+   * [send_email_subscribed description]
+   * @param  integer $course_id [description]
+   * @return [type]             [description]
+   */
+  public function send_email_subscribed( $course_id = 0 ){
+    //echo (($course_id));die();
+    $options = get_option( $this->plugin_name . '_settings' );
+    $text = ! isset( $options['iusetvis_email_course_ended'] ) ? __("We would like to inform you the conclusive documentation of the course mentioned in the subject is now available on iusetvis.it in the section Personal space",'ius') : $options['iusetvis_email_course_ended'];
+
+    $course_meta = get_post_custom( $course_id );
+    $subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
+
+    //dati email
+    $headers =  array();
+    $to = "segreteria@iusetvis.it";
+    $headers[] = 'From: Ius et Vis <info@iusetvis.it>';
+    foreach ( $subscribed_users as $key => $value ) {
+        $user_id = $value;
+        $user_data = get_userdata( $user_id );
+        $headers[] = "Bcc: {$user_data->user_email}";
+        //wp_mail( $user_data->user_email, get_the_title($course_id), $text );
+    }
+    $esito = wp_mail( $to, get_the_title($course_id), $text, $headers );
+    //echo $esito; die();
+    if( $esito !== 1 ) {
+      //errore invio
+      echo __('There was a problem with sending emails', 'iusetvis');
+      die();
+    }
+  }
+
 }

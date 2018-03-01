@@ -624,7 +624,7 @@ class Iusetvis {
  * The HTML for the manage user metabox
  */
  function render_manage_users_meta_boxes( $post ) {
-	 $meta = get_post_custom( $post->ID );
+	 $course_meta = get_post_custom( $post->ID );
 	 ?>
 	 <table class="form-table">
 		 <tr>
@@ -639,23 +639,25 @@ class Iusetvis {
 	 	</tr>
 		 <tr>
 			 <td class="course_meta_box_td" colspan="2">
-				 <?php _e("Subscribed users",'iusetvis')?> : <?php echo  count($meta['subscribed_users'])?> /
-				 <?php echo $meta['course_places'][0]?>
+				 <?php _e("Subscribed users",'iusetvis')?> : <?php
+				 $subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
+				 echo count($subscribed_users)?> /
+				 <?php echo $course_meta['course_places'][0]?>
 			 	<br  />
-				 <?php _e("Waiting list users",'iusetvis')?> : <?php echo  count($meta['waiting_users'])?>
+				 <?php _e("Waiting list users",'iusetvis')?> : <?php echo  count($course_meta['waiting_users'][0])?>
 			 </td>
 		 </tr>
 		 <tr>
 			<td>
 			<?php
-	 		 if ($meta['course_end_time'][0] < time() ){
-				if($meta['course_ended'][0]!=='1'){
+	 		 if ($course_meta['course_end_time'][0] < time() ){
+				if($course_meta['course_ended'][0]!=='1'){
 	 			 ?>
 				 	<span id='actions_response_field'></span>
 	 			 	<button id='course_ended' class='button' data-rel='<?php echo $post->ID?>'><?php _e("Close course",'iusetvis')?></button>
 	 			 	<?php
 			 	}else{
-				 	echo "<span style='font-weight:bold;font-size:0.8em'>" . sprintf(__("The course is closed at %s",'iusetvis'),date("d/m/Y H:i",$meta['course_ended_at'][0])) . "</span>";
+				 	echo "<span style='font-weight:bold;font-size:0.8em'>" . sprintf(__("The course is closed at %s",'iusetvis'),date("d/m/Y H:i",$course_meta['course_ended_at'][0])) . "</span>";
 			 	}
 	 		 }
 	 		 ?>

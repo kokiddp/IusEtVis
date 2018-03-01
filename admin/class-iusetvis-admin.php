@@ -362,6 +362,32 @@ class Iusetvis_Admin {
 			'iusetvis_options_page_section_general'
 		);
 
+		// Bersi
+		add_settings_field(
+			'iusetvis_email_course_ended',
+			__( 'Email for closed course', 'iusetvis' ),
+			array( $this, 'iusetvis_email_course_ended_render' ),
+			'iusetvis_options_page',
+			'iusetvis_options_page_section_general'
+		);
+
+	}
+
+	/**
+	 * template per mail fine corso
+	 * @return boolean [description]
+	 */
+	function iusetvis_email_course_ended_render( ){
+		$options = get_option( $this->plugin_name . '_settings' );
+		$iusetvis_email_course_ended = ! isset( $options['iusetvis_email_course_ended'] ) ? '' : $options['iusetvis_email_course_ended'];
+
+		?>
+
+		<textarea style="clear:top;width:100%" name="iusetvis_settings[iusetvis_email_course_ended]" ><?= $iusetvis_email_course_ended ?></textarea>
+		<p>
+			<?php _e("Email text for course closed",'iusetvis');?>
+		</p>
+		<?php
 	}
 
 	/**
@@ -668,9 +694,16 @@ class Iusetvis_Admin {
 		update_post_meta( $course_id, 'course_ended', 1 );
 		update_post_meta( $course_id, 'course_ended_at', time() );
 
+		//carico utilità
+		$util = new Ius_Et_Vis_Util;
+		//invio email di chiusura
+		$util->send_email_subscribed( $course_id );
+
 		echo __( 'The course is now closed!', 'iusetvis' );
 		die();
 	}
+
+
 
 	/**
 	 * Delete user's course attendance
