@@ -1,4 +1,8 @@
 <?php
+/**
+ * Composer
+ */
+ require plugin_dir_path( dirname( __FILE__ ) ) . 'vendor/autoload.php';
 
 /**
  * Utilità generali
@@ -51,6 +55,10 @@ class Ius_Et_Vis_Util {
    * @return [type]             [description]
    */
   public function send_email_subscribed( $course_id = 0 ){
+    $logger = new Katzgrau\KLogger\Logger(__DIR__.'/logs');
+    $logger->info('Returned a million search results');
+    $logger->error('Oh dear.');
+    
     //echo (($course_id));die();
     $options = get_option( $this->plugin_name . '_settings' );
     $text = ! isset( $options['iusetvis_email_course_ended'] ) ? __("We would like to inform you the conclusive documentation of the course mentioned in the subject is now available on iusetvis.it in the section Personal space",'ius') : $options['iusetvis_email_course_ended'];

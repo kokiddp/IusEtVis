@@ -535,6 +535,17 @@ class Iusetvis_Admin {
 		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 		$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
 
+		$perfected_users = !isset( $course_meta['perfected_users'][0] ) ? array() : maybe_unserialize( $course_meta['perfected_users'][0] );
+
+		$course_price = ! isset( $course_meta['course_price_reg'][0] ) ? '0' : $course_meta['course_price_reg'][0];
+		if ( isset( $user_meta['association_state'][0] ) &&
+			isset( $user_meta['association_end'][0] ) &&
+			isset( $course_meta['course_start_time'][0] ) &&
+			$user_meta['association_state'][0] == 1  &&
+			$user_meta['association_end'][0] >= $course_meta['course_start_time'][0] ) {
+			$course_price = ! isset( $course_meta['course_price_assoc'][0] ) ? $course_price : $course_meta['course_price_assoc'][0];
+		}
+
 		// if the user is subscribed to the course
 		if ( in_array( $user_id, $subscribed_users ) ) {
 
@@ -542,7 +553,9 @@ class Iusetvis_Admin {
 		 	if ( !in_array( $course_id, $perfected_subscriptions ) ) {
 
 		 		array_push( $perfected_subscriptions, $course_id );
+				array_push( $perfected_users, array($user_id, $course_price) );
 				update_user_meta( $user_id, 'perfected_subscriptions', $perfected_subscriptions );
+				update_post_meta( $course_id, 'perfected_users', $perfected_users );
 				echo __( 'User registration to this course succesfully perfected.', 'iusetvis' );
 				wp_clear_scheduled_hook( 'action_unsubscribe_cron', array( $user_id, $course_id ) );
 				//mail
