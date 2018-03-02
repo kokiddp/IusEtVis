@@ -586,6 +586,7 @@ class Iusetvis_Admin {
 	 * @since    1.0.0
 	 */
 	public function unperfect_user_subscription( $_user_id = '0', $_course_id = '0' ) {
+		//utiliutà
 		$util = new Ius_Et_Vis_Util();
 		// retrieve ajax parameters
 		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
@@ -968,14 +969,6 @@ class Iusetvis_Admin {
         {
             $course_id = $_GET['course_id'];
         }
-
-				//
-				$course_meta = get_post_custom( $course_id );
-						$perfected_users = !isset( $course_meta['perfected_users'][0] ) ? array() : maybe_unserialize( $course_meta['perfected_users'][0] );
-						echo "<pre>";
-						print_r($perfected_users);
-						echo "</pre>";
-
 
 				$util = new Ius_Et_Vis_Util;
 				$table = new Subscribed_Users_List_Table();
