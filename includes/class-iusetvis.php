@@ -330,6 +330,11 @@ class Iusetvis {
 		// unsunscribe cron
 		$this->loader->add_action( 'action_unsubscribe_cron', $plugin_public, 'run_unsubscribe_cron', 0, 2);
 
+		//bersi
+		/* custom URL per stampa in pdf del diploma iscizrione....*/
+		$this->loader->add_action( 'init' ,$plugin_public, 'bersi_rewrite' );
+		$this->loader->add_action( 'template_redirect' ,$plugin_public, 'bersi_pdf' );
+
 	}
 
 	/**

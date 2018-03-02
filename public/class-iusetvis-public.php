@@ -1019,4 +1019,28 @@ class Iusetvis_Public {
 
 	}
 
+	//Bersi
+	/**
+	* gestione PDF bersi
+	*/
+	public function bersi_rewrite(){
+		add_rewrite_tag('%print_pdf_subscribe%','([^/]+)');
+		add_permastruct( 'print_pdf_subscribe' , 'pdf_'.'/%print_pdf_subscribe%/');
+	}
+
+	/**
+	 * Stampa certificato Iscrizione
+	 * chiamata con http://iusetvis.test/pdf_/MjM1MjM0NS0xMjM=
+	 * l'ultimo segnmento è un base64_encode di una stringa id_corso-id_utente
+	 * @return [blob] pdf
+	 */
+	public function bersi_pdf(){
+		//la variabile viene assegnata
+		if($dati = get_query_var('print_pdf_subscribe')){
+			$dati = sanitize_text_field ( $dati );
+			echo base64_decode( $dati );
+			//todo
+			die();
+		}
+	}
 }
