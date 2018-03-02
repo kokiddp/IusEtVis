@@ -53,8 +53,8 @@
 		        },
 		        success: function(blob) {
 		        	if (blob.size > 0) {
-		        		console.log(blob);
-			            var link=document.createElement('a');
+		        	//console.log(blob);
+			        var link=document.createElement('a');
 					    link.href=window.URL.createObjectURL(blob);
 					    link.download="Crediti.pdf";
 					    link.click();

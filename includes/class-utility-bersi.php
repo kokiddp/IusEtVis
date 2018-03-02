@@ -11,9 +11,11 @@
  * @author  Andrea Bersi
  */
 class Ius_Et_Vis_Util {
+  //istanza di logger
+  protected $logger;
 
   public function __construct() {
-
+    $this->logger = new Katzgrau\KLogger\Logger(get_home_path().'logs');
 	}
 
   /**
@@ -29,6 +31,7 @@ class Ius_Et_Vis_Util {
       $domain = $_SERVER['SERVER_NAME'];
       $filename = 'csv-' . $domain . '-' . time() . '.csv';
     }
+    $this->logger->info("Esportazione file CSV $filename");
     $fh = @fopen( 'php://output', 'w' );
     //fprintf( $fh, chr(0xEF) . chr(0xBB) . chr(0xBF) );
     fprintf( $fh );
@@ -55,10 +58,7 @@ class Ius_Et_Vis_Util {
    * @return [type]             [description]
    */
   public function send_email_subscribed( $course_id = 0 ){
-    $logger = new Katzgrau\KLogger\Logger(__DIR__.'/logs');
-    $logger->info('Returned a million search results');
-    $logger->error('Oh dear.');
-    
+
     //echo (($course_id));die();
     $options = get_option( $this->plugin_name . '_settings' );
     $text = ! isset( $options['iusetvis_email_course_ended'] ) ? __("We would like to inform you the conclusive documentation of the course mentioned in the subject is now available on iusetvis.it in the section Personal space",'ius') : $options['iusetvis_email_course_ended'];
@@ -68,21 +68,21 @@ class Ius_Et_Vis_Util {
 
     //dati email
     $headers =  array();
-    $to = "segreteria@iusetvis.it";
+    //$to = "segreteria@iusetvis.it";
     $headers[] = 'From: Ius et Vis <info@iusetvis.it>';
+    $title_course = get_the_title($course_id);
     foreach ( $subscribed_users as $key => $value ) {
         $user_id = $value;
         $user_data = get_userdata( $user_id );
-        $headers[] = "Bcc: {$user_data->user_email}";
-        //wp_mail( $user_data->user_email, get_the_title($course_id), $text );
+        //$headers[] = "Bcc: {$user_data->user_email}";
+        $esito = wp_mail( $user_data->user_email, $title_course, $text );
+        if( $esito ) {
+          $this->logger->info("Invio email termine corso $title_course => {$user_data->user_email}");
+        } else {
+          $this->logger->error("Invio email termine corso $title_course => {$user_data->user_email}");
+        }
     }
-    $esito = wp_mail( $to, get_the_title($course_id), $text, $headers );
-    //echo $esito; die();
-    if( $esito !== 1 ) {
-      //errore invio
-      echo __('There was a problem with sending emails', 'iusetvis');
-      die();
-    }
+    return;
   }
 
 }
