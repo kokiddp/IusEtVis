@@ -15,6 +15,13 @@ if( ! class_exists( 'WP_List_Table' ) ) {
 }
 
 /**
+ * utilità varie BERSI
+ */
+if ( ! class_exists( 'Ius_Et_Vis_Util' ) ) {
+    require plugin_dir_path( dirname( __FILE__ ) ). 'includes/class-utility-bersi.php';
+}
+
+/**
  * The subscribed users table class
  */
 class Subscribed_Users_List_Table extends WP_List_Table
@@ -39,8 +46,29 @@ class Subscribed_Users_List_Table extends WP_List_Table
         $this->items = $data;
     }
 
+    /**
+     * verifica se un corso è flaggato come chiuso
+     * @return boolean [description]
+     */
+    private function is_course_closed(){
+      $util = new Ius_Et_Vis_Util;
+      return $util->is_course_closed ( $_GET['course_id'] );
+    }
+
     public function get_columns()
     {
+        if($this->is_course_closed()){
+          $columns = array(
+              'name'	        => __('Name', 'iusetvis'),
+              'address'		=> __('Address', 'iusetvis'),
+              'email'     => __ ('Email','iusetvis'),
+              'phone'         => __('Telephone', 'iusetvis'),
+              'associated'	=> __('Associated', 'iusetvis'),
+              'perfected'		=> __('Perfected', 'iusetvis'),
+              'confirmed'		=> __('Confirmed', 'iusetvis'),
+              //'unsubscribe'   => __('Unsubscribe', 'iusetvis')
+          );
+        }else
         $columns = array(
             'name'	        => __('Name', 'iusetvis'),
             'address'		=> __('Address', 'iusetvis'),
@@ -74,6 +102,7 @@ class Subscribed_Users_List_Table extends WP_List_Table
         {
             $course_id = $_GET['course_id'];
         }
+
         $course_meta = get_post_custom( $course_id );
         $subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 
@@ -115,7 +144,7 @@ class Subscribed_Users_List_Table extends WP_List_Table
 
     public function column_default( $item, $column_name )
     {
-        switch( $column_name ) {
+      switch( $column_name ) {
             case 'id':
             case 'name':
             case 'address':
@@ -128,8 +157,14 @@ class Subscribed_Users_List_Table extends WP_List_Table
                 return '<input type="checkbox" name="' . $column_name . '" value="' . $item[ $column_name ] . '" ' . ( ( $item[ $column_name ] == true ) ? 'checked' : '' ) . ' disabled="disabled"><span style="color:#ffffff">' . $item[ $column_name ] . '</span>';
             case 'perfected':
             case 'confirmed':
-              //aggiungo span con testo bianco pewr permettere ordinamento di datatables
-            	return '<input class="' . $column_name . '_checkbox" data-user_id="' . $item[ 'id' ] . '" type="checkbox" name="' . $column_name . '" value="' . $item[ $column_name ] . '" ' . ( ( $item[ $column_name ] == true ) ? 'checked' : '' ) . '><span style="color:#ffffff">' . $item[ $column_name ] . '</span>';
+              //imposta la classe dei check per renderli bloccati se corso chiuso
+              if($this->is_course_closed()){
+                //aggiungo span con testo bianco pewr permettere ordinamento di datatables
+              	return '<input readonly  disabled="disabled" ata-user_id="' . $item[ 'id' ] . '" type="checkbox" name="' . $column_name . '" value="' . $item[ $column_name ] . '" ' . ( ( $item[ $column_name ] == true ) ? 'checked' : '' ) . '><span style="color:#ffffff">' . $item[ $column_name ] . '</span>';
+              }else{
+                //aggiungo span con testo bianco pewr permettere ordinamento di datatables
+                return '<input class="' . $column_name . '_checkbox" data-user_id="' . $item[ 'id' ] . '" type="checkbox" name="' . $column_name . '" value="' . $item[ $column_name ] . '" ' . ( ( $item[ $column_name ] == true ) ? 'checked' : '' ) . '><span style="color:#ffffff">' . $item[ $column_name ] . '</span>';
+              }
             case 'unsubscribe':
                 return '<input class="' . $column_name . '_button button button-primary button-large" data-user_id="' . $item[ 'id' ] . '" type="submit" name="' . $column_name . '" value="' . __('Unsubscribe', 'iusetvis') . '">';
             default:

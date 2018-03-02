@@ -19,6 +19,24 @@ class Ius_Et_Vis_Util {
 	}
 
   /**
+   * rimuove un elemento array da un array multidimensionale
+   * @param  [type] $array [origine su cui oiperare]
+   * @param  [type] $key   [chiave dell'array da eliminare]
+   * @param  [type] $value [valore della chiave ]
+   * @return [array]
+   */
+  public function remove_element_by_value($array, $key, $value){
+    foreach($array as $subKey => $subArray){
+        if($subArray[$key] == $value){
+             unset($array[$subKey]);
+        }
+    }
+    //$this->logger->debug("passato $key e $value",$array);
+
+    return $array;
+  }
+
+  /**
    * esporta un csv
    * @param  [type] $header_row intestazione dei campi
    * @param  [type] $data_rows  data da scrivere
@@ -83,6 +101,22 @@ class Ius_Et_Vis_Util {
         }
     }
     return;
+  }
+
+  /**
+   * restituisce true se il corso è chiuso
+   * @param  integer $course_id [id del corso]
+   * @return boolean true se chiuso
+  */
+  public function is_course_closed ( $course_id = 0 ){
+		if ( $course_id == '0' ) {
+			echo __( 'Error: course unset!', 'iusetvis' );
+			die();
+		}
+
+    $course_meta = get_post_custom( $course_id );
+    $is_course_closed = !isset( $course_meta['course_ended'][0] ) ? false : (int)( $course_meta['course_ended'][0] );
+		return $is_course_closed;
   }
 
 }

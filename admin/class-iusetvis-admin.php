@@ -534,7 +534,7 @@ class Iusetvis_Admin {
 		$user_meta = get_user_meta( $user_id );
 		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 		$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
-
+		//meta con id utente e costo pagato
 		$perfected_users = !isset( $course_meta['perfected_users'][0] ) ? array() : maybe_unserialize( $course_meta['perfected_users'][0] );
 
 		$course_price = ! isset( $course_meta['course_price_reg'][0] ) ? '0' : $course_meta['course_price_reg'][0];
@@ -552,10 +552,13 @@ class Iusetvis_Admin {
 			// if the user hans't perfected his subscription to the course
 		 	if ( !in_array( $course_id, $perfected_subscriptions ) ) {
 
+				//meta dell'user
 		 		array_push( $perfected_subscriptions, $course_id );
-				array_push( $perfected_users, array($user_id, $course_price) );
 				update_user_meta( $user_id, 'perfected_subscriptions', $perfected_subscriptions );
+				//meta del corso
+				array_push( $perfected_users, array("user" => $user_id, "price" => $course_price) );
 				update_post_meta( $course_id, 'perfected_users', $perfected_users );
+
 				echo __( 'User registration to this course succesfully perfected.', 'iusetvis' );
 				wp_clear_scheduled_hook( 'action_unsubscribe_cron', array( $user_id, $course_id ) );
 				//mail
@@ -583,7 +586,7 @@ class Iusetvis_Admin {
 	 * @since    1.0.0
 	 */
 	public function unperfect_user_subscription( $_user_id = '0', $_course_id = '0' ) {
-
+		$util = new Ius_Et_Vis_Util();
 		// retrieve ajax parameters
 		$user_id = ( isset( $_POST['user_id'] ) ? $_POST['user_id'] : $_user_id );
 		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
@@ -598,6 +601,8 @@ class Iusetvis_Admin {
 		$user_meta = get_user_meta( $user_id );
 		$subscribed_users = !isset( $course_meta['subscribed_users'][0] ) ? array() : maybe_unserialize( $course_meta['subscribed_users'][0] );
 		$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
+		//meta del corso con id utente e costo pagato
+		$perfected_users = !isset( $course_meta['perfected_users'][0] ) ? array() : maybe_unserialize( $course_meta['perfected_users'][0] );
 
 		// if the user is subscribed to the course
 		if ( in_array( $user_id, $subscribed_users ) ) {
@@ -608,6 +613,16 @@ class Iusetvis_Admin {
 				$key = array_search( $course_id, $perfected_subscriptions );
 				array_splice( $perfected_subscriptions, $key, 1 );
 				update_user_meta( $user_id, 'perfected_subscriptions', $perfected_subscriptions );
+				//rimuove dal meta del corso
+				//estrae gli utenti dall'array
+				$users = array_column($perfected_users, 'user');
+				if(array_search($user_id, $users)!==false) {
+					$arr= $util->remove_element_by_value($perfected_users , "user" , $user_id);
+					//memnorizza il meta
+					update_post_meta( $course_id, 'perfected_users', $arr );
+				}
+				//fine rimuove dal meta del corso
+
 				echo __( 'User registration to this course succesfully unperfected.', 'iusetvis' );
 				$plugin_public->start_unsubscribe_cron( $user_id, $course_id );
 				die();
@@ -954,14 +969,26 @@ class Iusetvis_Admin {
             $course_id = $_GET['course_id'];
         }
 
-		$table = new Subscribed_Users_List_Table();
+				//
+				$course_meta = get_post_custom( $course_id );
+						$perfected_users = !isset( $course_meta['perfected_users'][0] ) ? array() : maybe_unserialize( $course_meta['perfected_users'][0] );
+						echo "<pre>";
+						print_r($perfected_users);
+						echo "</pre>";
+
+
+				$util = new Ius_Et_Vis_Util;
+				$table = new Subscribed_Users_List_Table();
         $table->prepare_items();
         ?>
             <div class="wrap">
                 <div id="icon-users" class="icon32"></div>
                 <h1><a href="post.php?post=<?=$course_id?>&action=edit"><?php echo strtoupper(get_the_title($course_id))?></a>: <?php _e('Subscribed Users List Table Page', 'iusetvis')?></h1>
                 <h3 id="actions_response_field"></h3>
-                <a class='button' href="./admin.php?page=iusetvis_upload_file&course_id=<?php echo $course_id ?>" class="btn btn-default">Accreditamento CSV</a>
+								<!-- ACCREDITO SOLO SE CORSO NON CHIUSO -->
+								<?php if(! ($util->is_course_closed( $course_id ))){ ?>
+                	<a class='button' href="./admin.php?page=iusetvis_upload_file&course_id=<?php echo $course_id ?>" class="btn btn-default">Accreditamento CSV</a>
+								<?php } ?>
 								<a class='button' href="<?php echo admin_url( 'admin.php?page=iusetvis_options_page' ) ?>&action=csv_subscribed_file&amp;course_id=<?php echo $course_id ?>&amp;_wpnonce=<?php echo wp_create_nonce( 'download_csv' )?>"><?php _e("Download CSV of the users for the course",'iusetvis')?></a>
 								<?php $table->display(); ?>
             </div>
@@ -1051,10 +1078,9 @@ class Iusetvis_Admin {
 	public function course_waiting_list_table( $_course_id = '0' ) {
 
 		if(!empty($_GET['course_id']))
-        {
-            $course_id = $_GET['course_id'];
-        }
-
+    {
+        $course_id = $_GET['course_id'];
+    }
 		$table = new Waiting_Users_List_Table();
         $table->prepare_items();
         ?>
