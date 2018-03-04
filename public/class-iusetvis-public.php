@@ -120,7 +120,10 @@ class Iusetvis_Public {
 		add_shortcode("course_subscribe", array( $this, 'display_course_subscribe_button' ) );
 		add_shortcode("course_unsubscribe", array( $this, 'display_course_unsubscribe_button' ) );
 		add_shortcode("course_waiting_list_subscribe", array( $this, 'display_course_waiting_list_subscribe_button' ) );
-		add_shortcode("user_courses", array( $this, 'display_user_course_list' ) );
+		add_shortcode("user_subsrcibed_courses", array( $this, 'display_user_course_list' ) );
+		add_shortcode("user_waiting_courses", array( $this, 'display_user_waiting_course_list' ) );
+		add_shortcode("user_paid_courses", array( $this, 'display_user_paid_course_list' ) );
+		add_shortcode("user_attended_courses", array( $this, 'display_user_attended_course_list' ) );
 
 	}
 
@@ -263,7 +266,7 @@ class Iusetvis_Public {
 		$user_courses = array();
 		foreach ( $courses as $course ) {
 			$subscribed_users = get_post_meta( $course->ID, 'subscribed_users' );
-			if ( in_array( $atts['user_id'], $subscribed_users[0] ) )  {
+			if ( isset( $subscribed_users[0] ) && in_array( $atts['user_id'], $subscribed_users[0] ) )  {
 				array_push( $user_courses, $course );
 			}
 		}
@@ -271,6 +274,135 @@ class Iusetvis_Public {
 
 		<div class='wrap'>
 			<h2><?php _e( 'User courses', 'iusetvis' ) ?></h2>
+			<ul>
+				<?php foreach ($user_courses as $course) { ?>
+					<li>
+						<a href="<?= get_post_permalink( $course->ID ) ?>"><?= $course->post_name ?></a>
+					</li>
+				<?php }	?>
+			</ul>
+		</div>
+
+		<?php
+	}
+
+	/*
+	 * Display user waiting course list
+	 *
+	 * @since    1.0.0
+	 */
+	public function display_user_waiting_course_list( $atts = array() ) {
+
+		// retrieve and merge shortcode args
+		$atts = shortcode_atts(
+			array(
+				'user_id' => isset( $_POST['user_id'] ) ? $_POST['user_id'] : get_current_user_id()
+			), $atts, 'user_courses' );
+
+		$courses = get_posts(
+			array(
+			  'numberposts' => -1,
+			  'post_type'   => 'course'
+			)
+		);
+
+		$user_courses = array();
+		foreach ( $courses as $course ) {
+			$waiting_users = get_post_meta( $course->ID, 'waiting_users' );
+			if ( isset( $waiting_users[0] ) && in_array( $atts['user_id'], $waiting_users[0] ) )  {
+				array_push( $user_courses, $course );
+			}
+		}
+		?>
+
+		<div class='wrap'>
+			<h2><?php _e( 'In waiting list', 'iusetvis' ) ?></h2>
+			<ul>
+				<?php foreach ($user_courses as $course) { ?>
+					<li>
+						<a href="<?= get_post_permalink( $course->ID ) ?>"><?= $course->post_name ?></a>
+					</li>
+				<?php }	?>
+			</ul>
+		</div>
+
+		<?php
+	}
+
+	/*
+	 * Display user paid course list
+	 *
+	 * @since    1.0.0
+	 */
+	public function display_user_paid_course_list( $atts = array() ) {
+
+		// retrieve and merge shortcode args
+		$atts = shortcode_atts(
+			array(
+				'user_id' => isset( $_POST['user_id'] ) ? $_POST['user_id'] : get_current_user_id()
+			), $atts, 'user_courses' );
+
+		$courses = get_posts(
+			array(
+			  'numberposts' => -1,
+			  'post_type'   => 'course'
+			)
+		);
+
+		$user_courses = array();
+		foreach ( $courses as $course ) {
+			$perfected_subscriptions = get_user_meta( $atts['user_id'], 'perfected_subscriptions' );
+			if ( isset( $perfected_subscriptions[0] ) && in_array( $course->ID, $perfected_subscriptions[0] ) )  {
+				array_push( $user_courses, $course );
+			}
+		}
+		?>
+
+		<div class='wrap'>
+			<h2><?php _e( 'Paid courses', 'iusetvis' ) ?></h2>
+			<ul>
+				<?php foreach ($user_courses as $course) { ?>
+					<li>
+						<a href="<?= get_post_permalink( $course->ID ) ?>"><?= $course->post_name ?></a>
+					</li>
+				<?php }	?>
+			</ul>
+		</div>
+
+		<?php
+	}
+
+	/*
+	 * Display user attended course list
+	 *
+	 * @since    1.0.0
+	 */
+	public function display_user_attended_course_list( $atts = array() ) {
+
+		// retrieve and merge shortcode args
+		$atts = shortcode_atts(
+			array(
+				'user_id' => isset( $_POST['user_id'] ) ? $_POST['user_id'] : get_current_user_id()
+			), $atts, 'user_courses' );
+
+		$courses = get_posts(
+			array(
+			  'numberposts' => -1,
+			  'post_type'   => 'course'
+			)
+		);
+
+		$user_courses = array();
+		foreach ( $courses as $course ) {
+			$confirmed_attendances = get_user_meta( $atts['user_id'], 'confirmed_attendances' );
+			if ( isset( $confirmed_attendances[0] ) && in_array( $course->ID, $confirmed_attendances[0] ) )  {
+				array_push( $user_courses, $course );
+			}
+		}
+		?>
+
+		<div class='wrap'>
+			<h2><?php _e( 'Attended courses', 'iusetvis' ) ?></h2>
 			<ul>
 				<?php foreach ($user_courses as $course) { ?>
 					<li>
