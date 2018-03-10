@@ -28,4 +28,5 @@
 		<input type="file" name="csv" accept=".csv" id="csv_file">
 		<input type='submit' style='margin-bottom: 20px;' class='button-primary' id='upload-csv' value='<?php _e( 'Upload CSV', 'iusetvis' ) ?>'>
 	</p>
+	<img src="<?= str_replace( 'partials/', '', plugin_dir_url( __FILE__ ) ) ?>img/csv.jpg">
 </div>

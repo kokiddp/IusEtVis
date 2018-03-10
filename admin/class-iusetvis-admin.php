@@ -904,12 +904,13 @@ class Iusetvis_Admin {
 
 	      case 'start_date' :
 							$course_start_time = ! isset( $course_meta['course_start_time'][0] ) ? 0 : $course_meta['course_start_time'][0];
+							$course_ended = ! isset( $course_meta['course_ended'][0] ) ? 0 : $course_meta['course_ended'][0];
 	            if ( isset( $course_start_time ) && $course_start_time > 0 ){
-									if((int)$course_meta['course_ended'][0]){
+									if((int)$course_ended){
 										echo "<span style='color:red'>";
 									}
 	                echo date( $datetime_format, $course_start_time );
-									if((int)$course_meta['course_ended'][0]){
+									if((int)$course_ended){
 										echo "</span>";
 									}
 	            } else
@@ -918,12 +919,13 @@ class Iusetvis_Admin {
 
 	        case 'subs_end_date' :
 							$course_subs_dead_end = ! isset( $course_meta['course_subs_dead_end'][0] ) ? 0 : $course_meta['course_subs_dead_end'][0];
+							$course_ended = ! isset( $course_meta['course_ended'][0] ) ? 0 : $course_meta['course_ended'][0];
 	            if ( isset( $course_subs_dead_end ) && $course_subs_dead_end > 0 ){
-								if((int)$course_meta['course_ended'][0]){
+								if((int)$course_ended){
 									echo "<span style='color:red'>";
 								}
 	              echo date( $datetime_format, $course_subs_dead_end );
-								if((int)$course_meta['course_ended'][0]){
+								if((int)$course_ended){
 									echo "</span>";
 								}
 	            } else
@@ -1096,13 +1098,22 @@ class Iusetvis_Admin {
 		$file = ( isset( $_POST['file'] ) ? $_POST['file'] : $_file );
 		$course_id = ( isset( $_POST['course_id'] ) ? $_POST['course_id'] : $_course_id );
 
+		if ( $course_id == '0' ) {
+			echo __( 'Error: course unset!', 'iusetvis' );
+			die();
+		}
+		
 		$strings = preg_split('/\s+/', $file);
 		array_pop($strings);
 
 		foreach ($strings as $string) {
 			$parts = explode(',', $string);
 			$user = get_user_by( 'email', $parts[4] );
-			//echo 'User is ' . $user->id . ' '. $user->first_name . ' ' . $user->last_name;
+			//echo 'User is ' . $user->id . ' '. $user->first_name . ' ' . $user->last_name . ' course ' . $course_id;
+			if ($user === 0 || $user === false) {
+				echo __('Error: user with email ' . $parts[4] .' not found!', 'iusetvis');
+				continue;
+			}
 
 			$course_meta = get_post_custom( $course_id );
 			$user_meta = get_user_meta( $user->id );
@@ -1110,37 +1121,24 @@ class Iusetvis_Admin {
 			$perfected_subscriptions = !isset( $user_meta['perfected_subscriptions'][0] ) ? array() : maybe_unserialize( $user_meta['perfected_subscriptions'][0] );
 			$confirmed_attendances = !isset( $user_meta['confirmed_attendances'][0] ) ? array() : maybe_unserialize( $user_meta['confirmed_attendances'][0] );
 
-
-			if($parts[2] == '1'){
-				//perfect_user_subscription
-				array_push( $perfected_subscriptions, $course_id );
-				update_user_meta( $user->id, 'perfected_subscriptions', $perfected_subscriptions );
-				echo __( 'User ' . $user->first_name . ' ' . $user->last_name . ' registration to this course succesfully perfected.', 'iusetvis' );
-			}
-			else{
-				//unperfect_user_subscription
-				$key = array_search( $course_id, $perfected_subscriptions );
-				array_splice( $perfected_subscriptions, $key, 1 );
-				update_user_meta( $user->id, 'perfected_subscriptions', $perfected_subscriptions );
-				echo __( 'User ' . $user->first_name . ' ' . $user->last_name . ' registration to this course succesfully unperfected.', 'iusetvis' );
-			}
-
-			if($parts[5] == 'SI'){
+			if($parts[5] == 'SI' && !in_array( $course_id, $confirmed_attendances )){
 				//confirm_user_attendance
-				array_push( $confirmed_attendances, $course_id );
-				update_user_meta( $user->id, 'confirmed_attendances', $confirmed_attendances );
+				$this->confirm_user_attendance($user->id, $course_id);
+				//array_push( $confirmed_attendances, $course_id );
+				//update_user_meta( $user->id, 'confirmed_attendances', $confirmed_attendances );		
 				echo __( 'User ' . $user->first_name . ' ' . $user->last_name . ' attendance to this course succesfully confirmed.', 'iusetvis' );
 			}
-			else {
+			if($parts[5] == 'NO' && in_array( $course_id, $confirmed_attendances )){
 				//delete user attendance
-				$key = array_search( $course_id, $confirmed_attendances );
-				array_splice( $confirmed_attendances, $key, 1 );
-				update_user_meta( $user->id, 'confirmed_attendances', $confirmed_attendances );
+				$this->delete_user_attendance($user->id, $course_id);
+				//$key = array_search( $course_id, $confirmed_attendances );
+				//array_splice( $confirmed_attendances, $key, 1 );		
+				//update_user_meta( $user->id, 'confirmed_attendances', $confirmed_attendances );			
 				echo __( 'User ' . $user->first_name . ' ' . $user->last_name . ' attendance to this course succesfully deleted.', 'iusetvis' );
 			}
 
 		}
-
+		die();
 	}
 
 }

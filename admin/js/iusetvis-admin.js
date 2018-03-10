@@ -341,6 +341,8 @@
 	    $('#upload-csv').click(function() {
 	    	actions_response_field.text("Uploading csv");
 
+	    	var course_id = getParameterByName('course_id');
+
 	    	var file = $("#csv_file").prop('files')[0];
 	    	var fr = new FileReader();
 
@@ -355,7 +357,8 @@
 			        type: 'POST',
 			        data: {
 			            'action': 'upload_csv',
-			            'file' : content
+			            'file' : content,
+			            'course_id': course_id
 			        },
 			        success: function(response) {
 			        	actions_response_field.text(response);
@@ -369,7 +372,7 @@
 	    	}
 
 		    fr.readAsText(file);
-
+			
 	    });
 
 	    $('.unsubscribe_button').click(function() {

@@ -16,6 +16,7 @@ class Ius_Et_Vis_Util {
 
   public function __construct() {
     $this->logger = new Katzgrau\KLogger\Logger(get_home_path().'logs');
+    $this->plugin_name = 'iusetvis';
 	}
 
   /**

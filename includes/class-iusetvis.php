@@ -628,8 +628,9 @@ class Iusetvis {
 	/**
  * The HTML for the manage user metabox
  */
- function render_manage_users_meta_boxes( $post ) {
-	 $course_meta = get_post_custom( $post->ID );
+ function render_manage_users_meta_boxes( $post ) {	 
+	 $course_id = $post->ID;
+	 $course_meta = get_post_custom( $course_id );
 	 ?>
 	 <table class="form-table">
 		 <tr>
@@ -649,14 +650,14 @@ class Iusetvis {
 				 echo count($subscribed_users)?> /
 				 <?php echo $course_meta['course_places'][0]?>
 			 	<br  />
-				 <?php _e("Waiting list users",'iusetvis')?> : <?php echo  count($course_meta['waiting_users'][0])?>
+				 <?php _e("Waiting list users",'iusetvis')?> : <?php echo isset($course_meta['waiting_users']) ? count($course_meta['waiting_users'][0]) : 0 ?>
 			 </td>
 		 </tr>
 		 <tr>
 			<td>
 			<?php
 	 		 if ($course_meta['course_end_time'][0] < time() ){
-				if($course_meta['course_ended'][0]!=='1'){
+				if(!isset($course_meta['course_ended']) || $course_meta['course_ended'][0]!=='1'){
 	 			 ?>
 				 	<span id='actions_response_field'></span>
 	 			 	<button id='course_ended' class='button' data-rel='<?php echo $post->ID?>'><?php _e("Close course",'iusetvis')?></button>
