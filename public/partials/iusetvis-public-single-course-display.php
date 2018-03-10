@@ -182,6 +182,7 @@
 
                     <div class="course_actions">
                         <h3 id="actions_response_field"></h3>
+                        <?= do_shortcode('[course_attachments]'); ?>
                         <?= do_shortcode('[course_subscribe]'); ?>
                         <?= do_shortcode('[course_unsubscribe]'); ?>
                         <?= do_shortcode('[course_waiting_list_subscribe]'); ?>

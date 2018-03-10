@@ -230,6 +230,8 @@ class Iusetvis {
 		$this->loader->add_action( 'save_post', $this, 'save_places_meta_boxes', 10, 2 );
 		$this->loader->add_action( 'add_meta_boxes', $this, 'course_internal_meta_boxes' );
 		$this->loader->add_action( 'save_post', $this, 'save_internal_meta_boxes', 10, 2 );
+		$this->loader->add_action( 'add_meta_boxes', $this, 'course_attachments_meta_boxes' );
+		$this->loader->add_action( 'save_post', $this, 'save_attachments_meta_boxes', 10, 2 );
 		// metaboxes courses BERSI
 		$this->loader->add_action( 'add_meta_boxes', $this, 'course_address_meta_boxes' );
 		$this->loader->add_action( 'save_post', $this, 'save_address_meta_boxes', 10, 2 );
@@ -1466,6 +1468,213 @@ class Iusetvis {
 			update_post_meta( $post->ID, $key, $value );
 		}
 	}
+
+
+
+
+	/**
+	 * Register the metaboxes to be used for the attachments post type
+	 *
+	 */
+	public function course_attachments_meta_boxes() {
+		add_meta_box(
+			'attachments_fields',
+			__( 'Course Attachments', 'iusetvis' ),
+			array( $this, 'render_attachments_meta_boxes' ),
+			$this->post_type,
+			'normal',
+			'high'
+		);
+	}
+
+    /**
+	 * The HTML for the attachments metaboxes
+	 *
+	 */
+	function render_attachments_meta_boxes( $post ) {
+
+		$meta = get_post_custom( $post->ID );
+
+		$course_attachments = ! isset( $meta['course_attachments'][0] ) ? array() :  maybe_unserialize( $meta['course_attachments'][0] );
+
+		$course_attachments_names = array();
+		foreach ($course_attachments as $key => $value) {
+			$course_attachments_names[$key] = get_the_title($value);
+		}
+
+		wp_nonce_field( basename( __FILE__ ), 'attachments_fields' ); ?>
+
+
+		<a class="button-primary button" style="display: block; text-align: center; width: 80px;" id="add-attachment"><?php _e( 'Add att', 'iusetvis' ); ?></a>
+
+		<table class="form-table form-table-course form-table-course-attachments">
+
+			<?php foreach ( $course_attachments as $key => $value ) { ?>
+				
+				<tr data-attachment="<?php echo $key; ?>" style="border: 2px dotted #666666">
+					<td class="course_meta_box_td" colspan="1">
+						<label for="course_attachments[<?php echo $key; ?>]" style="font-weight: bold;"><?php _e( 'Attachment ', 'iusetvis' ); echo ( $key + 1 ); ?></label>
+					</td>
+					<td colspan="4">
+						<input type="hidden" name="course_attachments[<?php echo $key; ?>]" id="course_attachments_<?php echo $key; ?>" class="regular-text" value="<?php echo $course_attachments[$key] ?>">
+						<input class="attachment_upload button" id="attachment_upload_<?php echo $key; ?>" type="button" value="<?php _e( 'Upload file', 'wordmedia' ); ?>" />
+						<p class="attachment_preview" id="attachment_preview_<?php echo $key; ?>"><?= $course_attachments_names[$key] ?></p>
+						<a class="button-primary button remove-attachment" style="display: inline-block; text-align: center; width: 80px;"><?php _e( 'Remove att', 'wordmedia' ); ?></a>
+					</td>					
+				</tr>
+
+				<script>
+					jQuery(document).ready(function($){
+						var file_frame;
+						var wp_media_post_id = wp.media.model.settings.post.id;
+						var set_to_post_id = $( '#image_attachment_id' ).val() != '' && $( '#image_attachment_id' ).val() != undefined && $( '#image_attachment_id' ).val() != null ? $( '#image_attachment_id' ).val() : 0;
+
+						$('#attachment_upload_<?php echo $key; ?>').on('click', function( event ){
+							event.preventDefault();
+							wp.media.model.settings.post.id = set_to_post_id;
+							file_frame = wp.media.frames.file_frame = wp.media({
+								title: '<?= __('Attachment ', 'iusetvis') ?><?php echo ( $key + 1 ); ?>',
+								button: {
+									text: '<?= __('Choose ', 'iusetvis') ?>',
+								},
+								multiple: false
+							});
+							file_frame.on( 'select', function() {
+								if (file_frame.options.title == '<?= __('Attachment ', 'iusetvis') ?><?php echo ( $key + 1 ); ?>') {
+									var attachment = file_frame.state().get('selection').first().toJSON();
+									$( '#attachment_preview_<?php echo $key; ?>' ).text( attachment.name );									
+									$( '#course_attachments_<?php echo $key; ?>' ).val( attachment.id );
+									wp.media.model.settings.post.id = wp_media_post_id;
+								}
+							});
+								file_frame.open();
+						});
+						$('#attachment_remove_<?php echo $key; ?>').on('click', function ( event) {
+							$( '#attachment_preview_<?php echo $key; ?>' ).val( '' );
+							$( '#course_attachments_<?php echo $key; ?>' ).val( '' );
+						});
+						$('.remove-attachment').on('click', function(event){
+							$(this).parent().parent().remove();
+						});
+					});
+					
+				</script>
+
+			<?php } ?>
+
+		</table>
+
+		<script>
+			jQuery(document).ready(function($){
+				$('#add-attachment').on('click', function(event){
+					event.preventDefault();
+
+					var last = $('tr[data-attachment]').last();
+
+					var id = last.length == 0 ? 0 : parseInt(last.attr('data-attachment')) + 1;
+
+					var nextTr = $('<tr></tr>').attr('data-attachment', id).css('border', '2px dotted #666666');
+					var firstTd = $('<td></td>').addClass('course_meta_box_td').attr('colspan', '1');
+					var label = $('<label></label>').css('font-weight', 'bold').text('<?php _e( 'Attachment ', 'wordmedia' ); ?> ' + (id + 1));
+					var secondTd = $('<td></td>').attr('colspan', '4');
+					var hiddenInput = $('<input></input>').attr('type', 'hidden').attr('id', 'course_attachments_' + id ).attr('name', 'course_attachments[' + id + ']').addClass('regular-text').val('');
+					var uploadInput = $('<input></input>').attr('type', 'button').addClass('attachment_upload').attr('id', 'attachment_upload_' + id).addClass('button').val('<?php _e( 'Upload file', 'wordmedia' ); ?>');
+					var previewP = $('<p></p>').attr('id', 'attachment_preview_' + id).addClass('attachment_preview');
+					var removeButton = $('<a></a>').css('display', 'inline-block').css('text-align', 'center').css('width', '80px').addClass('button').addClass('button-primary').addClass('remove-attachment').text('<?php _e( 'Remove att', 'wordmedia' ); ?>');
+
+					label.appendTo(firstTd);
+					hiddenInput.appendTo(secondTd);
+					uploadInput.appendTo(secondTd);
+					previewP.appendTo(secondTd);
+					removeButton.appendTo(secondTd);
+					firstTd.appendTo(nextTr);
+					secondTd.appendTo(nextTr);
+
+					if (last.length == 0) {
+						nextTr.appendTo($('.form-table-course-attachments'));
+					}
+					else {
+						nextTr.appendTo(last.parent());
+					}
+
+					$(document).ready(function($){
+						var file_frame;
+						var wp_media_post_id = wp.media.model.settings.post.id;
+						var set_to_post_id = $( '#image_attachment_id' ).val() != '' && $( '#image_attachment_id' ).val() != undefined && $( '#image_attachment_id' ).val() != null ? $( '#image_attachment_id' ).val() : 0;
+
+						$('#attachment_upload_' + id).on('click', function( event ){
+							event.preventDefault();
+							wp.media.model.settings.post.id = set_to_post_id;
+							file_frame = wp.media.frames.file_frame = wp.media({
+								title: '<?= __('Attachment ', 'iusetvis') ?>' + ( id + 1 ),
+								button: {
+									text: '<?= __('Choose ', 'iusetvis') ?>',
+								},
+								multiple: false
+							});
+							file_frame.on( 'select', function() {
+								if (file_frame.options.title == '<?= __('Attachment ', 'iusetvis') ?>' + ( id + 1 ) ) {
+									var attachment = file_frame.state().get('selection').first().toJSON();
+									$( '#attachment_preview_' + id ).text( attachment.name );
+									$( '#course_attachments_' + id ).val( attachment.id );
+									wp.media.model.settings.post.id = wp_media_post_id;
+								}
+							});
+								file_frame.open();
+						});
+						$('#attachment_remove_' + id).on('click', function ( event) {
+							$( '#attachment_preview_' + id ).attr( 'src', '' );
+							$( '#course_attachments_' + id ).val( '' );
+						});
+					});
+					$('.remove-attachment').on('click', function(event){
+						$(this).parent().parent().remove();
+					});
+				});
+			});
+
+		</script>
+
+
+	<?php }
+
+    /**
+	 * Save attachments metaboxes
+	 *
+	 */
+	function save_attachments_meta_boxes( $post_id ) {
+
+		global $post;
+
+		if ( !isset( $_POST['attachments_fields'] ) || !wp_verify_nonce( $_POST['attachments_fields'], basename(__FILE__) ) ) {
+			return $post_id;
+		}
+
+		if ( (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) || ( defined('DOING_AJAX') && DOING_AJAX) || isset($_REQUEST['bulk_edit']) ) {
+			return $post_id;
+		}
+
+		if ( isset( $post->post_type ) && $post->post_type == 'revision' ) {
+			return $post_id;
+		}
+
+		if ( !current_user_can( 'edit_post', $post->ID ) ) {
+			return $post_id;
+		}
+		
+		$meta = array();
+
+		$meta['course_attachments'] = ( isset( $_POST['course_attachments'] ) ? $_POST['course_attachments'] : '' );
+
+		foreach ( $meta as $key => $value ) {
+			update_post_meta( $post->ID, $key, $value );
+		}
+	}
+
+
+
+
+
 
 
 	/**

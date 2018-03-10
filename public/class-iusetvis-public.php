@@ -120,6 +120,7 @@ class Iusetvis_Public {
 		add_shortcode("course_subscribe", array( $this, 'display_course_subscribe_button' ) );
 		add_shortcode("course_unsubscribe", array( $this, 'display_course_unsubscribe_button' ) );
 		add_shortcode("course_waiting_list_subscribe", array( $this, 'display_course_waiting_list_subscribe_button' ) );
+		add_shortcode("course_attachments", array( $this, 'display_course_attachments' ) );
 		add_shortcode("user_subsrcibed_courses", array( $this, 'display_user_course_list' ) );
 		add_shortcode("user_waiting_courses", array( $this, 'display_user_waiting_course_list' ) );
 		add_shortcode("user_paid_courses", array( $this, 'display_user_paid_course_list' ) );
@@ -241,6 +242,34 @@ class Iusetvis_Public {
 		</div>
 		<?php
 		}
+	}
+
+	/*
+	 * Display course attachments
+	 *
+	 */
+	public function display_course_attachments( $atts = array() ) {
+
+		global $post;
+		$course_id = $post->ID;
+
+		$meta = get_post_custom( $course_id );
+
+		$course_attachments = ! isset( $meta['course_attachments'][0] ) ? array() :  maybe_unserialize( $meta['course_attachments'][0] );
+		?>
+
+		<div class='wrap'>
+			<h2><?php _e( 'Attachments', 'iusetvis' ) ?></h2>
+			<ul>
+				<?php foreach ($course_attachments as $key => $value) { ?>
+					<li>
+						<a href="<?= wp_get_attachment_url( $value ) ?>"><?= get_the_title( $value ) ?></a>
+					</li>
+				<?php }	?>
+			</ul>
+		</div>
+
+		<?php
 	}
 
 	/*
